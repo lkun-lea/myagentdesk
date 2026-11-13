@@ -22,11 +22,29 @@ npm ci
 npm run dev
 ```
 
-打开终端显示的地址。项目默认使用全宽时间线，按首版路线图展示交付顺序。点里程碑、Issue 或「等待前置」打开右栏，查看开发前置、产品联调、验收标准和 GitHub 原文。右栏关闭时恢复全宽。「Issues」显示 MyAgentDesk 的 GitHub 只读快照，时间轴日期用于排期演示。
+打开终端显示的地址并选择「打开 Demo」，也可直接访问 `/?demo=1`。项目默认使用全宽时间线，按首版路线图展示交付顺序。点里程碑、Issue 或「等待前置」打开右栏，查看开发前置、产品联调、验收标准和 GitHub 原文。右栏关闭时恢复全宽。「Issues」显示 MyAgentDesk 的 GitHub 只读快照，时间轴日期用于排期演示。
 
 右上角「试点演示」打开同一流程的模拟操作。沿着版本排期、规格确认、tebb 派发、独立验收、质量放行和发布回执推进。模拟断网或请求产品决策后可恢复原运行，独立验收后可模拟集成包变更。试点来源是 [tebb #313](https://github.com/lkun-lea/tebb/issues/313)，进度保存在当前浏览器。生产构建使用 `npm run build`。
 
 [项目五页设计与可点预览](docs/design/project-pages/README.md) · [项目开发规则](AGENTS.md)
+
+## 独立运行基座
+
+需要 Python 3.11+、uv 和独立 PostgreSQL 16。可用 `docker compose up -d db` 启动本地数据库，或把已有的专用数据库地址填入 `.env`。从 `.env.example` 复制配置后运行：
+
+```sh
+uv sync --locked
+uv run --locked python -m server.admin --env-file .env migrate
+npm ci
+npm run build
+uv run --locked uvicorn server.main:create_app --factory --env-file .env --host 127.0.0.1 --port 8000 --no-access-log
+```
+
+同源入口为 `http://127.0.0.1:8000/`。通过 `/api/health/live` 和 `/api/health/ready` 分别核对进程和数据库。前端开发可运行 `npm run dev -- --host 127.0.0.1 --port 4178`，Vite 将 `/api` 转到 8000。将 `MAD_ORIGIN` 配成实际浏览器入口。
+
+基座的复用与验收方式见 [运行基座与 tebb 复用清单](docs/design/FOUNDATION.md)。
+
+首页支持邮箱登录、项目创建、邀请与成员管理。接入独立 Supabase 后可使用真实邮箱登录，完整配置与测试步骤见 [账号与项目成员](docs/design/ACCOUNTS.md#配置真实邮箱验收)。
 
 ## 与 tebb 的关系
 

@@ -29,3 +29,4 @@ jobs:
       - run: npm run build
       - run: uv sync --locked
       - run: uv run --locked pytest tests/test_foundation.py -q
+      - run: uv run --locked pytest tests/test_accounts.py -q

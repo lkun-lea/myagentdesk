@@ -19,6 +19,7 @@ import {
 import type { Action, DemoState, Role } from './demo'
 import { IssueDetails, IssuesList, IssueTimeline } from './ProjectRoadmap'
 import { issuesByNumber, roadmapIssues } from './roadmap'
+import { AccountWorkspace } from './AccountWorkspace'
 import './style.css'
 
 const tabs = ['时间线', '需求', '规格', 'Issues', '构建与发布'] as const
@@ -99,7 +100,7 @@ function BuildPanel({ state }: { state: DemoState }) {
   </section>
 }
 
-function Workspace({ dark, toggleTheme }: { dark: boolean; toggleTheme: () => void }) {
+function Workspace({ dark, toggleTheme, onAccounts }: { dark: boolean; toggleTheme: () => void; onAccounts: () => void }) {
   const { message } = AntApp.useApp()
   const [state, setState] = useState(loadDemo)
   const [role, setRole] = useState<Role>('owner')
@@ -235,6 +236,7 @@ function Workspace({ dark, toggleTheme }: { dark: boolean; toggleTheme: () => vo
       <header className="topbar">
         <div className="breadcrumb"><span>项目</span><span aria-hidden="true">/</span><strong>MyAgentDesk</strong></div>
         <div className="top-actions">
+          <Button type="text" onClick={onAccounts}>账号工作区</Button>
           <Button type="text" onClick={event => openIssue(1, event, true)}>试点演示</Button>
           <label className="role-picker"><TeamOutlined /><span>演示身份</span><Select
             aria-label="演示身份" value={role} onChange={setRole} popupMatchSelectWidth={190}
@@ -335,11 +337,24 @@ function Workspace({ dark, toggleTheme }: { dark: boolean; toggleTheme: () => vo
 
 function Root() {
   const [dark, setDark] = useState(false)
+  const [demo, setDemo] = useState(() => new URLSearchParams(window.location.search).get('demo') === '1')
+  useEffect(() => {
+    const readLocation = () => setDemo(new URLSearchParams(window.location.search).get('demo') === '1')
+    window.addEventListener('popstate', readLocation)
+    return () => window.removeEventListener('popstate', readLocation)
+  }, [])
+  function switchView(useDemo: boolean) {
+    window.history.pushState(null, '', useDemo ? '/?demo=1' : '/')
+    setDemo(useDemo)
+  }
   return <ConfigProvider locale={zhCN} button={{ autoInsertSpace: false }} theme={{
     algorithm: dark ? theme.darkAlgorithm : theme.defaultAlgorithm,
     token: { colorPrimary: dark ? '#86aeff' : '#315ed7', borderRadius: 8, fontFamily: 'Inter, "Microsoft YaHei UI", "PingFang SC", sans-serif' },
   }}>
-    <AntApp className={dark ? 'theme-dark' : 'theme-light'}><Workspace dark={dark} toggleTheme={() => setDark(value => !value)} /></AntApp>
+    <AntApp className={dark ? 'theme-dark' : 'theme-light'}>
+      {demo ? <Workspace dark={dark} toggleTheme={() => setDark(value => !value)} onAccounts={() => switchView(false)} />
+        : <AccountWorkspace onDemo={() => switchView(true)} />}
+    </AntApp>
   </ConfigProvider>
 }
 

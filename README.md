@@ -20,6 +20,6 @@ MyAgentDesk 是个人 Agent 工作台。每个账号绑定一个 Agent。成员�
 
 MyAgentDesk 独立管理应用、账号空间、项目状态和数据。计划使用官方 Pi SDK 执行模型及工具循环。
 
-两端的联动先通过 GitHub Issue、PR 和构建链接定位原记录，再按需增加显式的任务与证据交接。详见 [tebb 联动设计](docs/design/TEBB_INTEGRATION.md)。
+两端先通过 GitHub Issue、PR 和构建链接定位原记录。下一阶段支持把需求阶段派给 tebb Agent 或本机 Codex，把完成通知、产物和证据带回原需求。详见 [联动架构与验收](docs/design/TEBB_INTEGRATION.md)。
 
 [工作台与项目页设计](https://github.com/lkun-lea/tebb/blob/3769741dc807c55c52c9ea9a768633ba21d4fff2/docs/design/workbench/README.md) · [账号与个人 Agent 设计](https://github.com/lkun-lea/tebb/blob/3769741dc807c55c52c9ea9a768633ba21d4fff2/docs/design/workbench/ACCOUNT_DESIGN.md) · [MIT 许可证](LICENSE)

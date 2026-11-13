@@ -28,6 +28,22 @@ npm run dev
 
 [项目五页设计与可点预览](docs/design/project-pages/README.md) · [项目开发规则](AGENTS.md)
 
+## 独立运行基座
+
+需要 Python 3.11+、uv 和独立 PostgreSQL 16。可用 `docker compose up -d db` 启动本地数据库，或把已有的专用数据库地址填入 `.env`。从 `.env.example` 复制配置后运行：
+
+```sh
+uv sync --locked
+uv run --locked python -m server.admin --env-file .env migrate
+npm ci
+npm run build
+uv run --locked uvicorn server.main:create_app --factory --env-file .env --host 127.0.0.1 --port 8000 --no-access-log
+```
+
+同源入口为 `http://127.0.0.1:8000/`。通过 `/api/health/live` 和 `/api/health/ready` 分别核对进程和数据库。前端开发可运行 `npm run dev -- --host 127.0.0.1 --port 4178`，Vite 将 `/api` 转到 8000。将 `MAD_ORIGIN` 配成实际浏览器入口。
+
+基座的复用与验收方式见 [运行基座与 tebb 复用清单](docs/design/FOUNDATION.md)。
+
 ## 与 tebb 的关系
 
 设计来源是 [tebb #314](https://github.com/lkun-lea/tebb/issues/314)。可从 tebb 复用的候选包括目录授权与沙箱、运行回执与证据、账号登录交互和日程交互。官方 Skill 使用 [tebb-skills](https://github.com/lkun-lea/tebb-skills) 固定版本。是否直接复用代码由 [基座与复用边界](https://github.com/lkun-lea/myagentdesk/issues/2) 逐项验证并记录来源和许可。

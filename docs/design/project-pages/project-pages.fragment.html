@@ -1,0 +1,412 @@
+<section id="myagentdesk-project-pages" aria-label="MyAgentDesk 项目五个子页面的设计预览">
+  <div class="md-shell">
+    <aside class="md-rail" aria-label="全局导航示意">
+      <div class="md-brand"><b>m.</b><span>MyAgentDesk</span></div>
+      <div><i data-lucide="layout-grid" aria-hidden="true"></i>工作台</div>
+      <div aria-current="location"><i data-lucide="folders" aria-hidden="true"></i>项目</div>
+      <div><i data-lucide="messages-square" aria-hidden="true"></i>聊天</div>
+      <div><i data-lucide="calendar-days" aria-hidden="true"></i>日程</div>
+    </aside>
+    <main class="md-main">
+      <header class="md-project"><span>项目 <span aria-hidden="true">/</span> <strong>桌面协作</strong></span><span class="md-muted">设计预览 · 示例数据</span></header>
+      <nav class="md-nav" aria-label="项目子页面">
+        <button type="button" data-page="timeline" class="cursor-interaction" aria-current="page">时间线</button>
+        <button type="button" data-page="requirements" class="cursor-interaction">需求</button>
+        <button type="button" data-page="specs" class="cursor-interaction">规格</button>
+        <button type="button" data-page="materials" class="cursor-interaction">资料</button>
+        <button type="button" data-page="build" class="cursor-interaction">构建与发布</button>
+      </nav>
+      <div class="md-content" data-content></div>
+      <p class="md-sr" role="status" data-announcement></p>
+    </main>
+  </div>
+  <dialog class="md-dialog" aria-labelledby="md-dialog-title">
+    <header class="md-flex"><h2 id="md-dialog-title"></h2><button type="button" class="md-action cursor-interaction" data-close>关闭</button></header>
+    <div data-dialog-body></div>
+  </dialog>
+</section>
+
+<style>
+  #myagentdesk-project-pages {
+    --md-rail:light-dark(#eaf0f8,#181f2a);
+    --md-base:light-dark(#f7f9fc,#101620);
+    --md-surface:light-dark(#fff,#1b2432);
+    --md-fill:light-dark(#edf3fa,#253244);
+    --md-ink:light-dark(#172338,#ecf1fb);
+    --md-muted:light-dark(#53627a,#a9b9ce);
+    --md-line:light-dark(#dce5f0,#344356);
+    --md-blue:light-dark(#2356ad,#afcaff);
+    --md-blue-bg:light-dark(#e4edff,#293e66);
+    --md-green:light-dark(#17624a,#99dfc5);
+    --md-green-bg:light-dark(#e2f2e9,#233e36);
+    --md-amber:light-dark(#79501c,#f5ca90);
+    --md-amber-bg:light-dark(#f8eedc,#453521);
+    --md-red:light-dark(#a13538,#ffb8b9);
+    --md-red-bg:light-dark(#fbeaea,#492c32);
+    color-scheme:light dark;
+    color:var(--md-ink);
+    font:14px/1.48 Inter,"Microsoft YaHei UI","PingFang SC",system-ui,sans-serif;
+    font-variant-numeric:tabular-nums;
+  }
+  #myagentdesk-project-pages *,#myagentdesk-project-pages *::before,#myagentdesk-project-pages *::after {box-sizing:border-box}
+  #myagentdesk-project-pages :is(h1,h2,h3,p,ul,ol,dl,dd,pre) {margin:0;overflow-wrap:anywhere}
+  #myagentdesk-project-pages h1 {font-size:25px;font-weight:650;line-height:1.25;letter-spacing:-.028em}
+  #myagentdesk-project-pages h2 {font-size:16px;font-weight:650}
+  #myagentdesk-project-pages h3 {font-size:14px;font-weight:620}
+  #myagentdesk-project-pages button {font:inherit;color:inherit;text-align:left;border:0;background:transparent;border-radius:7px;min-width:0}
+  #myagentdesk-project-pages :is(button,summary):focus-visible {outline:2px solid var(--md-blue);outline-offset:2px}
+  #myagentdesk-project-pages :is([data-lucide],svg.lucide) {width:16px;height:16px;flex:0 0 16px;vertical-align:-.16em}
+  #myagentdesk-project-pages .md-shell {display:grid;grid-template-columns:139px minmax(0,1fr);background:var(--md-rail);border-radius:15px;overflow:hidden}
+  #myagentdesk-project-pages .md-rail {padding:15px 8px}
+  #myagentdesk-project-pages .md-rail>div {display:flex;align-items:center;gap:7px;padding:8px 7px;color:var(--md-muted);font-size:12px}
+  #myagentdesk-project-pages .md-rail .md-brand {margin-bottom:11px;color:var(--md-ink);font-size:12px;font-weight:670}
+  #myagentdesk-project-pages .md-brand b {display:grid;place-items:center;flex:none;width:24px;height:24px;border-radius:7px;color:var(--md-blue);background:var(--md-blue-bg);font-size:16px}
+  #myagentdesk-project-pages .md-rail [aria-current] {color:var(--md-blue);background:var(--md-surface);border-radius:7px;font-weight:620}
+  #myagentdesk-project-pages .md-main {min-width:0;background:var(--md-base)}
+  #myagentdesk-project-pages .md-project {display:flex;justify-content:space-between;align-items:center;gap:6px;flex-wrap:wrap;padding:13px 17px 6px;color:var(--md-muted);font-size:13px}
+  #myagentdesk-project-pages .md-project strong {color:var(--md-ink)}
+  #myagentdesk-project-pages .md-nav {display:flex;flex-wrap:wrap;gap:0 12px;padding:0 17px;border-bottom:1px solid var(--md-line)}
+  #myagentdesk-project-pages .md-nav button {padding:7px 2px;border-bottom:2px solid transparent;border-radius:0;color:var(--md-muted);font-size:13px}
+  #myagentdesk-project-pages .md-nav [aria-current] {color:var(--md-blue);border-bottom-color:currentColor;font-weight:630}
+  #myagentdesk-project-pages .md-content {padding:17px;min-width:0}
+  #myagentdesk-project-pages .md-top {margin-bottom:13px}
+  #myagentdesk-project-pages .md-top p {margin-top:5px}
+  #myagentdesk-project-pages .md-muted {color:var(--md-muted);font-size:12px}
+  #myagentdesk-project-pages :is(.md-flex,.md-inline,.md-actions) {display:flex;gap:5px 9px;align-items:center;flex-wrap:wrap}
+  #myagentdesk-project-pages .md-flex {justify-content:space-between}
+  #myagentdesk-project-pages .md-layout {display:grid;grid-template-columns:minmax(0,1.8fr) minmax(0,1fr);gap:10px;align-items:start}
+  #myagentdesk-project-pages .md-layout[data-kind="library"] {grid-template-columns:minmax(0,1fr) minmax(0,1.78fr)}
+  #myagentdesk-project-pages .md-layout>* {min-width:0}
+  #myagentdesk-project-pages .md-panel {min-width:0;padding:12px;border-radius:10px;background:var(--md-surface)}
+  #myagentdesk-project-pages .md-panel+.md-panel {margin-top:9px}
+  #myagentdesk-project-pages .md-panel h2 {margin-bottom:8px}
+  #myagentdesk-project-pages .md-panel .md-flex>h2 {margin:0}
+  #myagentdesk-project-pages .md-panel .md-flex+* {margin-top:7px}
+  #myagentdesk-project-pages .md-action {padding:5px 7px;color:var(--md-blue);font-size:13px;max-width:100%}
+  #myagentdesk-project-pages .md-action:hover,#myagentdesk-project-pages .md-line:hover,#myagentdesk-project-pages .md-event:hover {background:var(--md-fill)}
+  #myagentdesk-project-pages .md-action[aria-pressed=true] {background:var(--md-blue-bg);font-weight:620}
+  #myagentdesk-project-pages .md-primary {background:var(--md-blue-bg);font-weight:620}
+  #myagentdesk-project-pages .md-actions {margin-top:7px}
+  #myagentdesk-project-pages .md-badge {display:inline-block;padding:2px 6px;width:max-content;max-width:100%;border-radius:5px;color:var(--md-blue);background:var(--md-blue-bg);font-size:12px}
+  #myagentdesk-project-pages .md-badge[data-tone="good"] {color:var(--md-green);background:var(--md-green-bg)}
+  #myagentdesk-project-pages .md-badge[data-tone="warn"] {color:var(--md-amber);background:var(--md-amber-bg)}
+  #myagentdesk-project-pages .md-badge[data-tone="error"] {color:var(--md-red);background:var(--md-red-bg)}
+  #myagentdesk-project-pages .md-line {display:grid;gap:4px;width:100%;padding:7px 5px;overflow-wrap:anywhere}
+  #myagentdesk-project-pages .md-line+.md-line {border-top:1px solid var(--md-line)}
+  #myagentdesk-project-pages .md-line[aria-pressed=true] {background:var(--md-fill);color:var(--md-blue)}
+  #myagentdesk-project-pages .md-day+.md-day {margin-top:10px}
+  #myagentdesk-project-pages .md-day h3 {margin-bottom:4px}
+  #myagentdesk-project-pages .md-event {display:grid;grid-template-columns:37px minmax(0,1fr) auto;gap:4px 7px;align-items:start;width:100%;padding:7px 3px}
+  #myagentdesk-project-pages .md-event+.md-event {border-top:1px solid var(--md-line)}
+  #myagentdesk-project-pages :is(.md-event,.md-line) strong {display:block;font-weight:620;overflow-wrap:anywhere}
+  #myagentdesk-project-pages .md-req-row {grid-template-columns:minmax(0,1.65fr) minmax(0,1fr) auto;align-items:start;column-gap:9px}
+  #myagentdesk-project-pages .md-req-row .md-muted {display:block}
+  #myagentdesk-project-pages .md-stage {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;margin:8px 0 10px}
+  #myagentdesk-project-pages .md-stage button {padding:6px;background:var(--md-fill);font-size:12px;overflow-wrap:anywhere}
+  #myagentdesk-project-pages .md-stage button span {display:block}
+  #myagentdesk-project-pages .md-stage button[aria-pressed=true] {color:var(--md-blue);background:var(--md-blue-bg);box-shadow:inset 0 0 0 1px var(--md-blue)}
+  #myagentdesk-project-pages .md-stage .md-current {font-size:11px;color:var(--md-muted)}
+  #myagentdesk-project-pages .md-divider {border-top:1px solid var(--md-line);padding-top:8px;margin-top:9px}
+  #myagentdesk-project-pages .md-detail-tabs {display:flex;flex-wrap:wrap;gap:3px 4px;margin:7px 0}
+  #myagentdesk-project-pages .md-note {background:var(--md-fill);padding:8px;border-radius:7px;margin-top:8px}
+  #myagentdesk-project-pages .md-note p+p {margin-top:5px}
+  #myagentdesk-project-pages .md-record {padding:6px 0;border-top:1px solid var(--md-line)}
+  #myagentdesk-project-pages .md-record p {margin-top:5px}
+  #myagentdesk-project-pages .md-list {padding-left:17px}
+  #myagentdesk-project-pages .md-file {display:block;background:var(--md-fill);padding:7px;border-radius:7px;font:12px/1.5 "IBM Plex Mono",Consolas,monospace;white-space:pre-wrap;overflow-wrap:anywhere;margin-top:7px}
+  #myagentdesk-project-pages .md-gate {padding:6px 0;border-top:1px solid var(--md-line)}
+  #myagentdesk-project-pages .md-dialog {width:min(480px,calc(100% - 22px));max-height:calc(100% - 16px);padding:14px;border:1px solid var(--md-line);border-radius:10px;background:var(--md-surface);color:var(--md-ink)}
+  #myagentdesk-project-pages .md-dialog::backdrop {background:rgb(6 13 24 / .45)}
+  #myagentdesk-project-pages .md-dialog header {margin-bottom:7px}
+  #myagentdesk-project-pages .md-sr {position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+  @media(max-width:770px) {
+    #myagentdesk-project-pages .md-shell {grid-template-columns:117px minmax(0,1fr)}
+    #myagentdesk-project-pages .md-rail .md-brand {font-size:10px}
+    #myagentdesk-project-pages .md-content {padding:12px}
+  }
+  @media(max-width:610px) {
+    #myagentdesk-project-pages .md-shell,#myagentdesk-project-pages .md-layout,#myagentdesk-project-pages .md-layout[data-kind="library"] {grid-template-columns:minmax(0,1fr)}
+    #myagentdesk-project-pages .md-rail {display:flex;align-items:center;flex-wrap:wrap;gap:3px;padding:5px 9px}
+    #myagentdesk-project-pages .md-rail .md-brand {margin:0;font-size:12px}
+    #myagentdesk-project-pages .md-rail>div {padding:5px}
+    #myagentdesk-project-pages .md-rail>div :is(i,svg) {display:none}
+    #myagentdesk-project-pages .md-nav {gap:0 8px;padding-inline:11px}
+    #myagentdesk-project-pages .md-project {padding-inline:11px}
+    #myagentdesk-project-pages .md-event {grid-template-columns:37px minmax(0,1fr)}
+    #myagentdesk-project-pages .md-event>.md-badge {grid-column:2}
+    #myagentdesk-project-pages .md-stage {grid-template-columns:repeat(2,minmax(0,1fr))}
+    #myagentdesk-project-pages .md-req-row {grid-template-columns:minmax(0,1fr) auto}
+    #myagentdesk-project-pages .md-req-row>.md-badge {grid-column:1/-1}
+  }
+  @media(pointer:coarse) {#myagentdesk-project-pages button {min-height:44px}}
+</style>
+
+<script>
+(() => {
+  const root = document.getElementById('myagentdesk-project-pages');
+  const content = root.querySelector('[data-content]');
+  const live = root.querySelector('[data-announcement]');
+  const dialog = root.querySelector('dialog');
+  const stageNames = ['需求确认','实现与自测','独立验收','质量复核'];
+  const reqs = {
+    reconnect:{id:'REQ-024',title:'断线后接续原任务',version:'v3',current:2,progress:'进行中',owner:'测试 · 周宁',
+      owners:['产品 · 何琪','研发 · 林青','测试 · 周宁','质量 · 赵敏'],
+      states:['已确认','已交接','验收中','待开始'],
+      summaries:['同一请求重试沿用原运行；重连可以接着查看进度。','研发已交付候选 r2，改动覆盖请求去重和事件补读。','已通过请求去重与事件补读，正在核对过期游标。','等待同一候选的完整独立验收证据。']},
+    takeover:{id:'REQ-031',title:'需求群人工接手',version:'v2',current:0,progress:'待确认',owner:'产品 · 何琪',
+      owners:['产品 · 何琪','研发 · 林青','测试 · 周宁','质量 · 赵敏'],
+      states:['待决策','待开始','待开始','待开始'],
+      summaries:['待确认人工接手后，原 Agent 如何交还未完成的操作。','产品确认范围后可开始实现。','等待固定候选和独立验收计划。','等待测试证据。']}
+  };
+  const events = [
+    {day:'11 月 13 日',rows:[
+      {time:'15:10',title:'断线接续进入独立验收',detail:'REQ-024 · 周宁接手 · 候选 r2',label:'交接',action:'req:reconnect:2'},
+      {time:'13:40',title:'候选 r2 构建成功',detail:'Build #482 · Windows ZIP · 提交 b81a5f2',label:'构建',action:'build:r2'},
+      {time:'11:30',title:'人工接手规则等待产品确认',detail:'REQ-031 · 待决定如何交还未完成操作',label:'待决策',action:'req:takeover:0'}]},
+    {day:'11 月 12 日',rows:[
+      {time:'16:40',title:'产品确认离线重试规则',detail:'REQ-024 · 需求 v3 · 已记录决定',label:'决策',action:'doc:decision'},
+      {time:'14:25',title:'候选 r1 去重用例失败',detail:'REQ-024 · 独立验收 · 已退回研发',label:'返工',action:'req:reconnect:2:evidence:r1'}]}
+  ];
+  const specs = {
+    reconnect:{name:'reconnect-original-run',title:'断线接续原任务',version:'需求 v3',branch:'feat/reconnect-run',commit:'b81a5f2',
+      sections:[
+        ['proposal.md','问题：手机发送请求后断线，用户无法判断服务端是否已接收。\n范围：恢复原任务，并避免重试产生重复运行。'],
+        ['design.md','提交请求携带稳定 request_id。重连后查询原运行并按游标补读事件。'],
+        ['specs/session-recovery/spec.md','场景：首次回执丢失\n给定服务端已创建运行\n当客户端用同一请求编号重试\n则返回原 run_id，运行总数为一。'],
+        ['tasks.md','[x] 保存稳定请求编号\n[x] 实现事件补读与去重\n[ ] 独立验证过期游标']
+      ]},
+    takeover:{name:'human-takeover',title:'需求群人工接手',version:'需求 v2 草案',branch:'draft/human-takeover',commit:'d26ea90',
+      sections:[
+        ['proposal.md','范围：成员可在需求群接手决策，确认后交回给 Agent。'],
+        ['design.md','交接使用原运行、阶段和检查点；待产品确认未完成写入的归属。'],
+        ['specs/handoff/spec.md','待确认场景：旧执行者结果迟到，如何保留记录并防止覆盖。'],
+        ['tasks.md','[ ] 确认未完成动作的处理规则\n[ ] 补齐权限和恢复用例']
+      ]},
+    reconnectV2:{name:'reconnect-original-run',title:'断线接续 · 初版',version:'需求 v2',branch:'feat/reconnect-run',commit:'4ac91d8',
+      archived:true,req:'reconnect',sections:[
+        ['proposal.md','初版范围：支持断线后查询运行。'],
+        ['design.md','历史方案：只读取当前运行；重试和去重规则待确认。'],
+        ['specs/session-recovery/spec.md','历史场景：断线恢复后重新打开已存在的运行。'],
+        ['tasks.md','[x] 查询当前运行\n[ ] 补充重试和过期游标规则']
+      ]}
+  };
+  const materials = {
+    guide:{title:'项目说明与开发约定',kind:'项目说明',version:'v5',source:'项目资料库 · docs/project-guide.md',access:'项目成员可读',
+      body:['桌面端、云端与手机端通过同一个运行编号对齐进展。','开发前确认候选版本。修改后保留验证命令、实际结果和复现入口。']},
+    decision:{title:'离线重试规则',kind:'产品决策',version:'v3',source:'REQ-024 需求群 · 11 月 12 日决策记录',access:'需求群成员可读',req:'reconnect',
+      body:['同一个请求编号重试时继续使用原运行。','恢复后从原事件序号补读。界面应能处理过期游标并避免重复事件。']},
+    plan:{title:'弱网独立验收计划',kind:'测试资料',version:'v2',source:'项目资料库 · qa/reconnect-plan.md',access:'获授权的项目成员可读',req:'reconnect',
+      body:['候选 r2 · b81a5f2。依次验证首次回执丢失、重复事件和过期游标。','每个用例记录命令、退出码与原始日志。v1 归档，当前使用 v2。']}
+  };
+  const builds = {
+    r2:{number:'#482',version:'0.5.0-rc.2',name:'候选 r2',commit:'b81a5f2',state:'构建成功',tone:'good',passed:true,
+      artifact:'desktop-0.5.0-rc.2-win.zip',result:'前端检查、后端回归与 Windows 打包均完成，ZIP 校验摘要已登记。'},
+    r1:{number:'#477',version:'0.5.0-rc.1',name:'候选 r1',commit:'4ac91d8',state:'构建失败',tone:'error',passed:false,
+      result:'打包阶段中断，未生成可发布产物。保留退出码 1 与打包日志。'}
+  };
+  const view = {page:'timeline',req:'',stage:2,tab:'summary',evidence:'',spec:'reconnect',file:0,doc:'guide',build:'r2',validated:new Set(['reconnect'])};
+  let returnFocus = null;
+  const badge = (text,tone='') => '<span class="md-badge" data-tone="' + tone + '">' + text + '</span>';
+  const btn = (act,text,primary=false) => '<button type="button" data-action="' + act + '" class="md-action' +
+    (primary ? ' md-primary' : '') + ' cursor-interaction">' + text + '</button>';
+  const top = (title,detail) => '<header class="md-top"><h1>' + title + '</h1><p class="md-muted">' + detail + '</p></header>';
+  function line(act,title,detail,extra='',selected) {
+    return '<button type="button" class="md-line cursor-interaction" data-action="' + act + '"' +
+      (selected === undefined ? '' : ' aria-pressed="' + selected + '"') + '><strong>' + title +
+      '</strong><span class="md-muted">' + detail + '</span>' + extra + '</button>';
+  }
+  function timeline() {
+    return top('项目时间线','桌面协作 · 需求、决策、验收与构建') + '<div class="md-layout"><section class="md-panel">' +
+      events.map(group => '<div class="md-day"><h3>' + group.day + '</h3>' + group.rows.map(event =>
+        '<button type="button" class="md-event cursor-interaction" data-action="' + event.action + '"><time class="md-muted">' + event.time +
+        '</time><span><strong>' + event.title + '</strong><span class="md-muted">' + event.detail + '</span></span>' +
+        badge(event.label, ['返工','待决策'].includes(event.label) ? 'warn' : '') + '</button>').join('') + '</div>').join('') +
+      '</section><aside class="md-panel"><h2>进行中的需求</h2>' + Object.entries(reqs).map(([id,item]) =>
+      line('req:' + id,item.title,item.id + ' · ' + stageNames[item.current],badge(item.progress,id === 'takeover' ? 'warn' : ''))).join('') + '</aside></div>';
+  }
+  function requirementList() {
+    return top('需求','从需求列表查看阶段、负责人及交付证据') +
+      '<section class="md-panel" aria-label="项目需求列表">' + Object.entries(reqs).map(([id,item]) =>
+      '<button type="button" class="md-line md-req-row cursor-interaction" data-action="req:' + id + '"><span><strong>' + item.title +
+      '</strong><span class="md-muted">' + item.id + ' · 需求 ' + item.version + '</span></span><span><strong>' + stageNames[item.current] +
+      '</strong><span class="md-muted">' + item.owner + '</span></span>' + badge(item.progress,id === 'takeover' ? 'warn' : '') + '</button>').join('') + '</section>';
+  }
+  function records(rows,empty) {
+    return rows.length ? rows.map(([title,desc,opened]) =>
+      '<details class="md-record"' + (opened ? ' open' : '') + '><summary class="cursor-interaction">' + title + '</summary><p class="md-muted">' + desc +
+      '</p></details>').join('') : '<p class="md-muted">' + empty + '</p>';
+  }
+  function stageBody(req) {
+    const isReconnect = view.req === 'reconnect';
+    if (view.tab === 'summary') return '<p>' + req.summaries[view.stage] + '</p>';
+    if (!isReconnect) return '<p class="md-muted">本阶段资料待补充。</p>';
+    if (view.tab === 'docs') return '<div class="md-actions">' +
+      (view.stage === 0 ? btn('doc:decision','产品确认记录') : view.stage === 1 ? btn('spec:reconnect','OpenSpec 变更') :
+        btn('doc:plan','弱网独立验收计划 v2')) + '</div>';
+    if (view.tab === 'outputs') return view.stage < 1 ? '<p class="md-muted">尚无构建产物。</p>' : btn('build:r2','候选 r2 · Build #482');
+    if (view.stage === 0) return records([['产品确认 · 需求 v3','11 月 12 日已确认同一请求编号重试时使用原运行。']],'尚无证据。');
+    if (view.stage === 1) return records([['实现自测 · 已完成','研发提交去重自测记录；独立验收另见对应阶段。']],'尚无证据。');
+    if (view.stage === 3) return '<p class="md-muted">待同一候选的完整验收回执。</p>';
+    return records([
+      ['通过 · 同一请求仅生成一个任务','候选 r2 · 环境 weak-net-02 · 退出码 0。模拟回执丢失后返回原 run_id。',view.evidence === 'r2'],
+      ['通过 · 重连按事件序号补读','候选 r2 · 退出码 0。没有重复事件。'],
+      ['待运行 · 过期游标恢复','候选 r2。待核对快照水位与补读范围。'],
+      ['历史失败 · 候选 r1','旧候选重复创建两个任务，保留首次失败输出。',view.evidence === 'r1']
+    ],'尚无证据。');
+  }
+  function requirement() {
+    const req = reqs[view.req];
+    if (!req) return requirementList();
+    const tabs = [['summary','摘要'],['docs','文档'],['outputs','产物'],['evidence','验收证据']];
+    return '<div class="md-inline">' + btn('req-list','← 需求列表') + btn('timeline','项目时间线') + '</div>' +
+      top(req.title,req.id + ' · 需求 ' + req.version + ' · 当前阶段：' + stageNames[req.current]) +
+      '<div class="md-layout"><section class="md-panel"><div class="md-flex"><h2>需求流程</h2>' + btn('chat','查看需求群') +
+      '</div><div class="md-stage" aria-label="需求阶段">' + stageNames.map((name,index) =>
+        '<button type="button" class="cursor-interaction" data-stage="' + index + '" aria-pressed="' + (view.stage === index) +
+        '"><span>' + name + '</span><span class="md-current">' + req.states[index] + (req.current === index ? ' · 当前' : '') +
+        '</span></button>').join('') + '</div><div class="md-flex"><h3>' + stageNames[view.stage] + '</h3><span class="md-muted">' +
+        req.owners[view.stage] + '</span></div><div class="md-detail-tabs" aria-label="阶段资料">' + tabs.map(([id,label]) =>
+        '<button type="button" class="md-action cursor-interaction" data-detail-tab="' + id + '" aria-pressed="' + (view.tab === id) + '">' +
+        label + '</button>').join('') + '</div><div data-stage-body>' + stageBody(req) + '</div></section><aside class="md-panel">' +
+      '<h2>Agent 上下文</h2><p class="md-muted">当前阶段带入</p><ul class="md-list"><li>需求 ' + req.version +
+      '</li><li>当前验收条件</li><li>阶段职责 · ' + req.owners[view.stage] + '</li></ul><details class="md-divider"><summary class="cursor-interaction">按需读取的资料</summary>' +
+      '<div class="md-actions">' + btn('doc:guide','项目说明') + (view.req === 'reconnect' ? btn('doc:decision','离线重试规则') : '') +
+      '</div></details></aside></div>';
+  }
+  function specification() {
+    const spec = specs[view.spec];
+    const file = spec.sections[view.file];
+    const valid = view.validated.has(view.spec);
+    const rows = archived => Object.entries(specs).filter(([,item]) => Boolean(item.archived) === archived).map(([id,item]) =>
+      line('spec:' + id,item.title,item.name,badge(item.version),id === view.spec)).join('');
+    return top('规格','OpenSpec 变更 · 仓库原件与校验记录') + '<div class="md-layout" data-kind="library"><aside class="md-panel"><h2>活动变更</h2>' +
+      rows(false) + '<div class="md-divider"><h3>历史归档</h3>' + rows(true) + '</div></aside><section class="md-panel"><div class="md-flex"><h2>' + spec.title + '</h2>' +
+      (spec.archived ? badge('历史版本') : badge(valid ? '校验通过' : '待校验',valid ? 'good' : 'warn')) + '</div><p class="md-muted">' + spec.branch + ' · ' + spec.commit +
+      '</p><div class="md-detail-tabs" aria-label="规格文件">' + ['提案','设计','行为规格','任务清单'].map((label,index) =>
+        '<button type="button" class="md-action cursor-interaction" data-file="' + index + '" aria-pressed="' + (view.file === index) + '">' +
+        label + '</button>').join('') + '</div><p class="md-muted">openspec/changes/' + spec.name + '/' + file[0] +
+      '</p><pre class="md-file">' + file[1] + '</pre><div class="md-actions">' + (spec.archived ? '' : btn('validate','运行校验',true)) +
+      (valid ? btn('validation','查看回执') : '') + btn('req:' + (spec.req || view.spec),'查看关联需求') + '</div></section></div>';
+  }
+  function library() {
+    const doc = materials[view.doc];
+    return top('资料','项目说明、产品决策和验收资料') + '<div class="md-layout" data-kind="library"><aside class="md-panel"><h2>资料目录</h2>' +
+      Object.entries(materials).map(([id,item]) => line('doc:' + id,item.title,item.kind + ' · ' + item.version,'',id === view.doc)).join('') +
+      '</aside><section class="md-panel"><div class="md-flex"><h2>' + doc.title + '</h2>' + badge(doc.version + ' · 当前','good') +
+      '</div><p class="md-muted">' + doc.source + ' · ' + doc.access + '</p><div class="md-note">' + doc.body.map(text => '<p>' + text + '</p>').join('') +
+      '</div><details class="md-divider"><summary class="cursor-interaction">原件与引用</summary><p class="md-muted">' + doc.source +
+      ' · 固定版本 ' + doc.version + ' · Agent 按项目权限读取。</p></details>' +
+      (doc.req ? '<div class="md-actions">' + btn('req:' + doc.req,'查看关联需求') + '</div>' : '') + '</section></div>';
+  }
+  function buildPage() {
+    const build = builds[view.build];
+    return top('构建与发布','CI 记录、候选产物和发布条件') +
+      '<div class="md-layout"><div><section class="md-panel"><h2>构建记录</h2>' + Object.entries(builds).map(([id,item]) =>
+        line('build:' + id,item.number + ' · ' + item.name,item.version + ' · 提交 ' + item.commit,badge(item.state,item.tone),id === view.build)).join('') +
+      '</section><section class="md-panel"><div class="md-flex"><h2>' + build.number + ' 构建详情</h2>' + badge(build.state,build.tone) +
+      '</div><p>' + build.result + '</p><div class="md-actions">' + btn('logs','查看 CI 日志') +
+      (build.passed ? btn('artifact','查看 ZIP 与校验摘要') : '') + '</div></section></div><aside><section class="md-panel">' +
+      '<h2>发布准备</h2><p class="md-muted">' + build.version + ' · ' + build.commit + '</p><div class="md-divider">' +
+      '<div class="md-flex md-gate"><span>候选产物</span>' + badge(build.passed ? '已生成' : '未生成',build.tone) + '</div>' +
+      '<div class="md-flex md-gate"><span>独立验收</span>' + badge(build.passed ? '2 / 3 通过' : '历史失败','warn') + '</div>' +
+      '<div class="md-flex md-gate"><span>质量放行</span>' + badge('待复核','warn') + '</div>' +
+      '<div class="md-flex md-gate"><span>正式发布</span>' + badge('条件未齐','warn') + '</div></div><div class="md-actions">' +
+      btn('req:reconnect:2:evidence:' + view.build,'查看验收证据') + btn('release','查看发布条件') + '</div></section>' +
+      '<section class="md-panel"><h2>最近正式发布</h2><p><strong>v0.4.2</strong> ' + badge('已发布','good') +
+      '</p><p class="md-muted">11 月 8 日 · Windows · 正式渠道</p><div class="md-actions">' + btn('release-history','查看发布回执') + '</div></section></aside></div>';
+  }
+  function showDialog(title,html) {
+    returnFocus = document.activeElement;
+    root.querySelector('#md-dialog-title').textContent = title;
+    root.querySelector('[data-dialog-body]').innerHTML = html;
+    dialog.showModal();
+  }
+  function render(focus) {
+    content.innerHTML = {timeline,requirements:requirement,specs:specification,materials:library,build:buildPage}[view.page]();
+    root.querySelectorAll('.md-nav [data-page]').forEach(button => {
+      if (button.dataset.page === view.page) button.setAttribute('aria-current','page');
+      else button.removeAttribute('aria-current');
+    });
+    if (focus) content.querySelector(focus)?.focus({preventScroll:true});
+    live.textContent = content.querySelector('h1').textContent;
+  }
+  function navigate(action) {
+    const [kind,key,stage,tab,evidence] = action.split(':');
+    if (kind === 'req') {
+      view.page = 'requirements';
+      view.req = key;
+      view.stage = stage === undefined ? reqs[key].current : Number(stage);
+      view.tab = tab || 'summary';
+      view.evidence = evidence || '';
+      render('[data-stage="' + view.stage + '"]');
+    } else if (kind === 'req-list' || kind === 'timeline') {
+      view.page = kind === 'timeline' ? 'timeline' : 'requirements';
+      view.req = '';
+      render('[data-action]');
+    } else if (kind === 'spec') {
+      if (view.spec !== key) view.file = 0;
+      view.page = 'specs';
+      view.spec = key;
+      render('[data-action="' + action + '"]');
+    } else if (kind === 'doc') {
+      view.page = 'materials';
+      view.doc = key;
+      render('[data-action="' + action + '"]');
+    } else if (kind === 'build') {
+      view.page = 'build';
+      view.build = key;
+      render('[data-action="' + action + '"]');
+    } else if (kind === 'validate') {
+      view.validated.add(view.spec);
+      render('[data-action="validation"]');
+      live.textContent = '示例规格校验通过，回执已登记';
+    } else if (kind === 'validation') {
+      const spec = specs[view.spec];
+      showDialog('OpenSpec 校验回执','<p>示例校验通过 · 提交 ' + spec.commit + '</p><pre class="md-file">openspec validate ' +
+        spec.name + '\n退出码 0 · 文件结构与行为场景检查通过</pre>');
+    } else if (kind === 'logs' || kind === 'artifact' || kind === 'release') {
+      const build = builds[view.build];
+      if (kind === 'logs') showDialog(build.number + ' CI 日志','<pre class="md-file">' + (build.passed ?
+        '前端检查  · 退出码 0\n后端回归  · 退出码 0\nWindows 打包 · 退出码 0\n' + build.artifact :
+        'Windows 打包 · 退出码 1\n打包步骤未完成，候选产物为空。') + '</pre>');
+      else if (kind === 'artifact') showDialog('候选产物与校验摘要','<p>' + build.artifact +
+        '</p><p class="md-muted">构建 ' + build.number + ' · 提交 ' + build.commit + '</p><p class="md-note">SHA-256 校验摘要已随候选归档。</p>');
+      else showDialog('发布条件','<p>正式发布由获授权的发布负责人确认。</p><ul class="md-list">' +
+        (build.passed ? '<li>补齐过期游标用例的验收证据。</li>' : '<li>需要生成有效候选产物。</li>') +
+        '<li>质量负责人核对同版本证据并放行。</li></ul>');
+    } else if (kind === 'release-history') {
+      showDialog('v0.4.2 发布回执','<p>正式渠道 · Windows · 11 月 8 日</p><p class="md-muted">Build #461 · 质量放行已记录 · 发布负责人已确认</p>');
+    } else if (kind === 'chat') {
+      const req = reqs[view.req];
+      showDialog(req.title + ' · 需求群','<p class="md-muted">' + req.id + ' · ' + stageNames[req.current] + '</p><div class="md-note"><p>' +
+        req.owner + ' · ' + req.summaries[req.current] + '</p></div>');
+    }
+  }
+  root.addEventListener('click',event => {
+    const button = event.target.closest('button');
+    if (!button || !root.contains(button)) return;
+    const data = button.dataset;
+    if (button.hasAttribute('data-close')) dialog.close();
+    else if (data.page) {
+      view.page = data.page;
+      if (view.page === 'requirements') view.req = '';
+      render();
+    } else if (data.stage !== undefined) {
+      view.stage = Number(data.stage);
+      view.tab = 'summary';
+      view.evidence = '';
+      render('[data-stage="' + data.stage + '"]');
+    } else if (data.detailTab) {
+      view.tab = data.detailTab;
+      render('[data-detail-tab="' + data.detailTab + '"]');
+    } else if (data.file !== undefined) {
+      view.file = Number(data.file);
+      render('[data-file="' + data.file + '"]');
+    } else if (data.action) navigate(data.action);
+  });
+  dialog.addEventListener('close',() => {
+    if (returnFocus?.isConnected) returnFocus.focus();
+  });
+  render();
+})();
+</script>

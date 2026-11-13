@@ -1,10 +1,10 @@
 # 项目页面设计
 
-五个页面的草图已评审。[版本时间线预览](release-timeline.html) 展示版本节点和调整日期的交互。[项目五页预览](project-pages.html) 可沿同一条示例需求切换事件记录、需求、规格、资料和构建发布。[五页可编辑源稿](project-pages.fragment.html)
+项目页面草图已评审。时间线采用[已确认的全宽时间轴与 Issue 右栏](#时间线与-issue-详情)。[项目五页预览](project-pages.html) 可沿同一条示例需求切换事件记录、需求、规格、资料和构建发布。[五页可编辑源稿](project-pages.fragment.html)
 
 | 页面 | 图稿 | 实施 issue |
 | --- | --- | --- |
-| [项目时间线](#项目时间线) | [版本时间线](release-timeline.html)、[事件记录](timeline.png) | [#16 版本计划](https://github.com/lkun-lea/myagentdesk/issues/16)、[#6 需求事件](https://github.com/lkun-lea/myagentdesk/issues/6)、[#4 项目导航](https://github.com/lkun-lea/myagentdesk/issues/4) |
+| [项目时间线](#项目时间线) | [全宽时间轴](issue-flow-timeline.png)、[展开 Issue 详情](issue-flow-detail.png)、[事件记录](timeline.png) | [#16 版本计划](https://github.com/lkun-lea/myagentdesk/issues/16)、[#6 需求事件](https://github.com/lkun-lea/myagentdesk/issues/6)、[#4 项目导航](https://github.com/lkun-lea/myagentdesk/issues/4) |
 | [需求](#需求) | [需求详情](requirements.png) | [#6 需求群和交接](https://github.com/lkun-lea/myagentdesk/issues/6)、[#7 人工决策](https://github.com/lkun-lea/myagentdesk/issues/7)、[#11 独立验收](https://github.com/lkun-lea/myagentdesk/issues/11) |
 | [规格](#规格) | [OpenSpec](specs.png) | [#10 规格与校验](https://github.com/lkun-lea/myagentdesk/issues/10) |
 | [资料](#资料) | [资料目录与正文](materials.png) | [#6 项目上下文](https://github.com/lkun-lea/myagentdesk/issues/6) |
@@ -15,6 +15,9 @@
 ```mermaid
 flowchart LR
     V["项目时间线 · 版本计划"] -->|"范围与阻塞"| R["需求与具体阶段"]
+    V -->|"Issue、里程碑或阻塞"| I["Issue 详情右栏"]
+    L["Issues 只读列表"] --> I
+    I -->|"来源原文"| H["GitHub"]
     V -->|"实际发布回执"| B["构建与发布"]
     V <-->|"切换视图"| T["事件记录"]
     T -->|"交接或返工事件"| R
@@ -32,11 +35,27 @@ flowchart LR
 
 项目默认打开「版本时间线」。成员查看验收里程碑、目标和实际发布日期，点版本展开范围、必过项、阻塞和版本决定。未排期的需求和无日期的版本可单独查看。项目负责人调整范围或日期时先核对影响，再保存原因和修订记录。
 
-「事件记录」按项目、日期和持久事件序号展示历史，点击交接、返工、产品决定或构建定位原记录。查看 [版本草图](release-timeline.html)、[事件草图](timeline.png) 和 [版本交互与验收](../RELEASE_PLAN.md#时间线交互)。
+「事件记录」按项目、日期和持久事件序号展示历史，点击交接、返工、产品决定或构建定位原记录。查看 [调整日期的交互草图](release-timeline.html)、[事件草图](timeline.png) 和 [版本交互与验收](../RELEASE_PLAN.md#时间线交互)。
 
 - [ ] 版本详情能定位阻塞及其负责人、下一步和期限。修改范围后计数更新，历史能查到原计划；目标日期和实际发布分别展示。
 - [ ] 两条需求并行，生成交接、返工、决定及构建。进入项目看到该项目事件；点击旧候选返工定位原失败证据，点击当前需求定位最新阶段。
 - [ ] 返回保留原位置；断线后按游标补读并去重，失败后可重试，跨项目事件与受限标题不出现。
+
+### 时间线与 Issue 详情
+
+![默认全宽时间轴，按基础、排期、执行和交付排列关键 Issue](issue-flow-timeline.png)
+
+左侧对齐版本与 Issue 行，右侧用共享日期刻度和细网格显示阶段条。里程碑用短引线连到日期。「可安排」和「等待前置」根据已记录的开发前置判断。时间线展示首版关键任务，完整列表在「Issues」，按路线图、首版试点和试点后交付分组。
+
+![点开 #11 后，右栏展示开发前置和产品联调](issue-flow-detail.png)
+
+点 Issue、里程碑或等待前置标记打开右栏，时间轴保持可见，选中的 Issue 行高亮。窄窗口时详情排列在时间轴下方。详情显示 GitHub 状态、负责人和里程碑，分别列出开发前置、产品联调、后续依赖，并提供验收标准与 GitHub 原文。点依赖在同一栏切换。关闭或按 Esc 后恢复全宽，并将焦点还给最初的入口。
+
+Demo 使用 MyAgentDesk 的 16 条真实 GitHub Issue 快照。示意日期、tebb #313 的运行、验收和发布回执用于「试点演示」。正式版本日期与实际发布取自版本计划和渠道回执。
+
+- [ ] 从全宽视图点 #11，核对 #5、#6、#7 显示为开发前置，#14、#16 显示在产品联调。点 #14 后右栏展示该 Issue 的验收标准和原文链接。按 Esc 关闭，焦点回到原先的 #11 入口。
+- [ ] 从时间线进入「Issues」，核对完整列表、来源状态和分组。没有负责人的 Issue 显示「未分配」，无 GitHub 里程碑时说明缺失。排期示意与来源快照各有标识。
+- [ ] 验证桌面宽度的右栏与窄窗口下方详情都可通过键盘打开、切换和关闭，内容无横向溢出。
 
 ## 需求
 

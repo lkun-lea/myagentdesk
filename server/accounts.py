@@ -18,7 +18,7 @@ class SendCode(BaseModel):
 
 class VerifyCode(SendCode):
     challenge_id: UUID
-    code: str = Field(pattern=r"^[0-9]{6}$")
+    code: str = Field(pattern=r"^[0-9]{6,10}$")
 
 
 def enable_accounts(app, settings, transport):

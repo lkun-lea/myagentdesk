@@ -21,6 +21,7 @@ CODE = "731408"
 class FakeMailAuth:
     def __init__(self):
         self.users = {email: str(uuid4()) for email in (OWNER, MEMBER)}
+        self.code = CODE
         self.mail = []
         self.active = {}
         self.send_lost = False
@@ -45,7 +46,7 @@ class FakeMailAuth:
             return httpx.Response(200, json={})
         if path.endswith("/verify"):
             assert data["type"] == "email"
-            if self.expired or data["token"] != CODE or data["email"] not in self.mail:
+            if self.expired or data["token"] != self.code or data["email"] not in self.mail:
                 return httpx.Response(403, json={"error_code": "otp_expired", "msg": data["token"]})
             if self.verify_lost:
                 raise httpx.ReadTimeout("OTP " + CODE, request=request)
@@ -209,3 +210,17 @@ def test_invalid_config_and_validation_never_echo_secrets(setup):
     assert "malformed" not in str(result)
     assert send(client, "unprovisioned@example.com")[1].json() == {"outcome": "sent"}
     assert not fake.mail
+
+
+@pytest.mark.parametrize("code", ["031408", "03140827", "0314082759"])
+def test_supabase_email_code_length(setup, code):
+    fake, browser = setup
+    fake.code = code
+    client = browser()
+    challenge, response = send(client, OWNER)
+    assert response.json() == {"outcome": "sent"}
+    for invalid in ("03140", "03140827591"):
+        _, response = verify(client, OWNER, challenge, invalid)
+        assert response.status_code == 422
+    _, response = verify(client, OWNER, challenge, code)
+    assert response.json() == {"outcome": "verified"}

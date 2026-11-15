@@ -27,6 +27,7 @@ function Login({ onLogin }: { onLogin: (user: User) => void }) {
   const [notice, setNotice] = useState('')
   const [fault, setFault] = useState('')
   const [busy, setBusy] = useState(false)
+  const validCode = /^[0-9]{6,10}$/.test(code)
 
   async function apply(outcome: string, operation: { id: string; kind: 'send' | 'verify' }) {
     if (outcome === 'sent') {
@@ -85,7 +86,7 @@ function Login({ onLogin }: { onLogin: (user: User) => void }) {
 
   return <form className="login-form" onSubmit={event => {
     event.preventDefault()
-    if (challenge && code) void submit('verify')
+    if (challenge && validCode) void submit('verify')
     else if (!challenge && !pending) void submit('send')
   }}>
     <h1>登录 MyAgentDesk</h1>
@@ -94,11 +95,11 @@ function Login({ onLogin }: { onLogin: (user: User) => void }) {
     {notice && <Alert type="info" message={notice} showIcon />}
     <label>邮箱<Input type="email" autoComplete="email" required value={email} disabled={busy || !!challenge || !!pending}
       onChange={event => setEmail(event.target.value)} /></label>
-    {challenge && <label>验证码<Input inputMode="numeric" autoComplete="one-time-code" maxLength={6} value={code}
+    {challenge && <label>验证码<Input inputMode="numeric" autoComplete="one-time-code" value={code}
       disabled={busy} onChange={event => setCode(event.target.value.replace(/\D/g, ''))} /></label>}
     <div className="account-actions">
       {!challenge && !pending && <Button type="primary" htmlType="submit" loading={busy}>获取验证码</Button>}
-      {challenge && <Button type="primary" htmlType="submit" loading={busy} disabled={code.length !== 6}>登录</Button>}
+      {challenge && <Button type="primary" htmlType="submit" loading={busy} disabled={!validCode}>登录</Button>}
       {pending && <Button onClick={check} disabled={busy}>核对原请求</Button>}
       {(challenge || pending) && <Button type="link" disabled={busy} onClick={() => {
         setChallenge(null); setPending(null); setCode(''); setFault(''); setNotice('')

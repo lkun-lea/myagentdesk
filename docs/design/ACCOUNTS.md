@@ -17,7 +17,7 @@ Web 首页读取服务端会话。未登录时用已开通邮箱申请验证码�
 ## 配置真实邮箱验收
 
 1. 在 Supabase 创建一个 MyAgentDesk 专用测试项目。到 **Authentication → Users** 预建两个已确认的测试用户。使用你能收信的测试邮箱。项目邀请只授予已开通账号的项目权限。
-2. 在 **Authentication → Email Templates** 的 **Magic Link** 模板中保留 `{{ .Token }}`，让邮件显示六位验证码。按邮箱的投递范围配置 **Custom SMTP**，再用真实收件箱核对到达情况。[邮箱验证码](https://supabase.com/docs/guides/auth/auth-email-passwordless#with-otp) · [Custom SMTP](https://supabase.com/docs/guides/auth/auth-smtp)
+2. 在 **Authentication → Email Templates** 的 **Magic Link** 模板中保留 `{{ .Token }}`，让邮件显示完整验证码。登录页接受 Supabase 支持的 6 至 10 位数字。按邮箱的投递范围配置 **Custom SMTP**，再用真实收件箱核对到达情况。[验证码长度](https://supabase.com/docs/guides/local-development/cli/config#authemailotp_length) · [Custom SMTP](https://supabase.com/docs/guides/auth/auth-smtp)
 3. 从 `.env.example` 建立本机 `.env`。将 Supabase 项目 URL 填入 `MAD_SUPABASE_URL`，publishable key 填入 `MAD_SUPABASE_PUBLISHABLE_KEY`。在本机运行下列命令生成服务端会话密钥，将输出填入 `MAD_SESSION_KEY`。[Supabase API keys](https://supabase.com/docs/guides/api/api-keys)
 
    ```sh
@@ -28,3 +28,11 @@ Web 首页读取服务端会话。未登录时用已开通邮箱申请验证码�
 5. 两个独立浏览器会话中分别使用邮箱 A 和 B 登录。A 创建项目及邀请链接，B 登录后打开链接并加入。B 刷新页面，确认会话恢复。为验收测试项目配置短 JWT 有效期，跨过有效期后复查自动续期。A 移除 B，B 使用原项目链接再次打开，确认访问被拒。退出后核对浏览器 Cookie 与工作台回执。记录收信时间、环境、角色和结果。
 
 本地自动验收使用 PostgreSQL 与 Supabase 邮件和身份协议替身。真实收信和受信任 HTTPS 下的续期按上述流程独立验收。
+
+### 2026-11-15 实测记录
+
+环境为独立 Supabase 测试项目、Brevo SMTP、隔离 PostgreSQL 和受信任的本地 HTTPS。QQ 收件箱收到 8 位验证码并登录。Gmail 对应邮件在 Brevo 显示已交付给收件服务器，测试人员通过 Brevo 预览取得验证码并登录，收件箱可见性待核对。
+
+QQ 会话的上游 JWT 有效期为 60 分钟。本次只把该测试会话标记为应续期。浏览器刷新后，Supabase 为同一个上游会话签发新令牌，本地会话保持有效。续期按本地提前触发验证，另可按上面的步骤复测自然到期。
+
+QQ 创建项目和邀请，Gmail 接受后可访问项目，刷新后仍可访问。QQ 移除 Gmail 后，Gmail 用原项目地址访问被拒。两边退出后，服务端审计确认活动会话为零。项目事件各记录一次创建项目、创建邀请、接受邀请和移除成员。

@@ -1,0 +1,10 @@
+[
+  {"id":"calendar","name":"日程","category":"通用","icon":"calendar","description":"查看安排与关联事项","scope":"account","target":"calendar","version":"1","enabled":true},
+  {"id":"tasks","name":"事项","category":"通用","icon":"check","description":"管理个人事项与安排时间","scope":"account","target":"tasks","version":"1","enabled":true},
+  {"id":"requirements","name":"需求","category":"产品","icon":"requirements","description":"查看需求与阶段","scope":"project","target":"requirements","version":"1","enabled":true},
+  {"id":"specs","name":"规格 · OpenSpec","category":"研发","icon":"specs","description":"打开项目规格","scope":"project","target":"specs","version":"1","enabled":true},
+  {"id":"build","name":"构建与发布","category":"研发","icon":"build","description":"查看构建与发布记录","scope":"project","target":"build","version":"1","enabled":true},
+  {"id":"evidence","name":"验收证据","category":"测试与质量","icon":"evidence","description":"查看项目交付证据","scope":"project","target":"build","version":"1","enabled":true},
+  {"id":"materials","name":"项目资料","category":"通用","icon":"materials","description":"打开项目资料页","scope":"project","target":"materials","version":"1","enabled":true},
+  {"id":"timeline","name":"项目时间线","category":"项目管理","icon":"timeline","description":"查看所选项目的进展","scope":"project","target":"timeline","version":"1","enabled":true}
+]

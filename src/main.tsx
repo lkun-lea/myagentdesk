@@ -347,13 +347,14 @@ function Root() {
     window.history.pushState(null, '', useDemo ? '/?demo=1' : '/')
     setDemo(useDemo)
   }
+  const toggleTheme = () => setDark(value => !value)
   return <ConfigProvider locale={zhCN} button={{ autoInsertSpace: false }} theme={{
     algorithm: dark ? theme.darkAlgorithm : theme.defaultAlgorithm,
     token: { colorPrimary: dark ? '#86aeff' : '#315ed7', borderRadius: 8, fontFamily: 'Inter, "Microsoft YaHei UI", "PingFang SC", sans-serif' },
   }}>
     <AntApp className={dark ? 'theme-dark' : 'theme-light'}>
-      {demo ? <Workspace dark={dark} toggleTheme={() => setDark(value => !value)} onAccounts={() => switchView(false)} />
-        : <AccountWorkspace onDemo={() => switchView(true)} />}
+      {demo ? <Workspace dark={dark} toggleTheme={toggleTheme} onAccounts={() => switchView(false)} />
+        : <AccountWorkspace dark={dark} toggleTheme={toggleTheme} onDemo={() => switchView(true)} />}
     </AntApp>
   </ConfigProvider>
 }

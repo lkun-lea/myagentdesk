@@ -1,0 +1,22 @@
+.account-shell { min-height: 100vh; background: var(--panel); }
+.account-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 20px; border-bottom: 1px solid var(--line); }
+.account-main { display: grid; gap: 16px; max-width: 430px; margin: 0 auto; padding: 42px 18px; }
+.account-main.signed-in { max-width: 900px; padding-top: 22px; }
+.login-form, .project-members, .invite-accept { display: grid; gap: 14px; }
+.account-main h1 { font-size: 22px; }
+.account-main h2 { font-size: 16px; margin-top: 8px; }
+.account-muted { color: var(--muted); }
+.login-form label, .invite-link { display: grid; gap: 5px; }
+.account-actions, .account-projects { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.account-actions .ant-input { width: min(100%, 290px); }
+.account-projects { padding: 7px 0; border-bottom: 1px solid var(--line); }
+.member-heading { display: flex; align-items: start; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.account-list { padding: 0; margin: 0; list-style: none; }
+.account-list li { display: flex; gap: 9px; min-height: 42px; align-items: center; padding: 5px 0; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+.account-list li > span:first-child { margin-right: auto; overflow-wrap: anywhere; }
+.account-list .ant-select { min-width: 94px; }
+.invite-accept { padding-bottom: 12px; border-bottom: 1px solid var(--line); justify-items: start; }
+@media (max-width: 550px) {
+  .account-top { padding-inline: 10px; flex-wrap: wrap; }
+  .account-main { padding-inline: 12px; }
+}

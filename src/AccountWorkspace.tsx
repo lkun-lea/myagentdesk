@@ -1,10 +1,14 @@
-import { useEffect, useRef, useState } from 'react'
-import { Alert, Button, Input, Select, Spin } from 'antd'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { Alert, Button, Input, Select, Spin, Tabs } from 'antd'
+import { MoonOutlined, SunOutlined } from '@ant-design/icons'
 import { api, errorCode, isUnauthorized, messageFor } from './accounts-api'
+import { PersonalCalendar, PersonalTasks } from './PersonalPlanning'
+import { globalViews, ProjectContent, projectPages, Workbench } from './Workbench'
+import type { OpenRoute, Project, ProjectPage, View } from './Workbench'
 import './accounts.css'
+import './workbench.css'
 
 type User = { id: string; email: string }
-type Project = { id: string; workspace_id: string; workspace_name?: string; name: string; role: 'owner' | 'admin' | 'member' }
 type Member = User & { role: Project['role'] }
 type Invite = { id: string; email: string; expires_at: string; state: 'pending' | 'accepted' | 'expired' | 'revoked' }
 type Activity = { action: string; occurred_at: string }
@@ -246,7 +250,9 @@ function ProjectPanel({ project, onExpired, onUnavailable }: {
   </section>
 }
 
-export function AccountWorkspace({ onDemo }: { onDemo: () => void }) {
+export function AccountWorkspace({ dark, onDemo, toggleTheme }: {
+  dark: boolean; onDemo: () => void; toggleTheme: () => void
+}) {
   const [configuration, setConfiguration] = useState<Configuration | null>(null)
   const [user, setUser] = useState<User | null>(null)
   const [projects, setProjects] = useState<Project[]>([])
@@ -261,6 +267,9 @@ export function AccountWorkspace({ onDemo }: { onDemo: () => void }) {
   const [sessionCheck, setSessionCheck] = useState(0)
   const projectId = validId(location.get('project'))
   const inviteId = validId(location.get('invite'))
+  const taskId = validId(location.get('task')) ?? undefined
+  const view = projectId ? 'projects' : globalViews.find(item => item.id === location.get('view'))?.id ?? 'workbench'
+  const page = (Object.keys(projectPages) as ProjectPage[]).find(key => key === location.get('page')) ?? 'timeline'
 
   useEffect(() => {
     const onLocation = () => setLocation(new URLSearchParams(window.location.search))
@@ -268,10 +277,16 @@ export function AccountWorkspace({ onDemo }: { onDemo: () => void }) {
     return () => window.removeEventListener('popstate', onLocation)
   }, [])
 
-  function navigate(id?: string) {
-    const query = id ? '?project=' + id : ''
-    window.history.pushState(null, '', '/' + query)
-    setLocation(new URLSearchParams(query))
+  const navigate: OpenRoute = (target: View, params = {}, replace = false) => {
+    const next = new URLSearchParams(params)
+    if (target !== 'workbench' && !next.has('project')) next.set('view', target)
+    const query = next.toString()
+    if (window.location.search !== (query ? `?${query}` : '')) {
+      const path = query ? `/?${query}` : '/'
+      if (replace) window.history.replaceState(null, '', path)
+      else window.history.pushState(null, '', path)
+    }
+    setLocation(next)
     setFault('')
   }
 
@@ -315,6 +330,10 @@ export function AccountWorkspace({ onDemo }: { onDemo: () => void }) {
     if (code !== 'role_changed') setFault(messageFor(code))
     setReload(value => value + 1)
   }).current
+  const projectError = useCallback((code: string) => {
+    if (code === 'login_required') expired()
+    else unavailable(code)
+  }, [expired, unavailable])
 
   useEffect(() => {
     if (!user) return
@@ -334,7 +353,7 @@ export function AccountWorkspace({ onDemo }: { onDemo: () => void }) {
     })
     else setProject(null)
     return () => { active = false }
-  }, [user, projectId, reload, expired])
+  }, [user, projectId, page, reload, expired])
 
   async function act(task: () => Promise<void>) {
     setBusy(true); setFault(''); setNotice('')
@@ -345,8 +364,9 @@ export function AccountWorkspace({ onDemo }: { onDemo: () => void }) {
     } finally { setBusy(false) }
   }
 
-  const current = project?.id === projectId ? project : null
-  return <div className="account-shell">
+  const current = project?.id === projectId && projects.some(item => item.id === projectId) ? project : null
+  const hasShell = ready && !!user && !inviteId
+  return <div className={hasShell ? 'account-shell mad-shell' : 'account-shell'}>
     <header className="account-top">
       <strong>MyAgentDesk</strong>
       <div className="account-actions">
@@ -355,10 +375,16 @@ export function AccountWorkspace({ onDemo }: { onDemo: () => void }) {
           setUser(null); setProjects([]); setProject(null); signalChange()
           if (result.outcome === 'remote_unconfirmed') setNotice('已退出当前工作台。认证服务的远端撤销暂未确认。')
         })} loading={busy}>退出登录</Button></>}
+        <Button type="text" icon={dark ? <SunOutlined /> : <MoonOutlined />}
+          aria-label={dark ? '切换到浅色' : '切换到深色'} onClick={toggleTheme} />
         <Button type="link" onClick={onDemo}>打开 Demo</Button>
       </div>
     </header>
-    <main className={user ? 'account-main signed-in' : 'account-main'}>
+    {hasShell && <nav className="mad-rail" aria-label="全局导航">
+      {globalViews.map(item => <Button key={item.id} type="text" icon={item.icon} aria-current={view === item.id ? 'page' : undefined}
+        onClick={() => navigate(item.id)}>{item.label}</Button>)}
+    </nav>}
+    <main className={hasShell ? 'account-main mad-main' : user ? 'account-main signed-in' : 'account-main'}>
       {fault && <Alert type="error" showIcon message={fault} />}
       {notice && <Alert type="warning" showIcon message={notice} />}
       {!ready && <Spin />}
@@ -372,28 +398,44 @@ export function AccountWorkspace({ onDemo }: { onDemo: () => void }) {
         {inviteId && <section className="invite-accept"><h1>接受项目邀请</h1><p>{user.email}</p>
           <Button type="primary" loading={busy} onClick={() => act(async () => {
             const joined = await api<Project>('/invites/' + inviteId + '/accept', 'POST')
-            setProject(joined); navigate(joined.id); setReload(value => value + 1)
+            setProject(joined); navigate('projects', { project: joined.id }); setReload(value => value + 1)
           })}>接受邀请</Button>
         </section>}
-        <nav className="account-projects" aria-label="已授权的项目">
-          <Button type="link" onClick={() => navigate()}>全部项目</Button>
-          {projects.map(item => <Button key={item.id} type={projectId === item.id ? 'primary' : 'default'}
-            onClick={() => navigate(item.id)}>{item.name}</Button>)}
-        </nav>
-        {current && <ProjectPanel key={user.id + ':' + current.id + ':' + current.role} project={current}
-          onExpired={expired} onUnavailable={unavailable} />}
-        {!projectId && !inviteId && <section className="project-members"><h1>项目</h1>
+        {!inviteId && view === 'workbench' && <Workbench key={user.id} projects={projects} refresh={reload} navigate={navigate} />}
+        {!inviteId && view === 'chat' && <section className="mad-page"><h1>聊天</h1>
+          <p className="account-muted">需求群和消息入口随需求协作接入。</p>
+          <a href="https://github.com/lkun-lea/myagentdesk/issues/6" target="_blank" rel="noreferrer">查看实施进度 #6</a>
+        </section>}
+        {!inviteId && view === 'calendar' && <PersonalCalendar key={user.id} navigate={navigate} taskId={taskId} onExpired={expired} />}
+        {!inviteId && view === 'tasks' && <PersonalTasks key={user.id} navigate={navigate} taskId={taskId} onExpired={expired} />}
+        {!inviteId && view === 'projects' && <section className="mad-page mad-projects-page">
+          <nav className="account-projects" aria-label="已授权的项目">
+            <Button type="link" onClick={() => navigate('projects')}>全部项目</Button>
+            {projects.map(item => <Button key={item.id} type={projectId === item.id ? 'primary' : 'default'}
+              aria-current={projectId === item.id ? 'true' : undefined}
+              onClick={() => navigate('projects', { project: item.id })}>{item.name}</Button>)}
+          </nav>
+          {current && <>
+            <div className="mad-page-heading"><h1>{current.name}</h1></div>
+            <Tabs activeKey={page} onChange={key => navigate('projects', { project: current.id, page: key })}
+              items={Object.entries(projectPages).map(([key, label]) => ({ key, label }))} />
+            {page === 'members' ? <ProjectPanel key={user.id + ':' + current.id + ':' + current.role} project={current}
+              onExpired={expired} onUnavailable={unavailable} />
+              : <ProjectContent key={user.id + ':' + current.id + ':' + page} project={current} page={page} onUnavailable={projectError} />}
+          </>}
+          {projectId && !current && !fault && <Spin aria-label="正在核验项目权限" />}
+          {!projectId && <><h1>项目</h1>
           {!projects.length && <p className="account-muted">当前账号还没有项目。</p>}
           <form className="account-actions" onSubmit={event => {
             event.preventDefault()
             void act(async () => {
               const created = await api<Project>('/projects', 'POST', { name })
-              setName(''); setProject(created); navigate(created.id); setReload(value => value + 1)
+              setName(''); setProject(created); navigate('projects', { project: created.id }); setReload(value => value + 1)
             })
           }}>
             <Input aria-label="项目名称" required maxLength={100} placeholder="项目名称" value={name} onChange={event => setName(event.target.value)} />
             <Button type="primary" htmlType="submit" loading={busy}>创建项目</Button>
-          </form>
+          </form></>}
         </section>}
       </>}
     </main>

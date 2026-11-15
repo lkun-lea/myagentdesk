@@ -10,6 +10,7 @@ import pytest
 from server.config import Settings
 from server.db import connect
 from server.main import create_app
+from server.workbench import TOOLS_BY_ID
 
 ORIGIN = "https://workbench.test"
 HEADERS = {"Origin": ORIGIN, "X-MAD-Request": "1"}
@@ -224,3 +225,74 @@ def test_supabase_email_code_length(setup, code):
         assert response.status_code == 422
     _, response = verify(client, OWNER, challenge, code)
     assert response.json() == {"outcome": "verified"}
+
+
+def test_workbench_favorites_and_project_timeline_follow_membership(setup, monkeypatch):
+    _, browser = setup
+    owner, member = browser(), browser()
+    login(owner, OWNER)
+    login(member, MEMBER)
+    project_ids = [owner.post("/api/projects", json={"name": name}).json()["id"]
+                   for name in ("共享项目 A", "共享项目 B", "仅所有者")]
+    for project in project_ids[:2]:
+        invite = str(uuid4())
+        assert owner.post(f"/api/projects/{project}/invites", json={"id": invite, "email": MEMBER}).status_code == 200
+        assert member.post(f"/api/invites/{invite}/accept").status_code == 200
+    assert {project["id"] for project in member.get("/api/projects").json()} == set(project_ids[:2])
+    url = "/api/workbench/favorites/specs"
+    assert not member.get("/api/workbench").json()["favorites"]
+    for _ in range(2):
+        assert member.put(url, json={"saved": True}).json() == {"saved": True}
+    assert member.get("/api/workbench").json()["favorites"] == ["specs"]
+    assert not owner.get("/api/workbench").json()["favorites"]
+    assert member.get(f"/api/projects/{project_ids[2]}/timeline").status_code == 404
+    assert [row["action"] for row in member.get(f"/api/projects/{project_ids[0]}/timeline").json()] == ["project_created"]
+
+    specs = TOOLS_BY_ID["specs"]
+    monkeypatch.setitem(specs, "enabled", False)
+    assert member.put(url, json={"saved": True}).status_code == 409
+    assert not next(tool for tool in member.get("/api/workbench").json()["tools"] if tool["id"] == "specs")["enabled"]
+    monkeypatch.setitem(specs, "enabled", True)
+    monkeypatch.setitem(specs, "version", "0.9")
+    restored = member.get("/api/workbench").json()
+    assert restored["favorites"] == ["specs"]
+    assert next(tool for tool in restored["tools"] if tool["id"] == "specs")["version"] == "0.9"
+
+    project = project_ids[0]
+    member_id = member.get("/api/auth/session").json()["user"]["id"]
+    assert owner.delete(f"/api/projects/{project}/members/{member_id}").status_code == 200
+    assert member.get(f"/api/projects/{project}/timeline").status_code == 404
+    assert member.get(f"/api/projects/{project_ids[1]}/timeline").status_code == 200
+    assert owner.delete(f"/api/projects/{project_ids[1]}/members/{member_id}").status_code == 200
+    assert not member.get("/api/workbench").json()["favorites"]
+    assert member.put(url, json={"saved": True}).status_code == 404
+    assert member.put(url, json={"saved": False}).status_code == 200
+
+
+def test_calendar_uses_absolute_times_and_keeps_task_associations_private(setup):
+    _, browser = setup
+    owner, other = browser(), browser()
+    login(owner, OWNER)
+    login(other, MEMBER)
+    task_id = str(uuid4())
+    task = {"id": task_id, "title": "确认版本范围"}
+    assert owner.post("/api/tasks", json=task).status_code == 201
+    assert owner.post("/api/tasks", json=task).status_code == 201
+    assert owner.post("/api/tasks", json={**task, "title": "不同事项"}).status_code == 409
+    assert other.patch("/api/tasks/" + task_id, json={"completed": True}).status_code == 404
+    url = "/api/calendar/" + str(uuid4())
+    event = {"title": task["title"], "task_id": task_id, "starts_at": "2026-11-16T09:00:00+08:00",
+             "ends_at": "2026-11-16T10:00:00+08:00"}
+    assert other.put(url, json=event).status_code == 404
+    assert owner.put(url, json={**event, "starts_at": "2026-11-16T09:00:00"}).status_code == 422
+    saved = owner.put(url, json=event).json()
+    assert saved["task_id"] == task_id
+    assert owner.put(url, json=event).json() == saved
+    params = {"start": "2026-11-16T01:30:00Z", "end": "2026-11-16T03:00:00Z"}
+    assert owner.get("/api/calendar", params=params).json() == [saved]
+    assert other.get("/api/calendar", params=params).json() == []
+    assert other.delete(url).status_code == 200
+    assert owner.get("/api/calendar", params=params).json() == [saved]
+    assert owner.delete(url).status_code == 200
+    assert owner.get("/api/calendar", params=params).json() == []
+    assert owner.patch("/api/tasks/" + task_id, json={"completed": True}).json()["completed"]

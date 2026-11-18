@@ -177,11 +177,16 @@ export function ProjectContent({ project, page, onUnavailable, navigate }: {
     }}>重试</Button>} /> : !events ? <Spin aria-label="正在加载时间线" /> : events.length
       ? <Timeline items={events.map(event => ({ key: event.id, children: <><strong>{({ project_created: '创建项目',
         requirement_group_created: '需求已立项建群', requirement_stage_changed: '需求阶段已流转', requirement_confirmed: '需求版本已确认',
-        context_published: '项目资料已发布', github_issue_linked: '已关联 GitHub Issue' } as Record<string,string>)[event.action] ?? event.action}</strong>
+        context_published: '项目资料已发布', github_issue_linked: '已关联 GitHub Issue',
+        version_planned: '创建版本计划', version_revised: '修改版本计划' } as Record<string,string>)[event.action] ?? event.action}</strong>
         {['requirement_group_created', 'requirement_stage_changed'].includes(event.action) && <Button type="link"
           onClick={() => navigate('chat', { project: project.id, group: event.target })}>查看需求群</Button>}
         {event.action === 'github_issue_linked' && <Button type="link"
           onClick={() => navigate('projects', { project: project.id, page: 'requirements', requirement: event.target })}>查看关联需求</Button>}
+        {['version_planned', 'version_revised'].includes(event.action) && <Button type="link" onClick={() => {
+          const [plan, planRevision] = event.target.split(':')
+          navigate('projects', { project: project.id, page: 'timeline', plan, planRevision })
+        }}>查看计划修订</Button>}
         <p className="account-muted"><time dateTime={event.occurred_at}>{new Date(event.occurred_at).toLocaleString()}</time></p></> }))} />
       : <p className="account-muted">暂无项目事件。</p>}
   </section>

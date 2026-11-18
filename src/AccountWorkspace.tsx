@@ -7,6 +7,7 @@ import { MyAgent, ProjectContext } from './ProjectContext'
 import { DecisionInbox, ProjectChats } from './RequirementGroups'
 import { ResourcePermissions } from './ResourcePermissions'
 import { GitHubIssues } from './GitHubIssues'
+import { ReleaseTimeline } from './ReleaseTimeline'
 import { globalViews, ProjectContent, projectPages, Workbench } from './Workbench'
 import type { OpenRoute, Project, ProjectPage, View } from './Workbench'
 import './accounts.css'
@@ -451,6 +452,9 @@ export function AccountWorkspace({ dark, onDemo, toggleTheme }: {
                   initialRequirement={validId(location.get('requirement')) ?? undefined} navigate={navigate} onUnavailable={projectError} />
                 : page === 'issues' ? <GitHubIssues key={user.id + ':' + current.id + ':' + current.role} project={current}
                   number={location.get('issue')} sourceRevision={location.get('sourceRevision')} navigate={navigate} onUnavailable={projectError} />
+                : page === 'timeline' ? <ReleaseTimeline key={user.id + ':' + current.id + ':' + current.role} project={current} userId={user.id}
+                  planId={validId(location.get('plan')) ?? undefined} planRevision={Number(location.get('planRevision')) || undefined}
+                  navigate={navigate} onUnavailable={projectError} />
                 : <ProjectContent key={user.id + ':' + current.id + ':' + page} project={current} page={page} onUnavailable={projectError} navigate={navigate} />}
           </>}
           {projectId && !current && !fault && <Spin aria-label="正在核验项目权限" />}

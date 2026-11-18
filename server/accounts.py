@@ -13,6 +13,7 @@ from server.workbench import workbench_router
 from server.project_context import context_router
 from server.agents import agents_router, AgentService
 from server.github_issues import github_router
+from server.release_plans import release_plan_router
 
 
 class SendCode(BaseModel):
@@ -166,3 +167,4 @@ def enable_accounts(app, settings, transport, github_transport=None):
     app.state.agent_service=service
     app.include_router(agents_router(settings, identity, service))
     app.include_router(github_router(settings.database_url, identity, settings.github_read_token, github_transport))
+    app.include_router(release_plan_router(settings.database_url, identity))

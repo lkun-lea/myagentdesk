@@ -1,0 +1,87 @@
+.mad-release-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+.mad-release-main { display: grid; gap: 12px; min-width: 0; }
+.mad-release-scroll { overflow: auto; background: var(--panel); border-radius: 8px; }
+.mad-release-calendar { --stub: 210px; min-width: 650px; }
+.mad-release-calendar .calendar-stub {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: var(--panel);
+  overflow-wrap: anywhere;
+}
+.mad-release-axis, .mad-release-axis .calendar-stub { color: var(--muted); background: var(--wash); font-size: 12px; }
+.mad-release-axis > div { display: grid; grid-template-columns: repeat(var(--release-columns), minmax(0, 1fr)); }
+.mad-release-axis time { padding: 9px 4px; border-right: 1px solid var(--line); text-align: center; font-variant-numeric: tabular-nums; }
+.mad-release-band + .mad-release-band { border-top: 6px solid var(--wash); }
+.mad-release-track {
+  position: relative;
+  min-height: 36px;
+  background-image: linear-gradient(90deg, transparent calc(100% - 1px), var(--line) calc(100% - 1px));
+  background-size: calc(100% / var(--release-columns)) 100%;
+}
+.mad-release-version { min-height: 64px; }
+.mad-release-milestone .calendar-stub { padding-left: 22px; color: var(--muted); font-size: 12px; }
+.mad-release-req .calendar-stub { padding-left: 22px; }
+.mad-release-row-button {
+  display: grid;
+  gap: 2px;
+  width: 100%;
+  padding: 2px 3px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+.mad-release-row-button small { color: var(--muted); font-size: 12px; }
+.mad-release-row-button:hover { background: var(--accent-wash); }
+.mad-release-mark {
+  position: absolute;
+  left: var(--release-position);
+  top: 50%;
+  transform: translate(-50%, -50%);
+  border: 0;
+  border-radius: 4px;
+  padding: 3px 7px;
+  color: var(--accent);
+  background: var(--accent-wash);
+  white-space: nowrap;
+  font-size: 12px;
+  cursor: pointer;
+}
+.mad-release-target { font-weight: 650; }
+.mad-release-milestone .mad-release-mark::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  height: 5px;
+  border-left: 1px solid currentColor;
+}
+.mad-release-mark[data-overdue='true'], .mad-release-mark[data-state='blocked'] { color: var(--warn); background: var(--warn-wash); }
+.mad-release-mark[data-state='accepted'] { color: var(--good); background: var(--good-wash); }
+.mad-release-calendar [data-selected='true'] .calendar-stub { background: var(--accent-wash); }
+.mad-release-queue .ant-btn-link { justify-self: start; }
+.mad-release-queue h3 span { font-weight: 400; }
+.mad-release-detail { overflow-wrap: anywhere; border: 0; border-radius: 8px; }
+.mad-release-detail .drawer-content > .ant-btn { justify-self: start; }
+.mad-release-detail details { margin-top: 8px; }
+.mad-release-facts { display: grid; grid-template-columns: minmax(65px, auto) minmax(0, 1fr); gap: 6px 12px; margin: 0; }
+.mad-release-facts dt { color: var(--muted); }
+.mad-release-facts dd { margin: 0; }
+.mad-release-editor, .mad-release-review { margin-block: 14px; }
+.mad-release-review { display: grid; gap: 7px; overflow-wrap: anywhere; }
+
+@media (min-width: 1050px) {
+  .mad-release-layout[data-detail='true'] { grid-template-columns: minmax(0, 1fr) minmax(270px, 315px); }
+}
+@media (max-width: 700px) {
+  .mad-release-calendar { --stub: 140px; }
+}

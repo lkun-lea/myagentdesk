@@ -58,6 +58,7 @@ def decision_case(workflow,tmp_path):
     run=stage_run(developer,group)
     assert run['status']=='waiting_decision',run['events']
     decision=developer.get('/api/decisions').json()[0]
+    assert developer.get('/api/decisions/'+decision['id']).json()['job']['reason']=='decision_pending'
     answer={'expected_revision':decision['revision'],'answer':'继续首版','note':'本人已确认。'}
     return {'clients':clients,'ids':identities,'project':project,'group':group,'run':run,'decision':decision,'answer':answer,
             'resource':resource,'grant':grant,'settings':settings,'app':app,'endpoint':endpoint,'doc':doc,'requirement':req}

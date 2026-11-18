@@ -65,6 +65,10 @@ def process_job(service, run_id):
                     state, reason = 'completed', None
                 elif current['status'] == 'waiting_authorization':
                     state, reason = 'blocked', 'authorization_required'
+                elif current['status']=='waiting_decision':
+                    state, reason = 'blocked', 'decision_pending'
+                elif current['status']=='cancelled':
+                    state, reason = 'blocked', 'run_cancelled'
                 else:
                     last=db.execute("SELECT data->>'reason' AS reason FROM mad_run_events WHERE run_id=%s AND kind='stopped' ORDER BY id DESC LIMIT 1",(run_id,)).fetchone()
                     state, reason = 'blocked', (last['reason'] if last else current['status'])

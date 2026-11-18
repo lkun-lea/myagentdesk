@@ -1,0 +1,1887 @@
+{
+  "source": "https://github.com/lkun-lea/myagentdesk/issues/6",
+  "title": "需求群、项目时间线与阶段交接",
+  "commit": "4d5d7ea54913804e885152a746221435ace80cf4",
+  "regression": {
+    "commit": "4d5d7ea54913804e885152a746221435ace80cf4",
+    "tests": 20,
+    "failures": 0,
+    "errors": 0,
+    "seconds": "202.174",
+    "cases": [
+      "test_otp_failures_receipts_and_login_expiry",
+      "test_two_accounts_invite_permissions_and_revocation",
+      "test_invalid_config_and_validation_never_echo_secrets",
+      "test_supabase_email_code_length[031408]",
+      "test_supabase_email_code_length[03140827]",
+      "test_supabase_email_code_length[0314082759]",
+      "test_workbench_favorites_and_project_timeline_follow_membership",
+      "test_calendar_uses_absolute_times_and_keeps_task_associations_private",
+      "test_clean_install_home_health_and_migrations",
+      "test_missing_or_wrong_config_never_falls_back_to_tebb",
+      "test_upstream_time_example_and_fake_adapters",
+      "test_pi_sdk_shared_context_and_independent_handoff",
+      "test_version_confirmation_cancel_resume_and_revocation",
+      "test_failed_provider_and_abandoned_process_restore_receipts",
+      "test_initiation_and_product_stage",
+      "test_development_decision_and_same_checkpoint_resume",
+      "test_testing_return_rework_and_quality_gate",
+      "test_decision_takeover_revocation_and_revision_invalidation",
+      "test_automatic_agents_handoff_stops_for_human_and_quality",
+      "test_invalid_tool_range_can_be_corrected_without_success_receipt"
+    ]
+  },
+  "scope": "Review actual #6 implementation and recorded test evidence; no code execution by model.",
+  "identity": "Three isolated fixture accounts; product confirmation, developer boundary choice and quality approval are scripted acceptance actions.",
+  "model_config": "Reused authorized tebb configuration; credentials never copied.",
+  "stages": [
+    {
+      "label": "product_proposed",
+      "stage": "product",
+      "state": "awaiting_confirmation",
+      "revision": 2,
+      "runs": [
+        {
+          "id": "bb8321bb-1e61-4eec-9f52-2dbcb466039b",
+          "role": "product",
+          "status": "completed",
+          "user_id": "346044cf-fa03-4fcf-8327-547372727bbb",
+          "checkpoint": 8,
+          "group_revision": 1
+        }
+      ]
+    },
+    {
+      "label": "development_waiting_for_owner",
+      "stage": "development",
+      "state": "waiting_decision",
+      "revision": 3,
+      "runs": [
+        {
+          "id": "bb8321bb-1e61-4eec-9f52-2dbcb466039b",
+          "role": "product",
+          "status": "completed",
+          "user_id": "346044cf-fa03-4fcf-8327-547372727bbb",
+          "checkpoint": 8,
+          "group_revision": 1
+        },
+        {
+          "id": "5703fcf8-cb16-4965-b70b-89b706ed37df",
+          "role": "development",
+          "status": "waiting_decision",
+          "user_id": "c95cc586-e973-4d26-9ed3-8695fd26723e",
+          "checkpoint": 8,
+          "group_revision": 3
+        }
+      ]
+    },
+    {
+      "label": "development_resumed_and_delivered",
+      "stage": "testing",
+      "state": "active",
+      "revision": 4,
+      "runs": [
+        {
+          "id": "bb8321bb-1e61-4eec-9f52-2dbcb466039b",
+          "role": "product",
+          "status": "completed",
+          "user_id": "346044cf-fa03-4fcf-8327-547372727bbb",
+          "checkpoint": 8,
+          "group_revision": 1
+        },
+        {
+          "id": "5703fcf8-cb16-4965-b70b-89b706ed37df",
+          "role": "development",
+          "status": "completed",
+          "user_id": "c95cc586-e973-4d26-9ed3-8695fd26723e",
+          "checkpoint": 10,
+          "group_revision": 3
+        }
+      ]
+    },
+    {
+      "label": "testing_finished",
+      "stage": "quality",
+      "state": "awaiting_confirmation",
+      "revision": 5,
+      "runs": [
+        {
+          "id": "bb8321bb-1e61-4eec-9f52-2dbcb466039b",
+          "role": "product",
+          "status": "completed",
+          "user_id": "346044cf-fa03-4fcf-8327-547372727bbb",
+          "checkpoint": 8,
+          "group_revision": 1
+        },
+        {
+          "id": "5703fcf8-cb16-4965-b70b-89b706ed37df",
+          "role": "development",
+          "status": "completed",
+          "user_id": "c95cc586-e973-4d26-9ed3-8695fd26723e",
+          "checkpoint": 10,
+          "group_revision": 3
+        },
+        {
+          "id": "f3314d7a-6941-44cf-8714-fb41372e0405",
+          "role": "testing",
+          "status": "completed",
+          "user_id": "a0bde953-1256-4463-8638-dcffe4a3c9e2",
+          "checkpoint": 15,
+          "group_revision": 4
+        }
+      ]
+    },
+    {
+      "label": "quality_approved",
+      "stage": "completed",
+      "state": "completed",
+      "revision": 6,
+      "runs": [
+        {
+          "id": "bb8321bb-1e61-4eec-9f52-2dbcb466039b",
+          "role": "product",
+          "status": "completed",
+          "user_id": "346044cf-fa03-4fcf-8327-547372727bbb",
+          "checkpoint": 8,
+          "group_revision": 1
+        },
+        {
+          "id": "5703fcf8-cb16-4965-b70b-89b706ed37df",
+          "role": "development",
+          "status": "completed",
+          "user_id": "c95cc586-e973-4d26-9ed3-8695fd26723e",
+          "checkpoint": 10,
+          "group_revision": 3
+        },
+        {
+          "id": "f3314d7a-6941-44cf-8714-fb41372e0405",
+          "role": "testing",
+          "status": "completed",
+          "user_id": "a0bde953-1256-4463-8638-dcffe4a3c9e2",
+          "checkpoint": 15,
+          "group_revision": 4
+        }
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "path": "server/requirement_groups.py",
+      "sha256": "74e57545f392e7cced86ac1ddac561f6f742b60ae9372beab5dc365e354100ee",
+      "lines": [
+        62,
+        104
+      ]
+    },
+    {
+      "path": "server/requirement_groups.py",
+      "sha256": "74e57545f392e7cced86ac1ddac561f6f742b60ae9372beab5dc365e354100ee",
+      "lines": [
+        275,
+        312
+      ]
+    },
+    {
+      "path": "server/agents.py",
+      "sha256": "ab48b86adec1a1d8997ac9cf3485cdf30086454e6ac62f4ddbba1730b8a8bdf9",
+      "lines": [
+        168,
+        215
+      ]
+    },
+    {
+      "path": "tests/test_requirement_groups.py",
+      "sha256": "ecfcd73523dd2f1b73090837696c0a3b3c4f8fa750e78d83840633226af3ca01",
+      "lines": [
+        142,
+        192
+      ]
+    }
+  ],
+  "runs": [
+    {
+      "id": "bb8321bb-1e61-4eec-9f52-2dbcb466039b",
+      "role": "product",
+      "status": "completed",
+      "checkpoint": 8,
+      "references": [
+        {
+          "document_id": "ccab9a5b-61f7-4480-8727-4b2234a21475",
+          "revision": 1,
+          "start_offset": 0,
+          "end_offset": 1266,
+          "active": true
+        },
+        {
+          "document_id": "8f6e1153-c15c-4625-a5a1-c18abb7c88d5",
+          "revision": 1,
+          "start_offset": 0,
+          "end_offset": 1500,
+          "active": true
+        },
+        {
+          "document_id": "46429491-dcf0-49db-ab01-d32aec0923a6",
+          "revision": 1,
+          "start_offset": 0,
+          "end_offset": 1500,
+          "active": true
+        }
+      ],
+      "model": "deepseek-flash",
+      "events": [
+        {
+          "id": 1,
+          "kind": "started",
+          "data": {
+            "checkpoint": 0
+          },
+          "created_at": "2026-11-18T21:33:41.270649+08:00"
+        },
+        {
+          "id": 14,
+          "kind": "tool_result",
+          "data": {
+            "tool": "list_context",
+            "result": {
+              "documents": []
+            },
+            "call_id": "call_00_ET_sWMuHs4iH66iiqajsZqr7300"
+          },
+          "created_at": "2026-11-18T21:33:46.676596+08:00"
+        },
+        {
+          "id": 15,
+          "kind": "tool_result",
+          "data": {
+            "tool": "read_group_messages",
+            "result": {
+              "messages": [
+                {
+                  "body": "需求已立项，产品阶段待推进。",
+                  "data": {
+                    "source": "https://github.com/lkun-lea/myagentdesk/issues/6"
+                  },
+                  "kind": "created",
+                  "sequence": 1
+                }
+              ],
+              "next_cursor": 1
+            },
+            "call_id": "call_01_ET_y3tSHYjukDrHHhP9oAQy0420"
+          },
+          "created_at": "2026-11-18T21:33:46.924755+08:00"
+        },
+        {
+          "id": 16,
+          "kind": "tool_result",
+          "data": {
+            "tool": "list_context",
+            "result": {
+              "documents": [
+                {
+                  "id": "ccab9a5b-61f7-4480-8727-4b2234a21475",
+                  "title": "00 本次范围与真实需求",
+                  "source": "https://github.com/lkun-lea/myagentdesk/issues/6",
+                  "summary": "#6 需求群、项目时间线与阶段交接\n路线图 [#1](https://github.com/lkun-lea/myagentdesk/issues/1) · 来源 [tebb #314](https://github.com/lkun-lea/tebb/issues/314) · [工作台、需求群与项目页草图](htt",
+                  "revision": 1
+                },
+                {
+                  "id": "8f6e1153-c15c-4625-a5a1-c18abb7c88d5",
+                  "title": "10 阶段流转实现",
+                  "source": "repo://server/requirement_groups.py",
+                  "summary": "62:     group = group_scope(db, run['group_id'], run['user_id'])\n63:     if group['revision'] != run['group_revision'] or group['stage'] != run['role']:\n64:    ",
+                  "revision": 1
+                },
+                {
+                  "id": "46429491-dcf0-49db-ab01-d32aec0923a6",
+                  "title": "20 本人决定与恢复实现",
+                  "source": "repo://server/requirement_groups.py",
+                  "summary": "275:             if decision['state'] == 'resolved':\n276:                 if decision['answer'] != data.answer or decision['note'] != data.note:\n277:           ",
+                  "revision": 1
+                }
+              ]
+            },
+            "call_id": "call_00_o0QZqCUjTQLUQr9UdkQ57458"
+          },
+          "created_at": "2026-11-18T21:33:48.292610+08:00"
+        },
+        {
+          "id": 17,
+          "kind": "tool_result",
+          "data": {
+            "tool": "list_context",
+            "result": {
+              "documents": [
+                {
+                  "id": "ccab9a5b-61f7-4480-8727-4b2234a21475",
+                  "title": "00 本次范围与真实需求",
+                  "source": "https://github.com/lkun-lea/myagentdesk/issues/6",
+                  "summary": "#6 需求群、项目时间线与阶段交接\n路线图 [#1](https://github.com/lkun-lea/myagentdesk/issues/1) · 来源 [tebb #314](https://github.com/lkun-lea/tebb/issues/314) · [工作台、需求群与项目页草图](htt",
+                  "revision": 1
+                }
+              ]
+            },
+            "call_id": "call_01_aFrr0uz3FKs6BlOTGMOz2207"
+          },
+          "created_at": "2026-11-18T21:33:48.544386+08:00"
+        },
+        {
+          "id": 18,
+          "kind": "tool_result",
+          "data": {
+            "tool": "read_context",
+            "result": {
+              "id": "ccab9a5b-61f7-4480-8727-4b2234a21475",
+              "end": 1266,
+              "text": "#6 需求群、项目时间线与阶段交接\n路线图 [#1](https://github.com/lkun-lea/myagentdesk/issues/1) · 来源 [tebb #314](https://github.com/lkun-lea/tebb/issues/314) · [工作台、需求群与项目页草图](https://github.com/lkun-lea/tebb/blob/3769741dc807c55c52c9ea9a768633ba21d4fff2/docs/design/workbench/README.md)\r\n\r\n## 范围\r\n\r\n提供候选调研和人工立项入口，一条正式需求对应一个需求群。实现需求确认、实现与自测、独立验收、质量复核的阶段状态与交接记录，以及项目事件记录、阶段详情与按需项目上下文。事件记录按项目和事件序号补读，供版本时间线作为历史视图。版本范围和排期由 [#16 版本计划](https://github.com/lkun-lea/myagentdesk/issues/16) 管理。阶段服务先通过确定性角色替身验收，接入真实个人 Agent 后再贯通执行。\r\n\r\n## 依赖与联调\r\n\r\n- 前置 [#2 独立运行基座与 tebb 模块复用边界](https://github.com/lkun-lea/myagentdesk/issues/2)\r\n- 前置 [#3 账号登录、工作区与项目成员](https://github.com/lkun-lea/myagentdesk/issues/3)\r\n\r\n可先用替身开发与验收。以下模块就绪后验证完整产品入口：[#4 工作台首页、项目导航与应用工具目录](https://github.com/lkun-lea/myagentdesk/issues/4)、[#5 我的 Agent、一人一 Agent 与 Pi SDK 工具调用](https://github.com/lkun-lea/myagentdesk/issues/5)。\r\n\r\n## 验收标准\r\n\r\n- [ ] 有权限的人确认需求后建群；并发创建、丢回执重试只返回一个群。调研建议保留来源和待确认问题，由人确认立项。\r\n- [ ] 用模拟成员跑完确认、提交、退回、再交接和复核，验证研发与独立验收由不同成员执行，迟到回调无法覆盖新阶段。\r\n- [ ] 项目页和需求群展示同一阶段、负责人、文档、产物和证据；事件回放不重复，历史节点能定位。Agent 默认收到当前需求与验收条件，其余按需查，跨项目、私聊、撤权内容均受限。\r\n\r\n\n本次仅审阅已实现的需求群、本人决定与阶段交接，不是完成全部路线图。产品交方案；研发必须先以 request_decision 请本人选择范围（选项：仅复核已有实现和测试证据 / 扩展外部编码执行器），未答复不能自行选。已有决定后不再提问。测试独立查原文和记录，不能把研发自述当成测试。此样本无写文件或运行命令工具，禁止声称模型改代码或跑测试。",
+              "start": 0,
+              "title": "00 本次范围与真实需求",
+              "source": "https://github.com/lkun-lea/myagentdesk/issues/6",
+              "revision": 1
+            },
+            "call_id": "call_00_ZgE2WWmSSjlyy0YLQ68I9723"
+          },
+          "created_at": "2026-11-18T21:33:50.084796+08:00"
+        },
+        {
+          "id": 19,
+          "kind": "tool_result",
+          "data": {
+            "tool": "read_context",
+            "result": {
+              "id": "8f6e1153-c15c-4625-a5a1-c18abb7c88d5",
+              "end": 1500,
+              "text": "62:     group = group_scope(db, run['group_id'], run['user_id'])\n63:     if group['revision'] != run['group_revision'] or group['stage'] != run['role']:\n64:         raise Problem('stage_changed', 409)\n65:     if group.get(run['role'] + '_id') != run['user_id']:\n66:         raise Problem('permission_denied', 403)\n67:     return group\n68: \n69: \n70: def transition(db, group, stage, state, actor, handoff=None, note=''):\n71:     db.execute('''UPDATE mad_requirement_groups SET stage=%s,state=%s,revision=revision+1,last_handoff=%s WHERE id=%s''',\n72:                (stage, state, handoff, group['id']))\n73:     labels = {'product': '产品确认', 'development': '实现与自测', 'testing': '独立验收', 'quality': '质量复核', 'completed': '需求完成'}\n74:     body = note or ('本阶段已交付，等待本人确认。' if state == 'awaiting_confirmation' else f\"已交接至{labels[stage]}。\")\n75:     group_message(db, group, actor, 'transition', body,\n76:                   {'from_stage': group['stage'], 'stage': stage, 'revision': group['revision'] + 1,\n77:                    'run_id': str(handoff) if handoff else None})\n78:     record(db, group['project_id'], actor, group['id'], 'requirement_stage_changed')\n79: \n80: \n81: def group_handoff(db, run, result):\n82:     if not run.get('group_id'):\n83:         return\n84:     group = check_group_run(db, run)\n85:     handoff = db.execute('SELECT * FROM mad_handoffs WHERE run_id=%s', (run['id'],)).fetchone()\n86:     if handoff_outdated(db, handoff):\n87:         raise Problem('context_changed', 409)\n88:     if",
+              "start": 0,
+              "title": "10 阶段流转实现",
+              "source": "repo://server/requirement_groups.py",
+              "revision": 1
+            },
+            "call_id": "call_00_G4DsM7t3HiRq13dXBsAm6337"
+          },
+          "created_at": "2026-11-18T21:33:55.024045+08:00"
+        },
+        {
+          "id": 20,
+          "kind": "tool_result",
+          "data": {
+            "tool": "read_context",
+            "result": {
+              "id": "46429491-dcf0-49db-ab01-d32aec0923a6",
+              "end": 1500,
+              "text": "275:             if decision['state'] == 'resolved':\n276:                 if decision['answer'] != data.answer or decision['note'] != data.note:\n277:                     raise Problem('operation_conflict', 409)\n278:             else:\n279:                 check_group_run(db, run)\n280:                 if decision['state'] != 'pending' or decision['revision'] != data.expected_revision or decision['generation'] != run['generation']:\n281:                     raise Problem('version_conflict', 409)\n282:                 if context_changed(db, run):\n283:                     raise Problem('context_changed', 409)\n284:                 if data.answer not in decision['options']:\n285:                     raise Problem('invalid_request', 422)\n286:                 db.execute(\"UPDATE mad_run_decisions SET state='resolved',answer=%s,note=%s,resolved_at=now(),revision=revision+1 WHERE id=%s\", (data.answer, data.note, decision_id))\n287:                 db.execute(\"UPDATE mad_agent_runs SET status='paused' WHERE id=%s\", (run['id'],))\n288:                 event(db, run['id'], 'decision_resolved', {'decision_id': str(decision_id), 'answer': data.answer, 'note': data.note, 'checkpoint': decision['checkpoint']})\n289:                 if run['group_id']:\n290:                     group = group_scope(db, run['group_id'], user['id'])\n291:                     db.execute(\"UPDATE mad_requirement_groups SET state='active' WHERE id=%s\", (group['id'],))\n292:                     group_message(db, group, user['id'",
+              "start": 0,
+              "title": "20 本人决定与恢复实现",
+              "source": "repo://server/requirement_groups.py",
+              "revision": 1
+            },
+            "call_id": "call_01_XPsWsYKooPgyQ86F1eEg5462"
+          },
+          "created_at": "2026-11-18T21:33:55.257650+08:00"
+        },
+        {
+          "id": 21,
+          "kind": "tool_result",
+          "data": {
+            "tool": "submit_handoff",
+            "result": {
+              "run_id": "bb8321bb-1e61-4eec-9f52-2dbcb466039b",
+              "verdict": "proposed",
+              "submitted": true
+            },
+            "call_id": "call_00_2tgWpc0cWRaKnUR0utIF5239"
+          },
+          "created_at": "2026-11-18T21:34:04.086925+08:00"
+        },
+        {
+          "id": 22,
+          "kind": "completed",
+          "data": {},
+          "created_at": "2026-11-18T21:34:04.363021+08:00"
+        }
+      ]
+    },
+    {
+      "id": "5703fcf8-cb16-4965-b70b-89b706ed37df",
+      "role": "development",
+      "status": "completed",
+      "checkpoint": 10,
+      "references": [
+        {
+          "document_id": "ccab9a5b-61f7-4480-8727-4b2234a21475",
+          "revision": 1,
+          "start_offset": 0,
+          "end_offset": 1266,
+          "active": true
+        },
+        {
+          "document_id": "8f6e1153-c15c-4625-a5a1-c18abb7c88d5",
+          "revision": 1,
+          "start_offset": 0,
+          "end_offset": 1500,
+          "active": true
+        },
+        {
+          "document_id": "46429491-dcf0-49db-ab01-d32aec0923a6",
+          "revision": 1,
+          "start_offset": 0,
+          "end_offset": 3000,
+          "active": true
+        },
+        {
+          "document_id": "c04ee980-e572-4cda-8a2f-473443930d6f",
+          "revision": 1,
+          "start_offset": 0,
+          "end_offset": 1473,
+          "active": true
+        },
+        {
+          "document_id": "8f6e1153-c15c-4625-a5a1-c18abb7c88d5",
+          "revision": 1,
+          "start_offset": 1500,
+          "end_offset": 2505,
+          "active": true
+        },
+        {
+          "document_id": "46429491-dcf0-49db-ab01-d32aec0923a6",
+          "revision": 1,
+          "start_offset": 3000,
+          "end_offset": 3405,
+          "active": true
+        }
+      ],
+      "model": "deepseek-flash",
+      "events": [
+        {
+          "id": 23,
+          "kind": "started",
+          "data": {
+            "checkpoint": 0
+          },
+          "created_at": "2026-11-18T21:34:06.012721+08:00"
+        },
+        {
+          "id": 24,
+          "kind": "tool_result",
+          "data": {
+            "tool": "read_group_messages",
+            "result": {
+              "messages": [
+                {
+                  "body": "需求已立项，产品阶段待推进。",
+                  "data": {
+                    "source": "https://github.com/lkun-lea/myagentdesk/issues/6"
+                  },
+                  "kind": "created",
+                  "sequence": 1
+                },
+                {
+                  "body": "产品方案（#6 需求群交接实现与证据核对，revision 1，仅产品阶段交付，不含研发/测试结论）\n\n一、范围确认（依据 00 原文，不作外扩）\n本次只审阅\"已实现\"的需求群流程：一条正式需求对应一个需求群；阶段为 产品确认 → 实现与自测 → 独立验收 → 质量复核；含本人决定（request_decision）与答复后按原运行/检查点恢复；含项目事件记录与阶段详情。00 明确\"本次仅审阅已实现的需求群、本人决定与阶段交接，不是完成全部路线图\"，版本范围与排期归 #16，不在本次。\n\n二、阶段流转方案（与 00 验收标准一一对应）\n1) 建群与确认：有权限的人确认需求后才建群/进群；并发创建与丢回执重试只返回一个群；调研建议保留来源与待确认问题，由人确认立项。\n2) 流转与退回：产品确认 → 研发实现与自测 → 独立测试 → 质量复核；允许退回后再交接；研发与独立验收必须由不同成员执行；迟到回调不得覆盖新阶段（证据应体现阶段变更时的 group.revision / stage 校验，见 00 引用的 server/requirement_groups.py 第 62-67 行）。\n3) 本人决定与恢复：范围边界这一选择必须由研发以 request_decision 交本人（选项：仅复核已有实现和测试证据 / 扩展外部编码执行器），未答复不得自行选择；答复后沿用同一运行编号与检查点接续，已被答复的决定不重复提问，冲突写入返回 409（见 00 引用的第 275-291 行）。\n4) 展示与证据一致：项目页与需求群展示同一阶段、负责人、文档、产物、证据；事件回放不重复、历史节点可定位；Agent 默认收到当前需求与验收条件，其余按需检索，跨项目、私聊、撤权内容受限。\n\n三、交接要求（给研发与测试）\n- 研发：先 request_decision 交本人选择范围，答复后在同一运行编号与检查点继续；交付内容须为可核对结论+证据（阶段流转与决定恢复的实现位置、退回与迟到回调的处理证据），不得自述代替证据。\n- 测试：先读研发交接，再独立读取 00 原文与已有验证记录逐条比对；必须明确本样本无写文件/执行命令工具，模型未修改代码、未运行测试命令；未覆盖的范围不当作通过。\n\n四、本人确认点\n本方案的边界口径为\"仅复核已有实现与测试证据\"，不包含扩展外部编码执行器；如需扩展请在研发阶段的 request_decision 中直接选择，产品不代选。请本人确认本方案后转研发阶段。\n\n五、限制声明\n本次为产品阶段交付：未读取代码运行结果、未执行任何命令、未修改任何文件；所有引用均来自 00 原文与其内嵌的实现摘录。",
+                  "data": {
+                    "role": "product",
+                    "run_id": "bb8321bb-1e61-4eec-9f52-2dbcb466039b",
+                    "verdict": "proposed",
+                    "evidence": [
+                      "00 本次范围与真实需求 (revision 1, https://github.com/lkun-lea/myagentdesk/issues/6)：范围段写明“一条正式需求对应一个需求群”“实现需求确认、实现与自测、独立验收、质量复核的阶段状态与交接记录，以及项目事件记录、阶段详情与按需项目上下文”，并写明“本次仅审阅已实现的需求群、本人决定与阶段交接，不是完成全部路线图”。",
+                      "00 验收标准第 1 条：有权限的人确认需求后建群；并发创建、丢回执重试只返回一个群；调研建议保留来源和待确认问题，由人确认立项。",
+                      "00 验收标准第 2 条：用模拟成员跑完确认、提交、退回、再交接和复核，研发与独立验收由不同成员执行，迟到回调无法覆盖新阶段。",
+                      "00 验收标准第 3 条：项目页与需求群展示同一阶段、负责人、文档、产物和证据；事件回放不重复；Agent 默认收到当前需求与验收条件，其余按需查，跨项目、私聊、撤权内容受限。",
+                      "00 末尾约束：产品交方案；研发必须先以 request_decision 请本人选择范围（仅复核已有实现和测试证据 / 扩展外部编码执行器），未答复不能自行选��已有决定后不再提问；测试独立查原文和记录；本样本无写文件或运行命令工具，禁止声称模型改代码或跑测试。",
+                      "项目资料仅列出 3 份：00 本次范围与真实需求、10 阶段流转实现（repo://server/requirement_groups.py，含第 62-67 行 group.revision/stage 一致性校验与 409 stage_changed）、20 本人决定与恢复实现（同文件第 275-291 行 resolved 冲突 409、pending/revision/generation 校验、答复后 event decision_resolved 与 group 状态回 active）。产品阶段仅作方案依据，未作为测试结论。",
+                      "群消息游标 1：仅有“需求已立项，产品阶段待推进”，无历史运行编号或既有决定可复用；decisions 为空，客户端无既有答复。"
+                    ],
+                    "candidate_run": null,
+                    "context_references": [
+                      {
+                        "revision": 1,
+                        "end_offset": 1266,
+                        "document_id": "ccab9a5b-61f7-4480-8727-4b2234a21475",
+                        "start_offset": 0
+                      },
+                      {
+                        "revision": 1,
+                        "end_offset": 1500,
+                        "document_id": "8f6e1153-c15c-4625-a5a1-c18abb7c88d5",
+                        "start_offset": 0
+                      },
+                      {
+                        "revision": 1,
+                        "end_offset": 1500,
+                        "document_id": "46429491-dcf0-49db-ab01-d32aec0923a6",
+                        "start_offset": 0
+                      }
+                    ],
+                    "requirement_revision": 1
+                  },
+                  "kind": "handoff",
+                  "sequence": 2
+                },
+                {
+                  "body": "本阶段已交付，等待本人确认。",
+                  "data": {
+                    "stage": "product",
+                    "run_id": "bb8321bb-1e61-4eec-9f52-2dbcb466039b",
+                    "revision": 2,
+                    "from_stage": "product"
+                  },
+                  "kind": "transition",
+                  "sequence": 3
+                },
+                {
+                  "body": "验收脚本确认仅推进 #6 已有实现的资料与证据核对，研发边界交研发本人决定。",
+                  "data": {
+                    "stage": "development",
+                    "run_id": "bb8321bb-1e61-4eec-9f52-2dbcb466039b",
+                    "revision": 3,
+                    "from_stage": "product"
+                  },
+                  "kind": "transition",
+                  "sequence": 4
+                }
+              ],
+              "next_cursor": 4
+            },
+            "call_id": "call_00_CwOeyXhO3oyqWBsKvMWG7246"
+          },
+          "created_at": "2026-11-18T21:34:09.001401+08:00"
+        },
+        {
+          "id": 25,
+          "kind": "tool_result",
+          "data": {
+            "tool": "list_context",
+            "result": {
+              "documents": [
+                {
+                  "id": "ccab9a5b-61f7-4480-8727-4b2234a21475",
+                  "title": "00 本次范围与真实需求",
+                  "source": "https://github.com/lkun-lea/myagentdesk/issues/6",
+                  "summary": "#6 需求群、项目时间线与阶段交接\n路线图 [#1](https://github.com/lkun-lea/myagentdesk/issues/1) · 来源 [tebb #314](https://github.com/lkun-lea/tebb/issues/314) · [工作台、需求群与项目页草图](htt",
+                  "revision": 1
+                },
+                {
+                  "id": "8f6e1153-c15c-4625-a5a1-c18abb7c88d5",
+                  "title": "10 阶段流转实现",
+                  "source": "repo://server/requirement_groups.py",
+                  "summary": "62:     group = group_scope(db, run['group_id'], run['user_id'])\n63:     if group['revision'] != run['group_revision'] or group['stage'] != run['role']:\n64:    ",
+                  "revision": 1
+                },
+                {
+                  "id": "46429491-dcf0-49db-ab01-d32aec0923a6",
+                  "title": "20 本人决定与恢复实现",
+                  "source": "repo://server/requirement_groups.py",
+                  "summary": "275:             if decision['state'] == 'resolved':\n276:                 if decision['answer'] != data.answer or decision['note'] != data.note:\n277:           ",
+                  "revision": 1
+                },
+                {
+                  "id": "c04ee980-e572-4cda-8a2f-473443930d6f",
+                  "title": "50 当前提交实际验证记录",
+                  "source": "acceptance://local/4d5d7ea54913804e885152a746221435ace80cf4",
+                  "summary": "执行者为开发工作中的 Codex，不是本次模型。以下是当前提交的真实 PostgreSQL 隔离回归报告摘要，非研发口述：\n{\"commit\": \"4d5d7ea54913804e885152a746221435ace80cf4\", \"tests\": 20, \"failures\": 0, \"errors\": 0, \"s",
+                  "revision": 1
+                }
+              ]
+            },
+            "call_id": "call_01_JKfA7fXs6COr1emCEAbn7089"
+          },
+          "created_at": "2026-11-18T21:34:09.254351+08:00"
+        },
+        {
+          "id": 26,
+          "kind": "tool_result",
+          "data": {
+            "tool": "read_context",
+            "result": {
+              "id": "ccab9a5b-61f7-4480-8727-4b2234a21475",
+              "end": 1266,
+              "text": "#6 需求群、项目时间线与阶段交接\n路线图 [#1](https://github.com/lkun-lea/myagentdesk/issues/1) · 来源 [tebb #314](https://github.com/lkun-lea/tebb/issues/314) · [工作台、需求群与项目页草图](https://github.com/lkun-lea/tebb/blob/3769741dc807c55c52c9ea9a768633ba21d4fff2/docs/design/workbench/README.md)\r\n\r\n## 范围\r\n\r\n提供候选调研和人工立项入口，一条正式需求对应一个需求群。实现需求确认、实现与自测、独立验收、质量复核的阶段状态与交接记录，以及项目事件记录、阶段详情与按需项目上下文。事件记录按项目和事件序号补读，供版本时间线作为历史视图。版本范围和排期由 [#16 版本计划](https://github.com/lkun-lea/myagentdesk/issues/16) 管理。阶段服务先通过确定性角色替身验收，接入真实个人 Agent 后再贯通执行。\r\n\r\n## 依赖与联调\r\n\r\n- 前置 [#2 独立运行基座与 tebb 模块复用边界](https://github.com/lkun-lea/myagentdesk/issues/2)\r\n- 前置 [#3 账号登录、工作区与项目成员](https://github.com/lkun-lea/myagentdesk/issues/3)\r\n\r\n可先用替身开发与验收。以下模块就绪后验证完整产品入口：[#4 工作台首页、项目导航与应用工具目录](https://github.com/lkun-lea/myagentdesk/issues/4)、[#5 我的 Agent、一人一 Agent 与 Pi SDK 工具调用](https://github.com/lkun-lea/myagentdesk/issues/5)。\r\n\r\n## 验收标准\r\n\r\n- [ ] 有权限的人确认需求后建群；并发创建、丢回执重试只返回一个群。调研建议保留来源和待确认问题，由人确认立项。\r\n- [ ] 用模拟成员跑完确认、提交、退回、再交接和复核，验证研发与独立验收由不同成员执行，迟到回调无法覆盖新阶段。\r\n- [ ] 项目页和需求群展示同一阶段、负责人、文档、产物和证据；事件回放不重复，历史节点能定位。Agent 默认收到当前需求与验收条件，其余按需查，跨项目、私聊、撤权内容均受限。\r\n\r\n\n本次仅审阅已实现的需求群、本人决定与阶段交接，不是完成全部路线图。产品交方案；研发必须先以 request_decision 请本人选择范围（选项：仅复核已有实现和测试证据 / 扩展外部编码执行器），未答复不能自行选。已有决定后不再提问。测试独立查原文和记录，不能把研发自述当成测试。此样本无写文件或运行命令工具，禁止声称模型改代码或跑测试。",
+              "start": 0,
+              "title": "00 本次范围与真实需求",
+              "source": "https://github.com/lkun-lea/myagentdesk/issues/6",
+              "revision": 1
+            },
+            "call_id": "call_00_Q2f9J3bMNan1fYD59P9H7779"
+          },
+          "created_at": "2026-11-18T21:34:11.167710+08:00"
+        },
+        {
+          "id": 27,
+          "kind": "tool_result",
+          "data": {
+            "tool": "read_context",
+            "result": {
+              "id": "8f6e1153-c15c-4625-a5a1-c18abb7c88d5",
+              "end": 1500,
+              "text": "62:     group = group_scope(db, run['group_id'], run['user_id'])\n63:     if group['revision'] != run['group_revision'] or group['stage'] != run['role']:\n64:         raise Problem('stage_changed', 409)\n65:     if group.get(run['role'] + '_id') != run['user_id']:\n66:         raise Problem('permission_denied', 403)\n67:     return group\n68: \n69: \n70: def transition(db, group, stage, state, actor, handoff=None, note=''):\n71:     db.execute('''UPDATE mad_requirement_groups SET stage=%s,state=%s,revision=revision+1,last_handoff=%s WHERE id=%s''',\n72:                (stage, state, handoff, group['id']))\n73:     labels = {'product': '产品确认', 'development': '实现与自测', 'testing': '独立验收', 'quality': '质量复核', 'completed': '需求完成'}\n74:     body = note or ('本阶段已交付，等待本人确认。' if state == 'awaiting_confirmation' else f\"已交接至{labels[stage]}。\")\n75:     group_message(db, group, actor, 'transition', body,\n76:                   {'from_stage': group['stage'], 'stage': stage, 'revision': group['revision'] + 1,\n77:                    'run_id': str(handoff) if handoff else None})\n78:     record(db, group['project_id'], actor, group['id'], 'requirement_stage_changed')\n79: \n80: \n81: def group_handoff(db, run, result):\n82:     if not run.get('group_id'):\n83:         return\n84:     group = check_group_run(db, run)\n85:     handoff = db.execute('SELECT * FROM mad_handoffs WHERE run_id=%s', (run['id'],)).fetchone()\n86:     if handoff_outdated(db, handoff):\n87:         raise Problem('context_changed', 409)\n88:     if",
+              "start": 0,
+              "title": "10 阶段流转实现",
+              "source": "repo://server/requirement_groups.py",
+              "revision": 1
+            },
+            "call_id": "call_01_BaAAuj1TFDsoQnNbKe6d7008"
+          },
+          "created_at": "2026-11-18T21:34:11.437366+08:00"
+        },
+        {
+          "id": 28,
+          "kind": "tool_result",
+          "data": {
+            "tool": "read_context",
+            "result": {
+              "id": "46429491-dcf0-49db-ab01-d32aec0923a6",
+              "end": 3000,
+              "text": "275:             if decision['state'] == 'resolved':\n276:                 if decision['answer'] != data.answer or decision['note'] != data.note:\n277:                     raise Problem('operation_conflict', 409)\n278:             else:\n279:                 check_group_run(db, run)\n280:                 if decision['state'] != 'pending' or decision['revision'] != data.expected_revision or decision['generation'] != run['generation']:\n281:                     raise Problem('version_conflict', 409)\n282:                 if context_changed(db, run):\n283:                     raise Problem('context_changed', 409)\n284:                 if data.answer not in decision['options']:\n285:                     raise Problem('invalid_request', 422)\n286:                 db.execute(\"UPDATE mad_run_decisions SET state='resolved',answer=%s,note=%s,resolved_at=now(),revision=revision+1 WHERE id=%s\", (data.answer, data.note, decision_id))\n287:                 db.execute(\"UPDATE mad_agent_runs SET status='paused' WHERE id=%s\", (run['id'],))\n288:                 event(db, run['id'], 'decision_resolved', {'decision_id': str(decision_id), 'answer': data.answer, 'note': data.note, 'checkpoint': decision['checkpoint']})\n289:                 if run['group_id']:\n290:                     group = group_scope(db, run['group_id'], user['id'])\n291:                     db.execute(\"UPDATE mad_requirement_groups SET state='active' WHERE id=%s\", (group['id'],))\n292:                     group_message(db, group, user['id'], 'decision_resolved', data.note,\n293:                                   {'decision_id': str(decision_id), 'run_id': str(run['id']), 'answer': data.answer,\n294:                                    'checkpoint': decision['checkpoint'], 'generation': run['generation']})\n295:             background.add_task(service.resume, run['id'], user['id'])\n296:             return {'id': decision_id, 'run_id': run['id'], 'checkpoint': decision['checkpoint'], 'outcome': 'resolved'}\n297: \n298:     @router.post('/decisions/{decision_id}/reassign')\n299:     def reassign(decision_id: UUID, data: ReassignInput, user=authenticated):\n300:         with connect(settings.database_url) as db:\n301:             decision = db.execute('SELECT * FROM mad_run_decisions WHERE id=%s', (decision_id,)).fetchone()\n302:             if not decision:\n303:                 raise Problem('decision_not_found', 404)\n304:             run = db.execute('SELECT * FROM mad_agent_runs WHERE id=%s', (decision['run_id'],)).fetchone()\n305:             membership(db, run['project_id'], user['id'], write=True, manage=True)\n306:             decision = db.execute('SELECT * FROM mad_run_decisions WHERE id=%s FOR UPDATE', (decision_id,)).fetchone()\n307:             run = db.execute('SELECT * FROM mad_agent_runs WHERE id=%s FOR UPDATE', (decision['run_id'],)).fetchone()\n308:             membership(db, run['project_id'], data.member_id)\n309:             role = db.execute('SELECT role FROM mad_project_roles WHERE project_id=%s AND user_id",
+              "start": 0,
+              "title": "20 本人决定与恢复实现",
+              "source": "repo://server/requirement_groups.py",
+              "revision": 1
+            },
+            "call_id": "call_00_uxRxRoKD6MSAq3AShs9h3250"
+          },
+          "created_at": "2026-11-18T21:34:13.664825+08:00"
+        },
+        {
+          "id": 29,
+          "kind": "tool_result",
+          "data": {
+            "tool": "read_context",
+            "result": {
+              "id": "c04ee980-e572-4cda-8a2f-473443930d6f",
+              "end": 1473,
+              "text": "执行者为开发工作中的 Codex，不是本次模型。以下是当前提交的真实 PostgreSQL 隔离回归报告摘要，非研发口述：\n{\"commit\": \"4d5d7ea54913804e885152a746221435ace80cf4\", \"tests\": 20, \"failures\": 0, \"errors\": 0, \"seconds\": \"202.174\", \"cases\": [\"test_otp_failures_receipts_and_login_expiry\", \"test_two_accounts_invite_permissions_and_revocation\", \"test_invalid_config_and_validation_never_echo_secrets\", \"test_supabase_email_code_length[031408]\", \"test_supabase_email_code_length[03140827]\", \"test_supabase_email_code_length[0314082759]\", \"test_workbench_favorites_and_project_timeline_follow_membership\", \"test_calendar_uses_absolute_times_and_keeps_task_associations_private\", \"test_clean_install_home_health_and_migrations\", \"test_missing_or_wrong_config_never_falls_back_to_tebb\", \"test_upstream_time_example_and_fake_adapters\", \"test_pi_sdk_shared_context_and_independent_handoff\", \"test_version_confirmation_cancel_resume_and_revocation\", \"test_failed_provider_and_abandoned_process_restore_receipts\", \"test_initiation_and_product_stage\", \"test_development_decision_and_same_checkpoint_resume\", \"test_testing_return_rework_and_quality_gate\", \"test_decision_takeover_revocation_and_revision_invalidation\", \"test_automatic_agents_handoff_stops_for_human_and_quality\", \"test_invalid_tool_range_can_be_corrected_without_success_receipt\"]}\n20项均在上述 commit 后执行，包含建群并发/重试幂等、原运行重建应用后恢复、测试退回/复交/质量门禁、无效工具读取参数纠正后才增加检查点。TypeScript 检查 exit 0。真实浏览器四角色入口及390px深色已通过。审阅范围是实现与既有证据，测试阶段不需要先观察其之后的质量人工确认才可交测试结论；质量完成门禁有单独回归。模型本身没有执行代码修改或测试命令。",
+              "start": 0,
+              "title": "50 当前提交实际验证记录",
+              "source": "acceptance://local/4d5d7ea54913804e885152a746221435ace80cf4",
+              "revision": 1
+            },
+            "call_id": "call_01_1y6WfdAxQw0kdGHyRgzR1296"
+          },
+          "created_at": "2026-11-18T21:34:13.919669+08:00"
+        },
+        {
+          "id": 30,
+          "kind": "tool_result",
+          "data": {
+            "tool": "read_context",
+            "result": {
+              "id": "8f6e1153-c15c-4625-a5a1-c18abb7c88d5",
+              "end": 2505,
+              "text": " run['role'] == 'product':\n89:         stage, state = 'product', 'awaiting_confirmation'\n90:     elif run['role'] == 'development':\n91:         stage, state = 'testing', 'active'\n92:     elif result['verdict'] == 'rejected':\n93:         stage, state = 'development', 'active'\n94:     else:\n95:         stage, state = 'quality', 'awaiting_confirmation'\n96:     group_message(db, group, run['user_id'], 'handoff', handoff['summary'],\n97:                   {'run_id': str(run['id']), 'role': run['role'], 'verdict': result['verdict'],\n98:                    'requirement_revision': run['requirement_revision'], 'evidence': handoff['evidence'],\n99:                    'context_references': handoff['context_references'],\n100:                    'candidate_run': str(handoff['candidate_run']) if handoff['candidate_run'] else None})\n101:     transition(db, group, stage, state, run['user_id'], run['id'])\n102:     db.execute(\"UPDATE mad_agent_runs SET status='completed' WHERE id=%s\", (run['id'],))\n103: \n104: ",
+              "start": 1500,
+              "title": "10 阶段流转实现",
+              "source": "repo://server/requirement_groups.py",
+              "revision": 1
+            },
+            "call_id": "call_00_8hH4IQWanJSBChdZnc2u3837"
+          },
+          "created_at": "2026-11-18T21:34:18.947985+08:00"
+        },
+        {
+          "id": 31,
+          "kind": "decision_requested",
+          "data": {
+            "checkpoint": 8,
+            "decision_id": "120ba32c-8df9-5a11-ade2-5ec4eea1321d"
+          },
+          "created_at": "2026-11-18T21:34:19.176732+08:00"
+        },
+        {
+          "id": 32,
+          "kind": "tool_result",
+          "data": {
+            "tool": "request_decision",
+            "result": {
+              "state": "pending",
+              "owner_id": "c95cc586-e973-4d26-9ed3-8695fd26723e",
+              "decision_id": "120ba32c-8df9-5a11-ade2-5ec4eea1321d"
+            },
+            "call_id": "call_01_1GE9fqP9ibsahuzPFYh93142"
+          },
+          "created_at": "2026-11-18T21:34:19.176732+08:00"
+        },
+        {
+          "id": 33,
+          "kind": "stopped",
+          "data": {
+            "reason": "decision_pending"
+          },
+          "created_at": "2026-11-18T21:34:19.421419+08:00"
+        },
+        {
+          "id": 34,
+          "kind": "decision_resolved",
+          "data": {
+            "note": "验收脚本选择仅复核已有实现和测试证据；外部编码执行器留在 #14。",
+            "answer": "仅复核已有实现和测试证据（只依据 00/10/20 原文与 50 已有回归记录做阶段流转与决定恢复的审阅，不扩展外部编码执行器、不新增执行/改码）",
+            "checkpoint": 8,
+            "decision_id": "120ba32c-8df9-5a11-ade2-5ec4eea1321d"
+          },
+          "created_at": "2026-11-18T21:34:20.868677+08:00"
+        },
+        {
+          "id": 35,
+          "kind": "started",
+          "data": {
+            "checkpoint": 8
+          },
+          "created_at": "2026-11-18T21:34:21.067952+08:00"
+        },
+        {
+          "id": 36,
+          "kind": "tool_result",
+          "data": {
+            "tool": "read_context",
+            "result": {
+              "id": "46429491-dcf0-49db-ab01-d32aec0923a6",
+              "end": 3405,
+              "text": "=%s', (run['project_id'], data.member_id)).fetchone()\n310:             if not role or role['role'] != run['role'] or decision['state'] != 'pending' or decision['revision'] != data.expected_revision:\n311:                 raise Problem('role_required', 409)\n312:             if not db.execute('SELECT pg_try_advisory_xact_lock(hashtextextended(%s,0)) AS acquired', (str(run['id']),)).fetchone()['acquired']:",
+              "start": 3000,
+              "title": "20 本人决定与恢复实现",
+              "source": "repo://server/requirement_groups.py",
+              "revision": 1
+            },
+            "call_id": "call_00_uTYAYwXxLsB67IbbDu6Z7805"
+          },
+          "created_at": "2026-11-18T21:34:25.858282+08:00"
+        },
+        {
+          "id": 37,
+          "kind": "tool_refused",
+          "data": {
+            "tool": "read_context",
+            "reason": "invalid_request",
+            "call_id": "call_01_L2wBDQJWzYAbSy5TWMdR2697"
+          },
+          "created_at": "2026-11-18T21:34:26.177341+08:00"
+        },
+        {
+          "id": 38,
+          "kind": "tool_result",
+          "data": {
+            "tool": "submit_handoff",
+            "result": {
+              "run_id": "5703fcf8-cb16-4965-b70b-89b706ed37df",
+              "verdict": "delivered",
+              "submitted": true
+            },
+            "call_id": "call_00_nYXHPCcc8s5fy0Z3Ob9H4916"
+          },
+          "created_at": "2026-11-18T21:34:47.329154+08:00"
+        },
+        {
+          "id": 39,
+          "kind": "completed",
+          "data": {},
+          "created_at": "2026-11-18T21:34:47.605545+08:00"
+        }
+      ]
+    },
+    {
+      "id": "f3314d7a-6941-44cf-8714-fb41372e0405",
+      "role": "testing",
+      "status": "completed",
+      "checkpoint": 15,
+      "references": [
+        {
+          "document_id": "ccab9a5b-61f7-4480-8727-4b2234a21475",
+          "revision": 1,
+          "start_offset": 0,
+          "end_offset": 1266,
+          "active": true
+        },
+        {
+          "document_id": "c04ee980-e572-4cda-8a2f-473443930d6f",
+          "revision": 1,
+          "start_offset": 0,
+          "end_offset": 1473,
+          "active": true
+        },
+        {
+          "document_id": "8f6e1153-c15c-4625-a5a1-c18abb7c88d5",
+          "revision": 1,
+          "start_offset": 0,
+          "end_offset": 1500,
+          "active": true
+        },
+        {
+          "document_id": "8f6e1153-c15c-4625-a5a1-c18abb7c88d5",
+          "revision": 1,
+          "start_offset": 1500,
+          "end_offset": 2505,
+          "active": true
+        },
+        {
+          "document_id": "46429491-dcf0-49db-ab01-d32aec0923a6",
+          "revision": 1,
+          "start_offset": 0,
+          "end_offset": 3000,
+          "active": true
+        },
+        {
+          "document_id": "46429491-dcf0-49db-ab01-d32aec0923a6",
+          "revision": 1,
+          "start_offset": 3000,
+          "end_offset": 3405,
+          "active": true
+        }
+      ],
+      "model": "deepseek-flash",
+      "events": [
+        {
+          "id": 40,
+          "kind": "started",
+          "data": {
+            "checkpoint": 0
+          },
+          "created_at": "2026-11-18T21:34:49.134616+08:00"
+        },
+        {
+          "id": 50,
+          "kind": "tool_result",
+          "data": {
+            "tool": "read_handoff",
+            "result": {
+              "run_id": "5703fcf8-cb16-4965-b70b-89b706ed37df",
+              "summary": "研发阶段审阅交接（#6 需求群交接实现与证据核对，revision 1，运行 5703fcf8-cb16-4965-b70b-89b706ed37df，checkpoint 8 / generation 0）\n\n一、范围决定已交本人并已按同一运行接续\n- 已按 00 末尾约束用 request_decision 交本人选择边界，未自行选择；本人答复为\"仅复核已有实现和测试证据（只依据 00/10/20 原文与 50 已有回归记录做阶段流转与决定恢复的审阅，不扩展外部编码执行器、不新增执行/改码）\"，note 注明外部编码执行器留在 #14。决定 id 120ba32c-8df9-5a11-ade2-5ec4eea1321d。\n- 答复记录的 run_id 为 5703fcf8-cb16-4965-b70b-89b706ed37df、checkpoint 8、generation 0，与 current_run 及本检查点一致，即沿用原运行编号/检查点接续，未新开运行。已在群内落 decision / decision_resolved 消息。本阶段不再重复提问同一决定（依据 20 第 275-277 行：resolved 且 answer/note 相同则复用，不同则 409 operation_conflict）。\n\n二、阶段流转实现审阅结论（依据 10 原文片段）\n1) 迟到回调不能覆盖新阶段：check_group_run 校验 group['revision'] != run['group_revision'] 或 group['stage'] != run['role'] 即抛 409 stage_changed，并校验 group[role+'_id'] == run['user_id']，否则 403（第 62-67 行）。这是\"迟到回调\"被拒绝的代码入口。\n2) 阶段推进与事件：transition 以 revision+1 更新 stage/state/last_handoff，写入 group_message kind=transition（含 from_stage/stage/revision/run_id）并 record requirement_stage_changed，阶段标签含 产品确认/实现与自测/独立验收/质量复核/需求完成（第 70-78 行）——对应 00\"阶段状态与交接记录、项目事件记录\"。\n3) 交接分支：group_handoff 先 check_group_run，再以 handoff_outdated → 409 context_changed、run.get('group_id') 缺失直接返回，并写入 handoff 消息（run_id/role/verdict/requirement_revision/evidence/context_references/candidate_run）；verdict=rejected 回到 development/active，role=development 转 testing/active，其余转 quality/awaiting_confirmation（第 81-102 行）——对应\"退回后再交接\"与\"研发后交独立测试，再交质量复核\"。\n4) 决定恢复实现：resolved 冲突 409；pending 时校验 expected_revision、generation、context_changed、answer 必须属于 options（否则 422）；通过后更新 decision 为 resolved、run 置 paused、写 event decision_resolved（携带 checkpoint）、需求群 state 回 active、写 decision_resolved 群消息，最后 background.add_task(service.resume, run['id'], ...) 恢复同一 run（第 275-296 行）。转派路径另校验角色/状态/revision 并取 pg_try_advisory_xact_lock 防并发（第 300-312 行）。\n\n三、已有验证记录（非本次模型执行）\n- 50 记录：commit 4d5d7ea54913804e885152a746221435ace80cf4 的真实 PostgreSQL 隔离回归，tests 20 / failures 0 / errors 0 / 202.174s，用例含 test_initiation_and_product_stage、test_development_decision_and_same_checkpoint_resume、test_testing_return_rework_and_quality_gate、test_decision_takeover_revocation_and_revision_invalidation、test_automatic_agents_handoff_stops_for_human_and_quality、test_invalid_tool_range_can_be_corrected_without_success_receipt 等；TypeScript 检查 exit 0；真实浏览器四角色入口与 390px 深色通过。执行者为开发工作中的 Codex，不是本次模型。\n\n四、证据不足/未覆盖，供测试重点独立核对（不当作通过）\n- 建群与\"并发创建、丢回执重试只返回一个群\"仅有 50 的记录性描述与该用例名，本次资料未提供对应代码摘录，未直接看到幂等实现本体。\n- 00 验收标准第 3 条\"项目页与需求群展示同一阶段、负责人、文档、产物和证据、事件回放不重复、历史节点能定位\"无展示层代码或截图证据摘录，仅有用例名 test_workbench_favorites_and_project_timeline_follow_membership。\n- \"Agent 默认收到当前需求与验收条件、其余按需检索、跨项目/私聊/撤权受限\"未在本次资料中给出实现摘录。\n- 10/20 为行段摘录（10 覆盖 0-2505 行、20 覆盖 0-3405 行区间），未提供整文件比对。\n- 扩展外部编码执行器、#16 版本范围与排期、路线图其余部分均不在本次范围，未做也未声称完成。\n\n五、限制声明\n本样本无写文件或执行命令工具，本次模型未修改任何代码/文件、未运行任何测试或命令；结论仅来自读取 00/10/20/50 原文摘录与群内决定消息。测试须先读本交接，再独立读原文与验证记录逐条对照。",
+              "evidence": [
+                "00 本次范围与真实需求（id ccab9a5b-61f7-4480-8727-4b2234a21475，revision 1，https://github.com/lkun-lea/myagentdesk/issues/6）：范围段写明“一条正式需求对应一个需求群”“实现需求确认、实现与自测、独立验收、质量复核的阶段状态与交接记录，以及项目事件记录、阶段详情与按需项目上下文”“本次仅审阅已实现的需求群、本人决定与阶段交接，不是完成全部路线图”；末尾约束写明研发必须先以 request_decision 请本人选择范围（仅复核已有实现和测试证据 / 扩展外部编码执行器）、未答复不能自行选、已有决定后不再提问、此样本无写文件或运行命令工具。",
+                "群内决定与答复（运行 5703fcf8-cb16-4965-b70b-89b706ed37df）：kind=decision 提出问题“本次研发审阅按哪个口径执行”，decision_id=120ba32c-8df9-5a11-ade2-5ec4eea1321d，checkpoint=8，generation=0；kind=decision_resolved 记录 answer=“仅复核已有实现和测试证据（只依据 00/10/20 原文与 50 已有回归记录做阶段流转与决定恢复的审阅，不扩展外部编码执行器、不新增执行/改码）”，note=“外部编码执行器留在 #14”，run_id/checkpoint/generation 与当前运行一致，证明未开新运行且未重复提问。",
+                "10 阶段流转实现（id 8f6e1153-c15c-4625-a5a1-c18abb7c88d5，revision 1，repo://server/requirement_groups.py）第 62-67 行：group['revision'] != run['group_revision'] 或 group['stage'] != run['role'] 抛 409 stage_changed；group[run['role']+'_id'] != run['user_id'] 抛 403 permission_denied —— 迟到回调/错阶段回调被拒的代码入口。",
+                "10 第 70-78 行：transition 以 revision+1 更新 mad_requirement_groups 的 stage/state/last_handoff，写 group_message kind=transition（from_stage/stage/revision/run_id），并 record requirement_stage_changed；标签含 product/development/testing/quality/completed。",
+                "10 第 81-102 行：group_handoff 先 check_group_run，handoff_outdated 抛 409 context_changed，写 handoff 消息（run_id/role/verdict/requirement_revision/evidence/context_references/candidate_run）；verdict=rejected → development/active，role=development → testing/active，否则 quality/awaiting_confirmation，随后 transition 并把 run 置 completed。",
+                "20 本人决定与恢复实现（id 46429491-dcf0-49db-ab01-d32aec0923a6，revision 1）第 275-277 行：decision 已 resolved 时，answer/note 不同抛 409 operation_conflict，相同则复用（不重复提问）。",
+                "20 第 279-285 行：pending 状态下 check_group_run(run) + decision['revision'] != data.expected_revision 或 decision['generation'] != run['generation'] → 409 version_conflict；context_changed → 409；answer 不在 decision['options'] → 422 invalid_request。",
+                "20 第 286-296 行：置 decision state=resolved/写入 answer/note/revision+1、run status=paused、event decision_resolved（带 checkpoint）、需求群 state=active、group_message decision_resolved（含 run_id/checkpoint/generation），最后 background.add_task(service.resume, run['id'], user['id']) 恢复同一运行。",
+                "20 第 300-312 行：reassign 路径校验决策存在、成员写权限、目标成员角色与 run['role'] 一致、state=pending 与 expected_revision，并取 pg_try_advisory_xact_lock(hashtextextended(run_id)) 防并发。",
+                "50 当前提交实际验证记录（id c04ee980-e572-4cda-8a2f-473443930d6f，revision 1，acceptance://local/4d5d7ea54913804e885152a746221435ace80cf4）：commit 4d5d7ea54913804e885152a746221435ace80cf4，tests 20、failures 0、errors 0、202.174s；用例含 test_initiation_and_product_stage、test_development_decision_and_same_checkpoint_resume、test_testing_return_rework_and_quality_gate、test_decision_takeover_revocation_and_revision_invalidation、test_automatic_agents_handoff_stops_for_human_and_quality、test_invalid_tool_range_can_be_corrected_without_success_receipt；TypeScript 检查 exit 0；真实浏览器四角色入口及 390px 深色通过；明确执行者为开发工作中的 Codex，非本次模型。",
+                "证据缺口（供测试独立核对）：建群并发/丢回执重试幂等、项目页与需求群展示同一阶段/负责人/文档/产物/证据、事件回放不重复、Agent 上下文与跨项目/私聊/撤权限制，本次资料仅有用例名或描述，无对应代码/展示证据摘录；10 覆盖 0-2505 行区间、20 覆盖 0-3405 行区间，均为行段摘录而非整文件。",
+                "工具执行事实：本次仅调用 list_context、read_context、read_group_messages、request_decision、submit_handoff；无写文件或命令执行工具，未修改任何代码/文件，未运行任何测试或命令。"
+              ]
+            },
+            "call_id": "call_00_oliLurpjiMLOpw1S6ou92745"
+          },
+          "created_at": "2026-11-18T21:34:54.041461+08:00"
+        },
+        {
+          "id": 51,
+          "kind": "tool_result",
+          "data": {
+            "tool": "list_context",
+            "result": {
+              "documents": []
+            },
+            "call_id": "call_01_OldoEhVFMJuCPvPwNMSW1140"
+          },
+          "created_at": "2026-11-18T21:34:54.301350+08:00"
+        },
+        {
+          "id": 63,
+          "kind": "tool_result",
+          "data": {
+            "tool": "list_context",
+            "result": {
+              "documents": [
+                {
+                  "id": "ccab9a5b-61f7-4480-8727-4b2234a21475",
+                  "title": "00 本次范围与真实需求",
+                  "source": "https://github.com/lkun-lea/myagentdesk/issues/6",
+                  "summary": "#6 需求群、项目时间线与阶段交接\n路线图 [#1](https://github.com/lkun-lea/myagentdesk/issues/1) · 来源 [tebb #314](https://github.com/lkun-lea/tebb/issues/314) · [工作台、需求群与项目页草图](htt",
+                  "revision": 1
+                },
+                {
+                  "id": "8f6e1153-c15c-4625-a5a1-c18abb7c88d5",
+                  "title": "10 阶段流转实现",
+                  "source": "repo://server/requirement_groups.py",
+                  "summary": "62:     group = group_scope(db, run['group_id'], run['user_id'])\n63:     if group['revision'] != run['group_revision'] or group['stage'] != run['role']:\n64:    ",
+                  "revision": 1
+                },
+                {
+                  "id": "46429491-dcf0-49db-ab01-d32aec0923a6",
+                  "title": "20 本人决定与恢复实现",
+                  "source": "repo://server/requirement_groups.py",
+                  "summary": "275:             if decision['state'] == 'resolved':\n276:                 if decision['answer'] != data.answer or decision['note'] != data.note:\n277:           ",
+                  "revision": 1
+                },
+                {
+                  "id": "c04ee980-e572-4cda-8a2f-473443930d6f",
+                  "title": "50 当前提交实际验证记录",
+                  "source": "acceptance://local/4d5d7ea54913804e885152a746221435ace80cf4",
+                  "summary": "执行者为开发工作中的 Codex，不是本次模型。以下是当前提交的真实 PostgreSQL 隔离回归报告摘要，非研发口述：\n{\"commit\": \"4d5d7ea54913804e885152a746221435ace80cf4\", \"tests\": 20, \"failures\": 0, \"errors\": 0, \"s",
+                  "revision": 1
+                }
+              ]
+            },
+            "call_id": "call_00_sQO5RVoE4ZVRdWg96cNW6370"
+          },
+          "created_at": "2026-11-18T21:34:58.306435+08:00"
+        },
+        {
+          "id": 64,
+          "kind": "tool_result",
+          "data": {
+            "tool": "read_context",
+            "result": {
+              "id": "ccab9a5b-61f7-4480-8727-4b2234a21475",
+              "end": 1266,
+              "text": "#6 需求群、项目时间线与阶段交接\n路线图 [#1](https://github.com/lkun-lea/myagentdesk/issues/1) · 来源 [tebb #314](https://github.com/lkun-lea/tebb/issues/314) · [工作台、需求群与项目页草图](https://github.com/lkun-lea/tebb/blob/3769741dc807c55c52c9ea9a768633ba21d4fff2/docs/design/workbench/README.md)\r\n\r\n## 范围\r\n\r\n提供候选调研和人工立项入口，一条正式需求对应一个需求群。实现需求确认、实现与自测、独立验收、质量复核的阶段状态与交接记录，以及项目事件记录、阶段详情与按需项目上下文。事件记录按项目和事件序号补读，供版本时间线作为历史视图。版本范围和排期由 [#16 版本计划](https://github.com/lkun-lea/myagentdesk/issues/16) 管理。阶段服务先通过确定性角色替身验收，接入真实个人 Agent 后再贯通执行。\r\n\r\n## 依赖与联调\r\n\r\n- 前置 [#2 独立运行基座与 tebb 模块复用边界](https://github.com/lkun-lea/myagentdesk/issues/2)\r\n- 前置 [#3 账号登录、工作区与项目成员](https://github.com/lkun-lea/myagentdesk/issues/3)\r\n\r\n可先用替身开发与验收。以下模块就绪后验证完整产品入口：[#4 工作台首页、项目导航与应用工具目录](https://github.com/lkun-lea/myagentdesk/issues/4)、[#5 我的 Agent、一人一 Agent 与 Pi SDK 工具调用](https://github.com/lkun-lea/myagentdesk/issues/5)。\r\n\r\n## 验收标准\r\n\r\n- [ ] 有权限的人确认需求后建群；并发创建、丢回执重试只返回一个群。调研建议保留来源和待确认问题，由人确认立项。\r\n- [ ] 用模拟成员跑完确认、提交、退回、再交接和复核，验证研发与独立验收由不同成员执行，迟到回调无法覆盖新阶段。\r\n- [ ] 项目页和需求群展示同一阶段、负责人、文档、产物和证据；事件回放不重复，历史节点能定位。Agent 默认收到当前需求与验收条件，其余按需查，跨项目、私聊、撤权内容均受限。\r\n\r\n\n本次仅审阅已实现的需求群、本人决定与阶段交接，不是完成全部路线图。产品交方案；研发必须先以 request_decision 请本人选择范围（选项：仅复核已有实现和测试证据 / 扩展外部编码执行器），未答复不能自行选。已有决定后不再提问。测试独立查原文和记录，不能把研发自述当成测试。此样本无写文件或运行命令工具，禁止声称模型改代码或跑测试。",
+              "start": 0,
+              "title": "00 本次范围与真实需求",
+              "source": "https://github.com/lkun-lea/myagentdesk/issues/6",
+              "revision": 1
+            },
+            "call_id": "call_00_z8YFNxh8PkKZdUKaFfCl5680"
+          },
+          "created_at": "2026-11-18T21:35:00.479127+08:00"
+        },
+        {
+          "id": 65,
+          "kind": "tool_result",
+          "data": {
+            "tool": "read_context",
+            "result": {
+              "id": "c04ee980-e572-4cda-8a2f-473443930d6f",
+              "end": 1473,
+              "text": "执行者为开发工作中的 Codex，不是本次模型。以下是当前提交的真实 PostgreSQL 隔离回归报告摘要，非研发口述：\n{\"commit\": \"4d5d7ea54913804e885152a746221435ace80cf4\", \"tests\": 20, \"failures\": 0, \"errors\": 0, \"seconds\": \"202.174\", \"cases\": [\"test_otp_failures_receipts_and_login_expiry\", \"test_two_accounts_invite_permissions_and_revocation\", \"test_invalid_config_and_validation_never_echo_secrets\", \"test_supabase_email_code_length[031408]\", \"test_supabase_email_code_length[03140827]\", \"test_supabase_email_code_length[0314082759]\", \"test_workbench_favorites_and_project_timeline_follow_membership\", \"test_calendar_uses_absolute_times_and_keeps_task_associations_private\", \"test_clean_install_home_health_and_migrations\", \"test_missing_or_wrong_config_never_falls_back_to_tebb\", \"test_upstream_time_example_and_fake_adapters\", \"test_pi_sdk_shared_context_and_independent_handoff\", \"test_version_confirmation_cancel_resume_and_revocation\", \"test_failed_provider_and_abandoned_process_restore_receipts\", \"test_initiation_and_product_stage\", \"test_development_decision_and_same_checkpoint_resume\", \"test_testing_return_rework_and_quality_gate\", \"test_decision_takeover_revocation_and_revision_invalidation\", \"test_automatic_agents_handoff_stops_for_human_and_quality\", \"test_invalid_tool_range_can_be_corrected_without_success_receipt\"]}\n20项均在上述 commit 后执行，包含建群并发/重试幂等、原运行重建应用后恢复、测试退回/复交/质量门禁、无效工具读取参数纠正后才增加检查点。TypeScript 检查 exit 0。真实浏览器四角色入口及390px深色已通过。审阅范围是实现与既有证据，测试阶段不需要先观察其之后的质量人工确认才可交测试结论；质量完成门禁有单独回归。模型本身没有执行代码修改或测试命令。",
+              "start": 0,
+              "title": "50 当前提交实际验证记录",
+              "source": "acceptance://local/4d5d7ea54913804e885152a746221435ace80cf4",
+              "revision": 1
+            },
+            "call_id": "call_01_XeiEIhJVBJXIJbikwPLE0323"
+          },
+          "created_at": "2026-11-18T21:35:00.762118+08:00"
+        },
+        {
+          "id": 66,
+          "kind": "tool_result",
+          "data": {
+            "tool": "read_context",
+            "result": {
+              "id": "8f6e1153-c15c-4625-a5a1-c18abb7c88d5",
+              "end": 1500,
+              "text": "62:     group = group_scope(db, run['group_id'], run['user_id'])\n63:     if group['revision'] != run['group_revision'] or group['stage'] != run['role']:\n64:         raise Problem('stage_changed', 409)\n65:     if group.get(run['role'] + '_id') != run['user_id']:\n66:         raise Problem('permission_denied', 403)\n67:     return group\n68: \n69: \n70: def transition(db, group, stage, state, actor, handoff=None, note=''):\n71:     db.execute('''UPDATE mad_requirement_groups SET stage=%s,state=%s,revision=revision+1,last_handoff=%s WHERE id=%s''',\n72:                (stage, state, handoff, group['id']))\n73:     labels = {'product': '产品确认', 'development': '实现与自测', 'testing': '独立验收', 'quality': '质量复核', 'completed': '需求完成'}\n74:     body = note or ('本阶段已交付，等待本人确认。' if state == 'awaiting_confirmation' else f\"已交接至{labels[stage]}。\")\n75:     group_message(db, group, actor, 'transition', body,\n76:                   {'from_stage': group['stage'], 'stage': stage, 'revision': group['revision'] + 1,\n77:                    'run_id': str(handoff) if handoff else None})\n78:     record(db, group['project_id'], actor, group['id'], 'requirement_stage_changed')\n79: \n80: \n81: def group_handoff(db, run, result):\n82:     if not run.get('group_id'):\n83:         return\n84:     group = check_group_run(db, run)\n85:     handoff = db.execute('SELECT * FROM mad_handoffs WHERE run_id=%s', (run['id'],)).fetchone()\n86:     if handoff_outdated(db, handoff):\n87:         raise Problem('context_changed', 409)\n88:     if",
+              "start": 0,
+              "title": "10 阶段流转实现",
+              "source": "repo://server/requirement_groups.py",
+              "revision": 1
+            },
+            "call_id": "call_00_AnKXcwqrNN5lIkDqjXDw1923"
+          },
+          "created_at": "2026-11-18T21:35:03.221798+08:00"
+        },
+        {
+          "id": 67,
+          "kind": "tool_result",
+          "data": {
+            "tool": "read_context",
+            "result": {
+              "id": "8f6e1153-c15c-4625-a5a1-c18abb7c88d5",
+              "end": 2505,
+              "text": " run['role'] == 'product':\n89:         stage, state = 'product', 'awaiting_confirmation'\n90:     elif run['role'] == 'development':\n91:         stage, state = 'testing', 'active'\n92:     elif result['verdict'] == 'rejected':\n93:         stage, state = 'development', 'active'\n94:     else:\n95:         stage, state = 'quality', 'awaiting_confirmation'\n96:     group_message(db, group, run['user_id'], 'handoff', handoff['summary'],\n97:                   {'run_id': str(run['id']), 'role': run['role'], 'verdict': result['verdict'],\n98:                    'requirement_revision': run['requirement_revision'], 'evidence': handoff['evidence'],\n99:                    'context_references': handoff['context_references'],\n100:                    'candidate_run': str(handoff['candidate_run']) if handoff['candidate_run'] else None})\n101:     transition(db, group, stage, state, run['user_id'], run['id'])\n102:     db.execute(\"UPDATE mad_agent_runs SET status='completed' WHERE id=%s\", (run['id'],))\n103: \n104: ",
+              "start": 1500,
+              "title": "10 阶段流转实现",
+              "source": "repo://server/requirement_groups.py",
+              "revision": 1
+            },
+            "call_id": "call_01_4SATxFkLCdA2yue1z8OR9018"
+          },
+          "created_at": "2026-11-18T21:35:03.495034+08:00"
+        },
+        {
+          "id": 68,
+          "kind": "tool_result",
+          "data": {
+            "tool": "read_context",
+            "result": {
+              "id": "46429491-dcf0-49db-ab01-d32aec0923a6",
+              "end": 3000,
+              "text": "275:             if decision['state'] == 'resolved':\n276:                 if decision['answer'] != data.answer or decision['note'] != data.note:\n277:                     raise Problem('operation_conflict', 409)\n278:             else:\n279:                 check_group_run(db, run)\n280:                 if decision['state'] != 'pending' or decision['revision'] != data.expected_revision or decision['generation'] != run['generation']:\n281:                     raise Problem('version_conflict', 409)\n282:                 if context_changed(db, run):\n283:                     raise Problem('context_changed', 409)\n284:                 if data.answer not in decision['options']:\n285:                     raise Problem('invalid_request', 422)\n286:                 db.execute(\"UPDATE mad_run_decisions SET state='resolved',answer=%s,note=%s,resolved_at=now(),revision=revision+1 WHERE id=%s\", (data.answer, data.note, decision_id))\n287:                 db.execute(\"UPDATE mad_agent_runs SET status='paused' WHERE id=%s\", (run['id'],))\n288:                 event(db, run['id'], 'decision_resolved', {'decision_id': str(decision_id), 'answer': data.answer, 'note': data.note, 'checkpoint': decision['checkpoint']})\n289:                 if run['group_id']:\n290:                     group = group_scope(db, run['group_id'], user['id'])\n291:                     db.execute(\"UPDATE mad_requirement_groups SET state='active' WHERE id=%s\", (group['id'],))\n292:                     group_message(db, group, user['id'], 'decision_resolved', data.note,\n293:                                   {'decision_id': str(decision_id), 'run_id': str(run['id']), 'answer': data.answer,\n294:                                    'checkpoint': decision['checkpoint'], 'generation': run['generation']})\n295:             background.add_task(service.resume, run['id'], user['id'])\n296:             return {'id': decision_id, 'run_id': run['id'], 'checkpoint': decision['checkpoint'], 'outcome': 'resolved'}\n297: \n298:     @router.post('/decisions/{decision_id}/reassign')\n299:     def reassign(decision_id: UUID, data: ReassignInput, user=authenticated):\n300:         with connect(settings.database_url) as db:\n301:             decision = db.execute('SELECT * FROM mad_run_decisions WHERE id=%s', (decision_id,)).fetchone()\n302:             if not decision:\n303:                 raise Problem('decision_not_found', 404)\n304:             run = db.execute('SELECT * FROM mad_agent_runs WHERE id=%s', (decision['run_id'],)).fetchone()\n305:             membership(db, run['project_id'], user['id'], write=True, manage=True)\n306:             decision = db.execute('SELECT * FROM mad_run_decisions WHERE id=%s FOR UPDATE', (decision_id,)).fetchone()\n307:             run = db.execute('SELECT * FROM mad_agent_runs WHERE id=%s FOR UPDATE', (decision['run_id'],)).fetchone()\n308:             membership(db, run['project_id'], data.member_id)\n309:             role = db.execute('SELECT role FROM mad_project_roles WHERE project_id=%s AND user_id",
+              "start": 0,
+              "title": "20 本人决定与恢复实现",
+              "source": "repo://server/requirement_groups.py",
+              "revision": 1
+            },
+            "call_id": "call_00_gxGKZRNVOwxv26RWGPZg4140"
+          },
+          "created_at": "2026-11-18T21:35:07.944156+08:00"
+        },
+        {
+          "id": 69,
+          "kind": "tool_result",
+          "data": {
+            "tool": "read_context",
+            "result": {
+              "id": "46429491-dcf0-49db-ab01-d32aec0923a6",
+              "end": 3405,
+              "text": "=%s', (run['project_id'], data.member_id)).fetchone()\n310:             if not role or role['role'] != run['role'] or decision['state'] != 'pending' or decision['revision'] != data.expected_revision:\n311:                 raise Problem('role_required', 409)\n312:             if not db.execute('SELECT pg_try_advisory_xact_lock(hashtextextended(%s,0)) AS acquired', (str(run['id']),)).fetchone()['acquired']:",
+              "start": 3000,
+              "title": "20 本人决定与恢复实现",
+              "source": "repo://server/requirement_groups.py",
+              "revision": 1
+            },
+            "call_id": "call_01_MNLl4N85Jc0dOz4bWr801265"
+          },
+          "created_at": "2026-11-18T21:35:08.244332+08:00"
+        },
+        {
+          "id": 70,
+          "kind": "tool_result",
+          "data": {
+            "tool": "read_group_messages",
+            "result": {
+              "messages": [
+                {
+                  "body": "需求已立项，产品阶段待推进。",
+                  "data": {
+                    "source": "https://github.com/lkun-lea/myagentdesk/issues/6"
+                  },
+                  "kind": "created",
+                  "sequence": 1
+                },
+                {
+                  "body": "产品方案（#6 需求群交接实现与证据核对，revision 1，仅产品阶段交付，不含研发/测试结论）\n\n一、范围确认（依据 00 原文，不作外扩）\n本次只审阅\"已实现\"的需求群流程：一条正式需求对应一个需求群；阶段为 产品确认 → 实现与自测 → 独立验收 → 质量复核；含本人决定（request_decision）与答复后按原运行/检查点恢复；含项目事件记录与阶段详情。00 明确\"本次仅审阅已实现的需求群、本人决定与阶段交接，不是完成全部路线图\"，版本范围与排期归 #16，不在本次。\n\n二、阶段流转方案（与 00 验收标准一一对应）\n1) 建群与确认：有权限的人确认需求后才建群/进群；并发创建与丢回执重试只返回一个群；调研建议保留来源与待确认问题，由人确认立项。\n2) 流转与退回：产品确认 → 研发实现与自测 → 独立测试 → 质量复核；允许退回后再交接；研发与独立验收必须由不同成员执行；迟到回调不得覆盖新阶段（证据应体现阶段变更时的 group.revision / stage 校验，见 00 引用的 server/requirement_groups.py 第 62-67 行）。\n3) 本人决定与恢复：范围边界这一选择必须由研发以 request_decision 交本人（选项：仅复核已有实现和测试证据 / 扩展外部编码执行器），未答复不得自行选择；答复后沿用同一运行编号与检查点接续，已被答复的决定不重复提问，冲突写入返回 409（见 00 引用的第 275-291 行）。\n4) 展示与证据一致：项目页与需求群展示同一阶段、负责人、文档、产物、证据；事件回放不重复、历史节点可定位；Agent 默认收到当前需求与验收条件，其余按需检索，跨项目、私聊、撤权内容受限。\n\n三、交接要求（给研发与测试）\n- 研发：先 request_decision 交本人选择范围，答复后在同一运行编号与检查点继续；交付内容须为可核对结论+证据（阶段流转与决定恢复的实现位置、退回与迟到回调的处理证据），不得自述代替证据。\n- 测试：先读研发交接，再独立读取 00 原文与已有验证记录逐条比对；必须明确本样本无写文件/执行命令工具，模型未修改代码、未运行测试命令；未覆盖的范围不当作通过。\n\n四、本人确认点\n本方案的边界口径为\"仅复核已有实现与测试证据\"，不包含扩展外部编码执行器；如需扩展请在研发阶段的 request_decision 中直接选择，产品不代选。请本人确认本方案后转研发阶段。\n\n五、限制声明\n本次为产品阶段交付：未读取代码运行结果、未执行任何命令、未修改任何文件；所有引用均来自 00 原文与其内嵌的实现摘录。",
+                  "data": {
+                    "role": "product",
+                    "run_id": "bb8321bb-1e61-4eec-9f52-2dbcb466039b",
+                    "verdict": "proposed",
+                    "evidence": [
+                      "00 本次范围与真实需求 (revision 1, https://github.com/lkun-lea/myagentdesk/issues/6)：范围段写明“一条正式需求对应一个需求群”“实现需求确认、实现与自测、独立验收、质量复核的阶段状态与交接记录，以及项目事件记录、阶段详情与按需项目上下文”，并写明“本次仅审阅已实现的需求群、本人决定与阶段交接，不是完成全部路线图”。",
+                      "00 验收标准第 1 条：有权限的人确认需求后建群；并发创建、丢回执重试只返回一个群；调研建议保留来源和待确认问题，由人确认立项。",
+                      "00 验收标准第 2 条：用模拟成员跑完确认、提交、退回、再交接和复核，研发与独立验收由不同成员执行，迟到回调无法覆盖新阶段。",
+                      "00 验收标准第 3 条：项目页与需求群展示同一阶段、负责人、文档、产物和证据；事件回放不重复；Agent 默认收到当前需求与验收条件，其余按需查，跨项目、私聊、撤权内容受限。",
+                      "00 末尾约束：产品交方案；研发必须先以 request_decision 请本人选择范围（仅复核已有实现和测试证据 / 扩展外部编码执行器），未答复不能自行选��已有决定后不再提问；测试独立查原文和记录；本样本无写文件或运行命令工具，禁止声称模型改代码或跑测试。",
+                      "项目资料仅列出 3 份：00 本次范围与真实需求、10 阶段流转实现（repo://server/requirement_groups.py，含第 62-67 行 group.revision/stage 一致性校验与 409 stage_changed）、20 本人决定与恢复实现（同文件第 275-291 行 resolved 冲突 409、pending/revision/generation 校验、答复后 event decision_resolved 与 group 状态回 active）。产品阶段仅作方案依据，未作为测试结论。",
+                      "群消息游标 1：仅有“需求已立项，产品阶段待推进”，无历史运行编号或既有决定可复用；decisions 为空，客户端无既有答复。"
+                    ],
+                    "candidate_run": null,
+                    "context_references": [
+                      {
+                        "revision": 1,
+                        "end_offset": 1266,
+                        "document_id": "ccab9a5b-61f7-4480-8727-4b2234a21475",
+                        "start_offset": 0
+                      },
+                      {
+                        "revision": 1,
+                        "end_offset": 1500,
+                        "document_id": "8f6e1153-c15c-4625-a5a1-c18abb7c88d5",
+                        "start_offset": 0
+                      },
+                      {
+                        "revision": 1,
+                        "end_offset": 1500,
+                        "document_id": "46429491-dcf0-49db-ab01-d32aec0923a6",
+                        "start_offset": 0
+                      }
+                    ],
+                    "requirement_revision": 1
+                  },
+                  "kind": "handoff",
+                  "sequence": 2
+                },
+                {
+                  "body": "本阶段已交付，等待本人确认。",
+                  "data": {
+                    "stage": "product",
+                    "run_id": "bb8321bb-1e61-4eec-9f52-2dbcb466039b",
+                    "revision": 2,
+                    "from_stage": "product"
+                  },
+                  "kind": "transition",
+                  "sequence": 3
+                },
+                {
+                  "body": "验收脚本确认仅推进 #6 已有实现的资料与证据核对，研发边界交研发本人决定。",
+                  "data": {
+                    "stage": "development",
+                    "run_id": "bb8321bb-1e61-4eec-9f52-2dbcb466039b",
+                    "revision": 3,
+                    "from_stage": "product"
+                  },
+                  "kind": "transition",
+                  "sequence": 4
+                },
+                {
+                  "body": "#6 研发阶段范围边界需要本人确认：本次研发审阅按哪个口径执行？",
+                  "data": {
+                    "run_id": "5703fcf8-cb16-4965-b70b-89b706ed37df",
+                    "options": [
+                      "仅复核已有实现和测试证据（只依据 00/10/20 原文与 50 已有回归记录做阶段流转与决定恢复的审阅，不扩展外部编码执行器、不新增执行/改码）",
+                      "扩展外部编码执行器（超出 #6 已实现范围，需要另外的写文件/命令执行能力与排期）"
+                    ],
+                    "evidence": [
+                      "00 本次范围与真实需求（revision 1，https://github.com/lkun-lea/myagentdesk/issues/6）末尾：研发必须先以 request_decision 请本人选择范围（选项：仅复核已有实现和测试证据 / 扩展外部编码执行器），未答复不能自行选；已有决定后不再提问；此样本无写文件或运行命令工具。",
+                      "00 范围段：本次仅审阅已实现的需求群、本人决定与阶段交接，不是完成全部路线图；版本范围和排期由 #16 管理。",
+                      "产品交接（群消息 sequence 2，run bb8321bb…）：边界口径为“仅复核已有实现与测试证据”，不包含扩展外部编码执行器，需研发以 request_decision 由本人选择。",
+                      "当前 decisions 为空、群消息序列 1-4 无历史答复，同一运行 5703fcf8-cb16-4965-b70b-89b706ed37df / checkpoint 0 尚无已答复决定，故需本人确认。"
+                    ],
+                    "owner_id": "c95cc586-e973-4d26-9ed3-8695fd26723e",
+                    "checkpoint": 8,
+                    "generation": 0,
+                    "decision_id": "120ba32c-8df9-5a11-ade2-5ec4eea1321d"
+                  },
+                  "kind": "decision",
+                  "sequence": 5
+                },
+                {
+                  "body": "验收脚本选择仅复核已有实现和测试证据；外部编码执行器留在 #14。",
+                  "data": {
+                    "answer": "仅复核已有实现和测试证据（只依据 00/10/20 原文与 50 已有回归记录做阶段流转与决定恢复的审阅，不扩展外部编码执行器、不新增执行/改码）",
+                    "run_id": "5703fcf8-cb16-4965-b70b-89b706ed37df",
+                    "checkpoint": 8,
+                    "generation": 0,
+                    "decision_id": "120ba32c-8df9-5a11-ade2-5ec4eea1321d"
+                  },
+                  "kind": "decision_resolved",
+                  "sequence": 6
+                },
+                {
+                  "body": "研发阶段审阅交接（#6 需求群交接实现与证据核对，revision 1，运行 5703fcf8-cb16-4965-b70b-89b706ed37df，checkpoint 8 / generation 0）\n\n一、范围决定已交本人并已按同一运行接续\n- 已按 00 末尾约束用 request_decision 交本人选择边界，未自行选择；本人答复为\"仅复核已有实现和测试证据（只依据 00/10/20 原文与 50 已有回归记录做阶段流转与决定恢复的审阅，不扩展外部编码执行器、不新增执行/改码）\"，note 注明外部编码执行器留在 #14。决定 id 120ba32c-8df9-5a11-ade2-5ec4eea1321d。\n- 答复记录的 run_id 为 5703fcf8-cb16-4965-b70b-89b706ed37df、checkpoint 8、generation 0，与 current_run 及本检查点一致，即沿用原运行编号/检查点接续，未新开运行。已在群内落 decision / decision_resolved 消息。本阶段不再重复提问同一决定（依据 20 第 275-277 行：resolved 且 answer/note 相同则复用，不同则 409 operation_conflict）。\n\n二、阶段流转实现审阅结论（依据 10 原文片段）\n1) 迟到回调不能覆盖新阶段：check_group_run 校验 group['revision'] != run['group_revision'] 或 group['stage'] != run['role'] 即抛 409 stage_changed，并校验 group[role+'_id'] == run['user_id']，否则 403（第 62-67 行）。这是\"迟到回调\"被拒绝的代码入口。\n2) 阶段推进与事件：transition 以 revision+1 更新 stage/state/last_handoff，写入 group_message kind=transition（含 from_stage/stage/revision/run_id）并 record requirement_stage_changed，阶段标签含 产品确认/实现与自测/独立验收/质量复核/需求完成（第 70-78 行）——对应 00\"阶段状态与交接记录、项目事件记录\"。\n3) 交接分支：group_handoff 先 check_group_run，再以 handoff_outdated → 409 context_changed、run.get('group_id') 缺失直接返回，并写入 handoff 消息（run_id/role/verdict/requirement_revision/evidence/context_references/candidate_run）；verdict=rejected 回到 development/active，role=development 转 testing/active，其余转 quality/awaiting_confirmation（第 81-102 行）——对应\"退回后再交接\"与\"研发后交独立测试，再交质量复核\"。\n4) 决定恢复实现：resolved 冲突 409；pending 时校验 expected_revision、generation、context_changed、answer 必须属于 options（否则 422）；通过后更新 decision 为 resolved、run 置 paused、写 event decision_resolved（携带 checkpoint）、需求群 state 回 active、写 decision_resolved 群消息，最后 background.add_task(service.resume, run['id'], ...) 恢复同一 run（第 275-296 行）。转派路径另校验角色/状态/revision 并取 pg_try_advisory_xact_lock 防并发（第 300-312 行）。\n\n三、已有验证记录（非本次模型执行）\n- 50 记录：commit 4d5d7ea54913804e885152a746221435ace80cf4 的真实 PostgreSQL 隔离回归，tests 20 / failures 0 / errors 0 / 202.174s，用例含 test_initiation_and_product_stage、test_development_decision_and_same_checkpoint_resu",
+                  "data": {
+                    "role": "development",
+                    "run_id": "5703fcf8-cb16-4965-b70b-89b706ed37df",
+                    "verdict": "delivered",
+                    "evidence": [
+                      "00 本次范围与真实需求（id ccab9a5b-61f7-4480-8727-4b2234a21475，revision 1，https://github.com/lkun-lea/myagentdesk/issues/6）：范围段写明“一条正式需求对应一个需求群”“实现需求确认、实现与自测、独立验收、质量复核的阶段状态与交接记录，以及项目事件记录、阶段详情与按需项目上下文”“本次仅审阅已实现的需求群、本人决定与阶段交接，不是完成全部路线图”；末尾约束写明研发必须先以 request_decision 请本人选择范围（仅复核已有实现和测试证据 / 扩展外部编码执行器）、未答复不能自行选、已有决定后不再提问、此样本无写文件或运行命令工具。",
+                      "群内决定与答复（运行 5703fcf8-cb16-4965-b70b-89b706ed37df）：kind=decision 提出问题“本次研发审阅按哪个口径执行”，decision_id=120ba32c-8df9-5a11-ade2-5ec4eea1321d，checkpoint=8，generation=0；kind=decision_resolved 记录 answer=“仅复核已有实现和测试证据（只依据 00/10/20 原文与 50 已有回归记录做阶段流转与决定恢复的审阅，不扩展外部编码执行器、不新增执行/改码）”，note=“外部编码执行器留在 #14”，run_id/checkpoint/generation 与当前运行一致，证明未开新运行且未重复提问。",
+                      "10 阶段流转实现（id 8f6e1153-c15c-4625-a5a1-c18abb7c88d5，revision 1，repo://server/requirement_groups.py）第 62-67 行：group['revision'] != run['group_revision'] 或 group['stage'] != run['role'] 抛 409 stage_changed；group[run['role']+'_id'] != run['user_id'] 抛 403 permission_denied —— 迟到回调/错阶段回调被拒的代码入口。",
+                      "10 第 70-78 行：transition 以 revision+1 更新 mad_requirement_groups 的 stage/state/last_handoff，写 group_message kind=transition（from_stage/stage/revision/run_id），并 record requirement_stage_changed；标签含 product/development/testing/quality/completed。",
+                      "10 第 81-102 行：group_handoff 先 check_group_run，handoff_outdated 抛 409 context_changed，写 handoff 消息（run_id/role/verdict/requirement_revision/evidence/context_references/candidate_run）；verdict=rejected → development/active，role=development → testing/active，否则 quality/awaiting_confirmation，随后 transition 并把 run 置 completed。",
+                      "20 本人决定与恢复实现（id 46429491-dcf0-49db-ab01-d32aec0923a6，revision 1）第 275-277 行：decision 已 resolved 时，answer/note 不同抛 409 operation_conflict，相同则复用（不重复提问）。",
+                      "20 第 279-285 行：pending 状态下 check_group_run(run) + decision['revision'] != data.expected_revision 或 decision['generation'] != run['generation'] → 409 version_conflict；context_changed → 409；answer 不在 decision['options'] → 422 invalid_request。",
+                      "20 第 286-296 行：置 decision state=resolved/写入 answer/note/revision+1、run status=paused、event decision_resolved（带 checkpoint）、需求群 state=active、group_message decision_resolved（含 run_id/checkpoint/generation），最后 background.add_task(service.resume, run['id'], user['id']) 恢复同一运行。",
+                      "20 第 300-312 行：reassign 路径校验决策存在、成员写权限、目标成员角色与 run['role'] 一致、state=pending 与 expected_revision，并取 pg_try_advisory_xact_lock(hashtextextended(run_id)) 防并发。",
+                      "50 当前提交实际验证记录（id c04ee980-e572-4cda-8a2f-473443930d6f，revision 1，acceptance://local/4d5d7ea54913804e885152a746221435ace80cf4）：commit 4d5d7ea54913804e885152a746221435ace80cf4，tests 20、failures 0、errors 0、202.174s；用例含 test_initiation_and_product_stage、test_development_decision_and_same_checkpoint_resume、test_testing_return_rework_and_quality_gate、test_decision_takeover_revocation_and_revision_invalidation、test_automatic_agents_handoff_stops_for_human_and_quality、test_invalid_tool_range_can_be_corrected_without_success_receipt；TypeScript 检查 exit 0；真实浏览器四角色入口及 390px 深色通过；明确执行者为开发工作中的 Codex，非本次模型。",
+                      "证据缺口（供测试独立核对）：建群并发/丢回执重试幂等、项目页与需求群展示同一阶段/负责人/文档/产物/证据、事件回放不重复、Agent 上下文与跨项目/私聊/撤权限制，本次资料仅有用例名或描述，无对应代码/展示证据摘录；10 覆盖 0-2505 行区间、20 覆盖 0-3405 行区间，均为行段摘录而非整文件。",
+                      "工具执行事实：本次仅调用 list_context、read_context、read_group_messages、request_decision、submit_handoff；无写文件或命令执行工具，未修改任何代码/文件，未运行任何测试或命令。"
+                    ],
+                    "candidate_run": null,
+                    "context_references": [
+                      {
+                        "revision": 1,
+                        "end_offset": 1266,
+                        "document_id": "ccab9a5b-61f7-4480-8727-4b2234a21475",
+                        "start_offset": 0
+                      },
+                      {
+                        "revision": 1,
+                        "end_offset": 1500,
+                        "document_id": "8f6e1153-c15c-4625-a5a1-c18abb7c88d5",
+                        "start_offset": 0
+                      },
+                      {
+                        "revision": 1,
+                        "end_offset": 3000,
+                        "document_id": "46429491-dcf0-49db-ab01-d32aec0923a6",
+                        "start_offset": 0
+                      },
+                      {
+                        "revision": 1,
+                        "end_offset": 1473,
+                        "document_id": "c04ee980-e572-4cda-8a2f-473443930d6f",
+                        "start_offset": 0
+                      },
+                      {
+                        "revision": 1,
+                        "end_offset": 2505,
+                        "document_id": "8f6e1153-c15c-4625-a5a1-c18abb7c88d5",
+                        "start_offset": 1500
+                      },
+                      {
+                        "revision": 1,
+                        "end_offset": 3405,
+                        "document_id": "46429491-dcf0-49db-ab01-d32aec0923a6",
+                        "start_offset": 3000
+                      }
+                    ],
+                    "requirement_revision": 1
+                  },
+                  "kind": "handoff",
+                  "sequence": 7
+                },
+                {
+                  "body": "已交接至独立验收。",
+                  "data": {
+                    "stage": "testing",
+                    "run_id": "5703fcf8-cb16-4965-b70b-89b706ed37df",
+                    "revision": 4,
+                    "from_stage": "development"
+                  },
+                  "kind": "transition",
+                  "sequence": 8
+                }
+              ],
+              "next_cursor": 8
+            },
+            "call_id": "call_00_sUminrgCDVnKJRlVcxTZ3822"
+          },
+          "created_at": "2026-11-18T21:35:28.734085+08:00"
+        },
+        {
+          "id": 101,
+          "kind": "tool_refused",
+          "data": {
+            "tool": "submit_handoff",
+            "reason": "evidence_required",
+            "call_id": "call_00_wriCOksD3uDcD6YNpEEZ0243"
+          },
+          "created_at": "2026-11-18T21:36:05.577333+08:00"
+        },
+        {
+          "id": 130,
+          "kind": "tool_result",
+          "data": {
+            "tool": "read_context",
+            "result": {
+              "id": "ccab9a5b-61f7-4480-8727-4b2234a21475",
+              "end": 1266,
+              "text": "#6 需求群、项目时间线与阶段交接\n路线图 [#1](https://github.com/lkun-lea/myagentdesk/issues/1) · 来源 [tebb #314](https://github.com/lkun-lea/tebb/issues/314) · [工作台、需求群与项目页草图](https://github.com/lkun-lea/tebb/blob/3769741dc807c55c52c9ea9a768633ba21d4fff2/docs/design/workbench/README.md)\r\n\r\n## 范围\r\n\r\n提供候选调研和人工立项入口，一条正式需求对应一个需求群。实现需求确认、实现与自测、独立验收、质量复核的阶段状态与交接记录，以及项目事件记录、阶段详情与按需项目上下文。事件记录按项目和事件序号补读，供版本时间线作为历史视图。版本范围和排期由 [#16 版本计划](https://github.com/lkun-lea/myagentdesk/issues/16) 管理。阶段服务先通过确定性角色替身验收，接入真实个人 Agent 后再贯通执行。\r\n\r\n## 依赖与联调\r\n\r\n- 前置 [#2 独立运行基座与 tebb 模块复用边界](https://github.com/lkun-lea/myagentdesk/issues/2)\r\n- 前置 [#3 账号登录、工作区与项目成员](https://github.com/lkun-lea/myagentdesk/issues/3)\r\n\r\n可先用替身开发与验收。以下模块就绪后验证完整产品入口：[#4 工作台首页、项目导航与应用工具目录](https://github.com/lkun-lea/myagentdesk/issues/4)、[#5 我的 Agent、一人一 Agent 与 Pi SDK 工具调用](https://github.com/lkun-lea/myagentdesk/issues/5)。\r\n\r\n## 验收标准\r\n\r\n- [ ] 有权限的人确认需求后建群；并发创建、丢回执重试只返回一个群。调研建议保留来源和待确认问题，由人确认立项。\r\n- [ ] 用模拟成员跑完确认、提交、退回、再交接和复核，验证研发与独立验收由不同成员执行，迟到回调无法覆盖新阶段。\r\n- [ ] 项目页和需求群展示同一阶段、负责人、文档、产物和证据；事件回放不重复，历史节点能定位。Agent 默认收到当前需求与验收条件，其余按需查，跨项目、私聊、撤权内容均受限。\r\n\r\n\n本次仅审阅已实现的需求群、本人决定与阶段交接，不是完成全部路线图。产品交方案；研发必须先以 request_decision 请本人选择范围（选项：仅复核已有实现和测试证据 / 扩展外部编码执行器），未答复不能自行选。已有决定后不再提问。测试独立查原文和记录，不能把研发自述当成测试。此样本无写文件或运行命令工具，禁止声称模型改代码或跑测试。",
+              "start": 0,
+              "title": "00 本次范围与真实需求",
+              "source": "https://github.com/lkun-lea/myagentdesk/issues/6",
+              "revision": 1
+            },
+            "call_id": "call_00_MCalQ5nJAvo1X6tgOBVa7966"
+          },
+          "created_at": "2026-11-18T21:36:17.733183+08:00"
+        },
+        {
+          "id": 131,
+          "kind": "tool_result",
+          "data": {
+            "tool": "read_context",
+            "result": {
+              "id": "8f6e1153-c15c-4625-a5a1-c18abb7c88d5",
+              "end": 1500,
+              "text": "62:     group = group_scope(db, run['group_id'], run['user_id'])\n63:     if group['revision'] != run['group_revision'] or group['stage'] != run['role']:\n64:         raise Problem('stage_changed', 409)\n65:     if group.get(run['role'] + '_id') != run['user_id']:\n66:         raise Problem('permission_denied', 403)\n67:     return group\n68: \n69: \n70: def transition(db, group, stage, state, actor, handoff=None, note=''):\n71:     db.execute('''UPDATE mad_requirement_groups SET stage=%s,state=%s,revision=revision+1,last_handoff=%s WHERE id=%s''',\n72:                (stage, state, handoff, group['id']))\n73:     labels = {'product': '产品确认', 'development': '实现与自测', 'testing': '独立验收', 'quality': '质量复核', 'completed': '需求完成'}\n74:     body = note or ('本阶段已交付，等待本人确认。' if state == 'awaiting_confirmation' else f\"已交接至{labels[stage]}。\")\n75:     group_message(db, group, actor, 'transition', body,\n76:                   {'from_stage': group['stage'], 'stage': stage, 'revision': group['revision'] + 1,\n77:                    'run_id': str(handoff) if handoff else None})\n78:     record(db, group['project_id'], actor, group['id'], 'requirement_stage_changed')\n79: \n80: \n81: def group_handoff(db, run, result):\n82:     if not run.get('group_id'):\n83:         return\n84:     group = check_group_run(db, run)\n85:     handoff = db.execute('SELECT * FROM mad_handoffs WHERE run_id=%s', (run['id'],)).fetchone()\n86:     if handoff_outdated(db, handoff):\n87:         raise Problem('context_changed', 409)\n88:     if",
+              "start": 0,
+              "title": "10 阶段流转实现",
+              "source": "repo://server/requirement_groups.py",
+              "revision": 1
+            },
+            "call_id": "call_01_CWkDWUBGbxJf5yU6LJkc4329"
+          },
+          "created_at": "2026-11-18T21:36:17.990009+08:00"
+        },
+        {
+          "id": 132,
+          "kind": "tool_refused",
+          "data": {
+            "tool": "submit_handoff",
+            "reason": "evidence_required",
+            "call_id": "call_00_IjP8Xcyxu0DspautaLig6899"
+          },
+          "created_at": "2026-11-18T21:36:30.573476+08:00"
+        },
+        {
+          "id": 133,
+          "kind": "tool_result",
+          "data": {
+            "tool": "read_handoff",
+            "result": {
+              "run_id": "5703fcf8-cb16-4965-b70b-89b706ed37df",
+              "summary": "研发阶段审阅交接（#6 需求群交接实现与证据核对，revision 1，运行 5703fcf8-cb16-4965-b70b-89b706ed37df，checkpoint 8 / generation 0）\n\n一、范围决定已交本人并已按同一运行接续\n- 已按 00 末尾约束用 request_decision 交本人选择边界，未自行选择；本人答复为\"仅复核已有实现和测试证据（只依据 00/10/20 原文与 50 已有回归记录做阶段流转与决定恢复的审阅，不扩展外部编码执行器、不新增执行/改码）\"，note 注明外部编码执行器留在 #14。决定 id 120ba32c-8df9-5a11-ade2-5ec4eea1321d。\n- 答复记录的 run_id 为 5703fcf8-cb16-4965-b70b-89b706ed37df、checkpoint 8、generation 0，与 current_run 及本检查点一致，即沿用原运行编号/检查点接续，未新开运行。已在群内落 decision / decision_resolved 消息。本阶段不再重复提问同一决定（依据 20 第 275-277 行：resolved 且 answer/note 相同则复用，不同则 409 operation_conflict）。\n\n二、阶段流转实现审阅结论（依据 10 原文片段）\n1) 迟到回调不能覆盖新阶段：check_group_run 校验 group['revision'] != run['group_revision'] 或 group['stage'] != run['role'] 即抛 409 stage_changed，并校验 group[role+'_id'] == run['user_id']，否则 403（第 62-67 行）。这是\"迟到回调\"被拒绝的代码入口。\n2) 阶段推进与事件：transition 以 revision+1 更新 stage/state/last_handoff，写入 group_message kind=transition（含 from_stage/stage/revision/run_id）并 record requirement_stage_changed，阶段标签含 产品确认/实现与自测/独立验收/质量复核/需求完成（第 70-78 行）——对应 00\"阶段状态与交接记录、项目事件记录\"。\n3) 交接分支：group_handoff 先 check_group_run，再以 handoff_outdated → 409 context_changed、run.get('group_id') 缺失直接返回，并写入 handoff 消息（run_id/role/verdict/requirement_revision/evidence/context_references/candidate_run）；verdict=rejected 回到 development/active，role=development 转 testing/active，其余转 quality/awaiting_confirmation（第 81-102 行）——对应\"退回后再交接\"与\"研发后交独立测试，再交质量复核\"。\n4) 决定恢复实现：resolved 冲突 409；pending 时校验 expected_revision、generation、context_changed、answer 必须属于 options（否则 422）；通过后更新 decision 为 resolved、run 置 paused、写 event decision_resolved（携带 checkpoint）、需求群 state 回 active、写 decision_resolved 群消息，最后 background.add_task(service.resume, run['id'], ...) 恢复同一 run（第 275-296 行）。转派路径另校验角色/状态/revision 并取 pg_try_advisory_xact_lock 防并发（第 300-312 行）。\n\n三、已有验证记录（非本次模型执行）\n- 50 记录：commit 4d5d7ea54913804e885152a746221435ace80cf4 的真实 PostgreSQL 隔离回归，tests 20 / failures 0 / errors 0 / 202.174s，用例含 test_initiation_and_product_stage、test_development_decision_and_same_checkpoint_resume、test_testing_return_rework_and_quality_gate、test_decision_takeover_revocation_and_revision_invalidation、test_automatic_agents_handoff_stops_for_human_and_quality、test_invalid_tool_range_can_be_corrected_without_success_receipt 等；TypeScript 检查 exit 0；真实浏览器四角色入口与 390px 深色通过。执行者为开发工作中的 Codex，不是本次模型。\n\n四、证据不足/未覆盖，供测试重点独立核对（不当作通过）\n- 建群与\"并发创建、丢回执重试只返回一个群\"仅有 50 的记录性描述与该用例名，本次资料未提供对应代码摘录，未直接看到幂等实现本体。\n- 00 验收标准第 3 条\"项目页与需求群展示同一阶段、负责人、文档、产物和证据、事件回放不重复、历史节点能定位\"无展示层代码或截图证据摘录，仅有用例名 test_workbench_favorites_and_project_timeline_follow_membership。\n- \"Agent 默认收到当前需求与验收条件、其余按需检索、跨项目/私聊/撤权受限\"未在本次资料中给出实现摘录。\n- 10/20 为行段摘录（10 覆盖 0-2505 行、20 覆盖 0-3405 行区间），未提供整文件比对。\n- 扩展外部编码执行器、#16 版本范围与排期、路线图其余部分均不在本次范围，未做也未声称完成。\n\n五、限制声明\n本样本无写文件或执行命令工具，本次模型未修改任何代码/文件、未运行任何测试或命令；结论仅来自读取 00/10/20/50 原文摘录与群内决定消息。测试须先读本交接，再独立读原文与验证记录逐条对照。",
+              "evidence": [
+                "00 本次范围与真实需求（id ccab9a5b-61f7-4480-8727-4b2234a21475，revision 1，https://github.com/lkun-lea/myagentdesk/issues/6）：范围段写明“一条正式需求对应一个需求群”“实现需求确认、实现与自测、独立验收、质量复核的阶段状态与交接记录，以及项目事件记录、阶段详情与按需项目上下文”“本次仅审阅已实现的需求群、本人决定与阶段交接，不是完成全部路线图”；末尾约束写明研发必须先以 request_decision 请本人选择范围（仅复核已有实现和测试证据 / 扩展外部编码执行器）、未答复不能自行选、已有决定后不再提问、此样本无写文件或运行命令工具。",
+                "群内决定与答复（运行 5703fcf8-cb16-4965-b70b-89b706ed37df）：kind=decision 提出问题“本次研发审阅按哪个口径执行”，decision_id=120ba32c-8df9-5a11-ade2-5ec4eea1321d，checkpoint=8，generation=0；kind=decision_resolved 记录 answer=“仅复核已有实现和测试证据（只依据 00/10/20 原文与 50 已有回归记录做阶段流转与决定恢复的审阅，不扩展外部编码执行器、不新增执行/改码）”，note=“外部编码执行器留在 #14”，run_id/checkpoint/generation 与当前运行一致，证明未开新运行且未重复提问。",
+                "10 阶段流转实现（id 8f6e1153-c15c-4625-a5a1-c18abb7c88d5，revision 1，repo://server/requirement_groups.py）第 62-67 行：group['revision'] != run['group_revision'] 或 group['stage'] != run['role'] 抛 409 stage_changed；group[run['role']+'_id'] != run['user_id'] 抛 403 permission_denied —— 迟到回调/错阶段回调被拒的代码入口。",
+                "10 第 70-78 行：transition 以 revision+1 更新 mad_requirement_groups 的 stage/state/last_handoff，写 group_message kind=transition（from_stage/stage/revision/run_id），并 record requirement_stage_changed；标签含 product/development/testing/quality/completed。",
+                "10 第 81-102 行：group_handoff 先 check_group_run，handoff_outdated 抛 409 context_changed，写 handoff 消息（run_id/role/verdict/requirement_revision/evidence/context_references/candidate_run）；verdict=rejected → development/active，role=development → testing/active，否则 quality/awaiting_confirmation，随后 transition 并把 run 置 completed。",
+                "20 本人决定与恢复实现（id 46429491-dcf0-49db-ab01-d32aec0923a6，revision 1）第 275-277 行：decision 已 resolved 时，answer/note 不同抛 409 operation_conflict，相同则复用（不重复提问）。",
+                "20 第 279-285 行：pending 状态下 check_group_run(run) + decision['revision'] != data.expected_revision 或 decision['generation'] != run['generation'] → 409 version_conflict；context_changed → 409；answer 不在 decision['options'] → 422 invalid_request。",
+                "20 第 286-296 行：置 decision state=resolved/写入 answer/note/revision+1、run status=paused、event decision_resolved（带 checkpoint）、需求群 state=active、group_message decision_resolved（含 run_id/checkpoint/generation），最后 background.add_task(service.resume, run['id'], user['id']) 恢复同一运行。",
+                "20 第 300-312 行：reassign 路径校验决策存在、成员写权限、目标成员角色与 run['role'] 一致、state=pending 与 expected_revision，并取 pg_try_advisory_xact_lock(hashtextextended(run_id)) 防并发。",
+                "50 当前提交实际验证记录（id c04ee980-e572-4cda-8a2f-473443930d6f，revision 1，acceptance://local/4d5d7ea54913804e885152a746221435ace80cf4）：commit 4d5d7ea54913804e885152a746221435ace80cf4，tests 20、failures 0、errors 0、202.174s；用例含 test_initiation_and_product_stage、test_development_decision_and_same_checkpoint_resume、test_testing_return_rework_and_quality_gate、test_decision_takeover_revocation_and_revision_invalidation、test_automatic_agents_handoff_stops_for_human_and_quality、test_invalid_tool_range_can_be_corrected_without_success_receipt；TypeScript 检查 exit 0；真实浏览器四角色入口及 390px 深色通过；明确执行者为开发工作中的 Codex，非本次模型。",
+                "证据缺口（供测试独立核对）：建群并发/丢回执重试幂等、项目页与需求群展示同一阶段/负责人/文档/产物/证据、事件回放不重复、Agent 上下文与跨项目/私聊/撤权限制，本次资料仅有用例名或描述，无对应代码/展示证据摘录；10 覆盖 0-2505 行区间、20 覆盖 0-3405 行区间，均为行段摘录而非整文件。",
+                "工具执行事实：本次仅调用 list_context、read_context、read_group_messages、request_decision、submit_handoff；无写文件或命令执行工具，未修改任何代码/文件，未运行任何测试或命令。"
+              ]
+            },
+            "call_id": "call_00_LhwtHHxGdD2L0g8CI1L83692"
+          },
+          "created_at": "2026-11-18T21:36:36.584571+08:00"
+        },
+        {
+          "id": 134,
+          "kind": "tool_result",
+          "data": {
+            "tool": "read_context",
+            "result": {
+              "id": "c04ee980-e572-4cda-8a2f-473443930d6f",
+              "end": 1473,
+              "text": "执行者为开发工作中的 Codex，不是本次模型。以下是当前提交的真实 PostgreSQL 隔离回归报告摘要，非研发口述：\n{\"commit\": \"4d5d7ea54913804e885152a746221435ace80cf4\", \"tests\": 20, \"failures\": 0, \"errors\": 0, \"seconds\": \"202.174\", \"cases\": [\"test_otp_failures_receipts_and_login_expiry\", \"test_two_accounts_invite_permissions_and_revocation\", \"test_invalid_config_and_validation_never_echo_secrets\", \"test_supabase_email_code_length[031408]\", \"test_supabase_email_code_length[03140827]\", \"test_supabase_email_code_length[0314082759]\", \"test_workbench_favorites_and_project_timeline_follow_membership\", \"test_calendar_uses_absolute_times_and_keeps_task_associations_private\", \"test_clean_install_home_health_and_migrations\", \"test_missing_or_wrong_config_never_falls_back_to_tebb\", \"test_upstream_time_example_and_fake_adapters\", \"test_pi_sdk_shared_context_and_independent_handoff\", \"test_version_confirmation_cancel_resume_and_revocation\", \"test_failed_provider_and_abandoned_process_restore_receipts\", \"test_initiation_and_product_stage\", \"test_development_decision_and_same_checkpoint_resume\", \"test_testing_return_rework_and_quality_gate\", \"test_decision_takeover_revocation_and_revision_invalidation\", \"test_automatic_agents_handoff_stops_for_human_and_quality\", \"test_invalid_tool_range_can_be_corrected_without_success_receipt\"]}\n20项均在上述 commit 后执行，包含建群并发/重试幂等、原运行重建应用后恢复、测试退回/复交/质量门禁、无效工具读取参数纠正后才增加检查点。TypeScript 检查 exit 0。真实浏览器四角色入口及390px深色已通过。审阅范围是实现与既有证据，测试阶段不需要先观察其之后的质量人工确认才可交测试结论；质量完成门禁有单独回归。模型本身没有执行代码修改或测试命令。",
+              "start": 0,
+              "title": "50 当前提交实际验证记录",
+              "source": "acceptance://local/4d5d7ea54913804e885152a746221435ace80cf4",
+              "revision": 1
+            },
+            "call_id": "call_01_UzITKT4ITLumcl3o1JFy8117"
+          },
+          "created_at": "2026-11-18T21:36:36.838024+08:00"
+        },
+        {
+          "id": 135,
+          "kind": "tool_refused",
+          "data": {
+            "tool": "submit_handoff",
+            "reason": "evidence_required",
+            "call_id": "call_00_unljxYvbn8iPC4DqsFZb4857"
+          },
+          "created_at": "2026-11-18T21:36:50.911896+08:00"
+        },
+        {
+          "id": 136,
+          "kind": "tool_result",
+          "data": {
+            "tool": "submit_handoff",
+            "result": {
+              "run_id": "f3314d7a-6941-44cf-8714-fb41372e0405",
+              "verdict": "passed",
+              "submitted": true
+            },
+            "call_id": "call_00_vCMAK9g6MWgoNLwW2tWH2528"
+          },
+          "created_at": "2026-11-18T21:37:03.337550+08:00"
+        },
+        {
+          "id": 137,
+          "kind": "completed",
+          "data": {},
+          "created_at": "2026-11-18T21:37:03.659181+08:00"
+        }
+      ]
+    }
+  ],
+  "resume": {
+    "same_run_id": true,
+    "run_id": "5703fcf8-cb16-4965-b70b-89b706ed37df",
+    "before_checkpoint": 8,
+    "after_checkpoint": 10,
+    "question": "#6 研发阶段范围边界需要本人确认：本次研发审阅按哪个口径执行？",
+    "answer": "仅复核已有实现和测试证据（只依据 00/10/20 原文与 50 已有回归记录做阶段流转与决定恢复的审阅，不扩展外部编码执行器、不新增执行/改码）"
+  },
+  "handoffs": [
+    {
+      "run_id": "f3314d7a-6941-44cf-8714-fb41372e0405",
+      "project_id": "a561a267-c567-4102-8151-6e5d3a8ba67f",
+      "requirement_id": "dabcc0fb-600c-4dae-ae64-529a1025d936",
+      "requirement_revision": 1,
+      "author": "a0bde953-1256-4463-8638-dcffe4a3c9e2",
+      "role": "testing",
+      "summary": "独立验收（#6，revision 1，测试阶段，运行 f3314d7a-6941-44cf-8714-fb41372e0405，checkpoint 0/generation 0）\n\n步骤：先 read_handoff 读研发交接（run 5703fcf8…，checkpoint 8/generation 0，verdict=delivered），再独立 read_context 读 00（0-1266）、10（0-1500、1500-2505）、20（0-3000、3000-3405）、50（0-1473），并 read_group_messages(after=0) 读群消息 1-8。\n\n结论：在本人确认的“仅复核已有实现和测试证据”范围内，三项验收条件成立。①阶段顺序：seq3 product/awaiting_confirmation → seq4 development，10 第 88-102 行 development→testing/active、rejected→development/active、其余→quality/awaiting_confirmation；研发 run 5703fcf8 与测试 run f3314d7a 不同。②决定与恢复：seq5 decision 与 seq6 decision_resolved 的 run_id/checkpoint 8/generation 0/decision_id 完全一致，seq7、seq8 同 run，仅一条 decision，未重复提问，未新开运行。③测试独立核对并声明未改码未跑命令。\n\n原文核对：研发交接的 10 第 62-67、70-78、81-102 行与 20 第 275-277、279-285、286-296、300-312 行引用逐字属实；50 的 commit、tests 20/failures 0/errors 0/202.174s、用例名、TypeScript exit 0、浏览器与 390px、执行者为 Codex 一致。偏差：交接写“先 check_group_run 再 handoff_outdated”，实际第 82-83 行 group_id 先返回；交接把 rejected 列在 development 之前，实际第 90-91 行 development→testing 先命中，rejected 退回仅对 testing/quality 生效；交接所称行区间实为字符偏移。\n\n不判通过：建群并发/丢回执幂等实现本体；展示一致性与事件回放、历史节点定位；Agent 上下文与跨项目/私聊/撤权限制；10/20 整文件比对；扩展外部编码执行器与 #16 排期。\n\n执行事实：仅调用读取与提交工具，无写文件或命令工具，未修改代码或文件、未运行测试或命令；50 为他方既有记录。",
+      "evidence": [
+        "00 本次范围与真实需求（id ccab9a5b-61f7-4480-8727-4b2234a21475，revision 1，https://github.com/lkun-lea/myagentdesk/issues/6，offset 0-1266）：“一条正式需求对应一个需求群”“用模拟成员跑完确认、提交、退回、再交接和复核，验证研发与独立验收由不同成员执行，迟到回调无法覆盖新阶段”“本次仅审阅已实现的需求群、本人决定与阶段交接”“此样本无写文件或运行命令工具”。",
+        "10 阶段流转实现（id 8f6e1153-c15c-4625-a5a1-c18abb7c88d5，revision 1，repo://server/requirement_groups.py，offset 0-1500）第 62-67 行：group['revision'] != run['group_revision'] or group['stage'] != run['role'] → raise Problem('stage_changed', 409)；group[role+'_id'] != user_id → Problem('permission_denied', 403)。第 70-78 行 transition 以 revision+1 更新 stage/state/last_handoff，写 group_message kind=transition 并 record requirement_stage_changed，labels 为 product/development/testing/quality/completed 对应产品确认/实现与自测/独立验收/质量复核/需求完成。",
+        "10 第 81-102 行（offset 1500-2505）：group_handoff 第 82-83 行 group_id 缺失先 return，84 行 check_group_run，86-87 行 handoff_outdated → 409 context_changed；88-95 行分支顺序 product→product/awaiting_confirmation、development→testing/active、rejected→development/active、其余→quality/awaiting_confirmation；96-100 行写 handoff 消息，102 行 run 置 completed。",
+        "20 本人决定与恢复实现（id 46429491-dcf0-49db-ab01-d32aec0923a6，revision 1，offset 0-3000）第 275-277 行：resolved 时 answer/note 不同 → 409 operation_conflict。第 279-285 行：check_group_run；state!='pending' 或 revision!=expected_revision 或 generation 不符 → 409 version_conflict；context_changed → 409；answer 不在 options → 422。第 286-296 行：decision 置 resolved、run 置 paused、event decision_resolved 带 checkpoint、群 state=active、group_message decision_resolved、background.add_task(service.resume, run['id'], user['id'])。",
+        "20 第 300-312 行（offset 3000-3405）：membership(write=True, manage=True)、两表 FOR UPDATE、目标角色与 run['role'] 不符或 state/revision 不符 → 409 role_required、pg_try_advisory_xact_lock(hashtextextended(run_id,0))。",
+        "50 当前提交实际验证记录（id c04ee980-e572-4cda-8a2f-473443930d6f，revision 1，acceptance://local/4d5d7ea54913804e885152a746221435ace80cf4，offset 0-1473）：commit 4d5d7ea54913804e885152a746221435ace80cf4，tests 20、failures 0、errors 0、202.174s；cases 含 test_initiation_and_product_stage、test_development_decision_and_same_checkpoint_resume、test_testing_return_rework_and_quality_gate、test_decision_takeover_revocation_and_revision_invalidation、test_automatic_agents_handoff_stops_for_human_and_quality、test_invalid_tool_range_can_be_corrected_without_success_receipt；TypeScript exit 0；四角色入口与 390px 深色通过；执行者为 Codex；“模型本身没有执行代码修改或测试命令”。",
+        "群消息 sequence 5（read_group_messages after=0）：decision，decision_id=120ba32c-8df9-5a11-ade2-5ec4eea1321d，run_id=5703fcf8-cb16-4965-b70b-89b706ed37df，checkpoint=8，generation=0，options=仅复核已有实现和测试证据／扩展外部编码执行器——研发实际提出范围决定交本人。sequence 6：decision_resolved，answer 与选项一一致，同 run/checkpoint 8/generation 0/decision_id，正文“外部编码执行器留在 #14”。sequence 7 handoff、sequence 8 transition 至 testing（revision=4）run_id 同为 5703fcf8…——同一运行接续，无重复提问；本测试运行 f3314d7a… 与研发 run 不同。sequence 3（product/awaiting_confirmation，revision=2）后才有 sequence 4 转 development（revision=3）——产品确认后才交研发。",
+        "未取得原文证据、不判通过：建群并发/丢回执幂等实现本体（仅 50 描述与用例名）；项目页与需求群展示一致性/事件回放不重复/历史节点定位（仅 test_workbench_favorites_and_project_timeline_follow_membership 用例名，无展示代码或截图）；Agent 默认上下文与跨项目/私聊/撤权限制（无实现摘录）；10 仅摘 62-104 行、20 仅摘 275-312 行（无整文件比对）；扩展外部编码执行器与 #16 排期（本人答复不在范围）。",
+        "工具执行事实：本次仅调用 read_handoff、list_context、read_context、read_group_messages、submit_handoff；无写文件或命令执行工具，未修改代码或文件、未运行测试或命令；50 为他方既有记录，非本次模型执行。"
+      ],
+      "context_references": [
+        {
+          "revision": 1,
+          "end_offset": 1266,
+          "document_id": "ccab9a5b-61f7-4480-8727-4b2234a21475",
+          "start_offset": 0
+        },
+        {
+          "revision": 1,
+          "end_offset": 1473,
+          "document_id": "c04ee980-e572-4cda-8a2f-473443930d6f",
+          "start_offset": 0
+        },
+        {
+          "revision": 1,
+          "end_offset": 1500,
+          "document_id": "8f6e1153-c15c-4625-a5a1-c18abb7c88d5",
+          "start_offset": 0
+        },
+        {
+          "revision": 1,
+          "end_offset": 2505,
+          "document_id": "8f6e1153-c15c-4625-a5a1-c18abb7c88d5",
+          "start_offset": 1500
+        },
+        {
+          "revision": 1,
+          "end_offset": 3000,
+          "document_id": "46429491-dcf0-49db-ab01-d32aec0923a6",
+          "start_offset": 0
+        },
+        {
+          "revision": 1,
+          "end_offset": 3405,
+          "document_id": "46429491-dcf0-49db-ab01-d32aec0923a6",
+          "start_offset": 3000
+        }
+      ],
+      "verdict": "passed",
+      "candidate_run": "5703fcf8-cb16-4965-b70b-89b706ed37df",
+      "created_at": "2026-11-18T21:37:03.337550+08:00",
+      "outdated": false
+    },
+    {
+      "run_id": "5703fcf8-cb16-4965-b70b-89b706ed37df",
+      "project_id": "a561a267-c567-4102-8151-6e5d3a8ba67f",
+      "requirement_id": "dabcc0fb-600c-4dae-ae64-529a1025d936",
+      "requirement_revision": 1,
+      "author": "c95cc586-e973-4d26-9ed3-8695fd26723e",
+      "role": "development",
+      "summary": "研发阶段审阅交接（#6 需求群交接实现与证据核对，revision 1，运行 5703fcf8-cb16-4965-b70b-89b706ed37df，checkpoint 8 / generation 0）\n\n一、范围决定已交本人并已按同一运行接续\n- 已按 00 末尾约束用 request_decision 交本人选择边界，未自行选择；本人答复为\"仅复核已有实现和测试证据（只依据 00/10/20 原文与 50 已有回归记录做阶段流转与决定恢复的审阅，不扩展外部编码执行器、不新增执行/改码）\"，note 注明外部编码执行器留在 #14。决定 id 120ba32c-8df9-5a11-ade2-5ec4eea1321d。\n- 答复记录的 run_id 为 5703fcf8-cb16-4965-b70b-89b706ed37df、checkpoint 8、generation 0，与 current_run 及本检查点一致，即沿用原运行编号/检查点接续，未新开运行。已在群内落 decision / decision_resolved 消息。本阶段不再重复提问同一决定（依据 20 第 275-277 行：resolved 且 answer/note 相同则复用，不同则 409 operation_conflict）。\n\n二、阶段流转实现审阅结论（依据 10 原文片段）\n1) 迟到回调不能覆盖新阶段：check_group_run 校验 group['revision'] != run['group_revision'] 或 group['stage'] != run['role'] 即抛 409 stage_changed，并校验 group[role+'_id'] == run['user_id']，否则 403（第 62-67 行）。这是\"迟到回调\"被拒绝的代码入口。\n2) 阶段推进与事件：transition 以 revision+1 更新 stage/state/last_handoff，写入 group_message kind=transition（含 from_stage/stage/revision/run_id）并 record requirement_stage_changed，阶段标签含 产品确认/实现与自测/独立验收/质量复核/需求完成（第 70-78 行）——对应 00\"阶段状态与交接记录、项目事件记录\"。\n3) 交接分支：group_handoff 先 check_group_run，再以 handoff_outdated → 409 context_changed、run.get('group_id') 缺失直接返回，并写入 handoff 消息（run_id/role/verdict/requirement_revision/evidence/context_references/candidate_run）；verdict=rejected 回到 development/active，role=development 转 testing/active，其余转 quality/awaiting_confirmation（第 81-102 行）——对应\"退回后再交接\"与\"研发后交独立测试，再交质量复核\"。\n4) 决定恢复实现：resolved 冲突 409；pending 时校验 expected_revision、generation、context_changed、answer 必须属于 options（否则 422）；通过后更新 decision 为 resolved、run 置 paused、写 event decision_resolved（携带 checkpoint）、需求群 state 回 active、写 decision_resolved 群消息，最后 background.add_task(service.resume, run['id'], ...) 恢复同一 run（第 275-296 行）。转派路径另校验角色/状态/revision 并取 pg_try_advisory_xact_lock 防并发（第 300-312 行）。\n\n三、已有验证记录（非本次模型执行）\n- 50 记录：commit 4d5d7ea54913804e885152a746221435ace80cf4 的真实 PostgreSQL 隔离回归，tests 20 / failures 0 / errors 0 / 202.174s，用例含 test_initiation_and_product_stage、test_development_decision_and_same_checkpoint_resume、test_testing_return_rework_and_quality_gate、test_decision_takeover_revocation_and_revision_invalidation、test_automatic_agents_handoff_stops_for_human_and_quality、test_invalid_tool_range_can_be_corrected_without_success_receipt 等；TypeScript 检查 exit 0；真实浏览器四角色入口与 390px 深色通过。执行者为开发工作中的 Codex，不是本次模型。\n\n四、证据不足/未覆盖，供测试重点独立核对（不当作通过）\n- 建群与\"并发创建、丢回执重试只返回一个群\"仅有 50 的记录性描述与该用例名，本次资料未提供对应代码摘录，未直接看到幂等实现本体。\n- 00 验收标准第 3 条\"项目页与需求群展示同一阶段、负责人、文档、产物和证据、事件回放不重复、历史节点能定位\"无展示层代码或截图证据摘录，仅有用例名 test_workbench_favorites_and_project_timeline_follow_membership。\n- \"Agent 默认收到当前需求与验收条件、其余按需检索、跨项目/私聊/撤权受限\"未在本次资料中给出实现摘录。\n- 10/20 为行段摘录（10 覆盖 0-2505 行、20 覆盖 0-3405 行区间），未提供整文件比对。\n- 扩展外部编码执行器、#16 版本范围与排期、路线图其余部分均不在本次范围，未做也未声称完成。\n\n五、限制声明\n本样本无写文件或执行命令工具，本次模型未修改任何代码/文件、未运行任何测试或命令；结论仅来自读取 00/10/20/50 原文摘录与群内决定消息。测试须先读本交接，再独立读原文与验证记录逐条对照。",
+      "evidence": [
+        "00 本次范围与真实需求（id ccab9a5b-61f7-4480-8727-4b2234a21475，revision 1，https://github.com/lkun-lea/myagentdesk/issues/6）：范围段写明“一条正式需求对应一个需求群”“实现需求确认、实现与自测、独立验收、质量复核的阶段状态与交接记录，以及项目事件记录、阶段详情与按需项目上下文”“本次仅审阅已实现的需求群、本人决定与阶段交接，不是完成全部路线图”；末尾约束写明研发必须先以 request_decision 请本人选择范围（仅复核已有实现和测试证据 / 扩展外部编码执行器）、未答复不能自行选、已有决定后不再提问、此样本无写文件或运行命令工具。",
+        "群内决定与答复（运行 5703fcf8-cb16-4965-b70b-89b706ed37df）：kind=decision 提出问题“本次研发审阅按哪个口径执行”，decision_id=120ba32c-8df9-5a11-ade2-5ec4eea1321d，checkpoint=8，generation=0；kind=decision_resolved 记录 answer=“仅复核已有实现和测试证据（只依据 00/10/20 原文与 50 已有回归记录做阶段流转与决定恢复的审阅，不扩展外部编码执行器、不新增执行/改码）”，note=“外部编码执行器留在 #14”，run_id/checkpoint/generation 与当前运行一致，证明未开新运行且未重复提问。",
+        "10 阶段流转实现（id 8f6e1153-c15c-4625-a5a1-c18abb7c88d5，revision 1，repo://server/requirement_groups.py）第 62-67 行：group['revision'] != run['group_revision'] 或 group['stage'] != run['role'] 抛 409 stage_changed；group[run['role']+'_id'] != run['user_id'] 抛 403 permission_denied —— 迟到回调/错阶段回调被拒的代码入口。",
+        "10 第 70-78 行：transition 以 revision+1 更新 mad_requirement_groups 的 stage/state/last_handoff，写 group_message kind=transition（from_stage/stage/revision/run_id），并 record requirement_stage_changed；标签含 product/development/testing/quality/completed。",
+        "10 第 81-102 行：group_handoff 先 check_group_run，handoff_outdated 抛 409 context_changed，写 handoff 消息（run_id/role/verdict/requirement_revision/evidence/context_references/candidate_run）；verdict=rejected → development/active，role=development → testing/active，否则 quality/awaiting_confirmation，随后 transition 并把 run 置 completed。",
+        "20 本人决定与恢复实现（id 46429491-dcf0-49db-ab01-d32aec0923a6，revision 1）第 275-277 行：decision 已 resolved 时，answer/note 不同抛 409 operation_conflict，相同则复用（不重复提问）。",
+        "20 第 279-285 行：pending 状态下 check_group_run(run) + decision['revision'] != data.expected_revision 或 decision['generation'] != run['generation'] → 409 version_conflict；context_changed → 409；answer 不在 decision['options'] → 422 invalid_request。",
+        "20 第 286-296 行：置 decision state=resolved/写入 answer/note/revision+1、run status=paused、event decision_resolved（带 checkpoint）、需求群 state=active、group_message decision_resolved（含 run_id/checkpoint/generation），最后 background.add_task(service.resume, run['id'], user['id']) 恢复同一运行。",
+        "20 第 300-312 行：reassign 路径校验决策存在、成员写权限、目标成员角色与 run['role'] 一致、state=pending 与 expected_revision，并取 pg_try_advisory_xact_lock(hashtextextended(run_id)) 防并发。",
+        "50 当前提交实际验证记录（id c04ee980-e572-4cda-8a2f-473443930d6f，revision 1，acceptance://local/4d5d7ea54913804e885152a746221435ace80cf4）：commit 4d5d7ea54913804e885152a746221435ace80cf4，tests 20、failures 0、errors 0、202.174s；用例含 test_initiation_and_product_stage、test_development_decision_and_same_checkpoint_resume、test_testing_return_rework_and_quality_gate、test_decision_takeover_revocation_and_revision_invalidation、test_automatic_agents_handoff_stops_for_human_and_quality、test_invalid_tool_range_can_be_corrected_without_success_receipt；TypeScript 检查 exit 0；真实浏览器四角色入口及 390px 深色通过；明确执行者为开发工作中的 Codex，非本次模型。",
+        "证据缺口（供测试独立核对）：建群并发/丢回执重试幂等、项目页与需求群展示同一阶段/负责人/文档/产物/证据、事件回放不重复、Agent 上下文与跨项目/私聊/撤权限制，本次资料仅有用例名或描述，无对应代码/展示证据摘录；10 覆盖 0-2505 行区间、20 覆盖 0-3405 行区间，均为行段摘录而非整文件。",
+        "工具执行事实：本次仅调用 list_context、read_context、read_group_messages、request_decision、submit_handoff；无写文件或命令执行工具，未修改任何代码/文件，未运行任何测试或命令。"
+      ],
+      "context_references": [
+        {
+          "revision": 1,
+          "end_offset": 1266,
+          "document_id": "ccab9a5b-61f7-4480-8727-4b2234a21475",
+          "start_offset": 0
+        },
+        {
+          "revision": 1,
+          "end_offset": 1500,
+          "document_id": "8f6e1153-c15c-4625-a5a1-c18abb7c88d5",
+          "start_offset": 0
+        },
+        {
+          "revision": 1,
+          "end_offset": 3000,
+          "document_id": "46429491-dcf0-49db-ab01-d32aec0923a6",
+          "start_offset": 0
+        },
+        {
+          "revision": 1,
+          "end_offset": 1473,
+          "document_id": "c04ee980-e572-4cda-8a2f-473443930d6f",
+          "start_offset": 0
+        },
+        {
+          "revision": 1,
+          "end_offset": 2505,
+          "document_id": "8f6e1153-c15c-4625-a5a1-c18abb7c88d5",
+          "start_offset": 1500
+        },
+        {
+          "revision": 1,
+          "end_offset": 3405,
+          "document_id": "46429491-dcf0-49db-ab01-d32aec0923a6",
+          "start_offset": 3000
+        }
+      ],
+      "verdict": "delivered",
+      "candidate_run": null,
+      "created_at": "2026-11-18T21:34:47.329154+08:00",
+      "outdated": false
+    },
+    {
+      "run_id": "bb8321bb-1e61-4eec-9f52-2dbcb466039b",
+      "project_id": "a561a267-c567-4102-8151-6e5d3a8ba67f",
+      "requirement_id": "dabcc0fb-600c-4dae-ae64-529a1025d936",
+      "requirement_revision": 1,
+      "author": "346044cf-fa03-4fcf-8327-547372727bbb",
+      "role": "product",
+      "summary": "产品方案（#6 需求群交接实现与证据核对，revision 1，仅产品阶段交付，不含研发/测试结论）\n\n一、范围确认（依据 00 原文，不作外扩）\n本次只审阅\"已实现\"的需求群流程：一条正式需求对应一个需求群；阶段为 产品确认 → 实现与自测 → 独立验收 → 质量复核；含本人决定（request_decision）与答复后按原运行/检查点恢复；含项目事件记录与阶段详情。00 明确\"本次仅审阅已实现的需求群、本人决定与阶段交接，不是完成全部路线图\"，版本范围与排期归 #16，不在本次。\n\n二、阶段流转方案（与 00 验收标准一一对应）\n1) 建群与确认：有权限的人确认需求后才建群/进群；并发创建与丢回执重试只返回一个群；调研建议保留来源与待确认问题，由人确认立项。\n2) 流转与退回：产品确认 → 研发实现与自测 → 独立测试 → 质量复核；允许退回后再交接；研发与独立验收必须由不同成员执行；迟到回调不得覆盖新阶段（证据应体现阶段变更时的 group.revision / stage 校验，见 00 引用的 server/requirement_groups.py 第 62-67 行）。\n3) 本人决定与恢复：范围边界这一选择必须由研发以 request_decision 交本人（选项：仅复核已有实现和测试证据 / 扩展外部编码执行器），未答复不得自行选择；答复后沿用同一运行编号与检查点接续，已被答复的决定不重复提问，冲突写入返回 409（见 00 引用的第 275-291 行）。\n4) 展示与证据一致：项目页与需求群展示同一阶段、负责人、文档、产物、证据；事件回放不重复、历史节点可定位；Agent 默认收到当前需求与验收条件，其余按需检索，跨项目、私聊、撤权内容受限。\n\n三、交接要求（给研发与测试）\n- 研发：先 request_decision 交本人选择范围，答复后在同一运行编号与检查点继续；交付内容须为可核对结论+证据（阶段流转与决定恢复的实现位置、退回与迟到回调的处理证据），不得自述代替证据。\n- 测试：先读研发交接，再独立读取 00 原文与已有验证记录逐条比对；必须明确本样本无写文件/执行命令工具，模型未修改代码、未运行测试命令；未覆盖的范围不当作通过。\n\n四、本人确认点\n本方案的边界口径为\"仅复核已有实现与测试证据\"，不包含扩展外部编码执行器；如需扩展请在研发阶段的 request_decision 中直接选择，产品不代选。请本人确认本方案后转研发阶段。\n\n五、限制声明\n本次为产品阶段交付：未读取代码运行结果、未执行任何命令、未修改任何文件；所有引用均来自 00 原文与其内嵌的实现摘录。",
+      "evidence": [
+        "00 本次范围与真实需求 (revision 1, https://github.com/lkun-lea/myagentdesk/issues/6)：范围段写明“一条正式需求对应一个需求群”“实现需求确认、实现与自测、独立验收、质量复核的阶段状态与交接记录，以及项目事件记录、阶段详情与按需项目上下文”，并写明“本次仅审阅已实现的需求群、本人决定与阶段交接，不是完成全部路线图”。",
+        "00 验收标准第 1 条：有权限的人确认需求后建群；并发创建、丢回执重试只返回一个群；调研建议保留来源和待确认问题，由人确认立项。",
+        "00 验收标准第 2 条：用模拟成员跑完确认、提交、退回、再交接和复核，研发与独立验收由不同成员执行，迟到回调无法覆盖新阶段。",
+        "00 验收标准第 3 条：项目页与需求群展示同一阶段、负责人、文档、产物和证据；事件回放不重复；Agent 默认收到当前需求与验收条件，其余按需查，跨项目、私聊、撤权内容受限。",
+        "00 末尾约束：产品交方案；研发必须先以 request_decision 请本人选择范围（仅复核已有实现和测试证据 / 扩展外部编码执行器），未答复不能自行选��已有决定后不再提问；测试独立查原文和记录；本样本无写文件或运行命令工具，禁止声称模型改代码或跑测试。",
+        "项目资料仅列出 3 份：00 本次范围与真实需求、10 阶段流转实现（repo://server/requirement_groups.py，含第 62-67 行 group.revision/stage 一致性校验与 409 stage_changed）、20 本人决定与恢复实现（同文件第 275-291 行 resolved 冲突 409、pending/revision/generation 校验、答复后 event decision_resolved 与 group 状态回 active）。产品阶段仅作方案依据，未作为测试结论。",
+        "群消息游标 1：仅有“需求已立项，产品阶段待推进”，无历史运行编号或既有决定可复用；decisions 为空，客户端无既有答复。"
+      ],
+      "context_references": [
+        {
+          "revision": 1,
+          "end_offset": 1266,
+          "document_id": "ccab9a5b-61f7-4480-8727-4b2234a21475",
+          "start_offset": 0
+        },
+        {
+          "revision": 1,
+          "end_offset": 1500,
+          "document_id": "8f6e1153-c15c-4625-a5a1-c18abb7c88d5",
+          "start_offset": 0
+        },
+        {
+          "revision": 1,
+          "end_offset": 1500,
+          "document_id": "46429491-dcf0-49db-ab01-d32aec0923a6",
+          "start_offset": 0
+        }
+      ],
+      "verdict": "proposed",
+      "candidate_run": null,
+      "created_at": "2026-11-18T21:34:04.086925+08:00",
+      "outdated": false
+    }
+  ],
+  "outcome": "passed",
+  "previous_attempt": {
+    "outcome": "failed_before_testing",
+    "stages": [
+      {
+        "label": "product_proposed",
+        "stage": "product",
+        "state": "awaiting_confirmation",
+        "revision": 2,
+        "runs": [
+          {
+            "id": "fb3aba62-73ea-49f2-8d41-6dbd0b966ed1",
+            "role": "product",
+            "status": "completed",
+            "user_id": "fed69ee2-59b5-47eb-8cdd-e446bf19f623",
+            "checkpoint": 8,
+            "group_revision": 1
+          }
+        ]
+      },
+      {
+        "label": "development_waiting_for_owner",
+        "stage": "development",
+        "state": "waiting_decision",
+        "revision": 3,
+        "runs": [
+          {
+            "id": "fb3aba62-73ea-49f2-8d41-6dbd0b966ed1",
+            "role": "product",
+            "status": "completed",
+            "user_id": "fed69ee2-59b5-47eb-8cdd-e446bf19f623",
+            "checkpoint": 8,
+            "group_revision": 1
+          },
+          {
+            "id": "e6855a19-a0c5-4a8e-89aa-acfc8061bb29",
+            "role": "development",
+            "status": "waiting_decision",
+            "user_id": "cc51870a-99c9-4cd1-b381-5a9afd287b1a",
+            "checkpoint": 9,
+            "group_revision": 3
+          }
+        ]
+      },
+      {
+        "label": "testing_finished",
+        "stage": "development",
+        "state": "active",
+        "revision": 3,
+        "runs": [
+          {
+            "id": "fb3aba62-73ea-49f2-8d41-6dbd0b966ed1",
+            "role": "product",
+            "status": "completed",
+            "user_id": "fed69ee2-59b5-47eb-8cdd-e446bf19f623",
+            "checkpoint": 8,
+            "group_revision": 1
+          },
+          {
+            "id": "e6855a19-a0c5-4a8e-89aa-acfc8061bb29",
+            "role": "development",
+            "status": "failed",
+            "user_id": "cc51870a-99c9-4cd1-b381-5a9afd287b1a",
+            "checkpoint": 17,
+            "group_revision": 3
+          }
+        ]
+      }
+    ],
+    "resume": {
+      "same_run_id": true,
+      "run_id": "e6855a19-a0c5-4a8e-89aa-acfc8061bb29",
+      "before_checkpoint": 9,
+      "after_checkpoint": 17,
+      "question": "#6 本次研发工作的范围，请本人在两个选项中裁定（本样本无写文件/运行命令工具，任何选项下我都只做证据审阅，不会修改代码或执行测试命令）：A. 仅复核已有实现和测试证据（不扩展执行器）；B. 扩展外部编码执行器。",
+      "answer": "A. 仅复核已有实现和测试证据（不扩展执行器）"
+    },
+    "limitation": "First attempt did not capture the stopped reason; no completion claimed. Reduced review context and clarified receipt reuse before retry."
+  },
+  "previous_attempt_2": {
+    "outcome": "rejected_by_independent_testing",
+    "stages": [
+      {
+        "label": "product_proposed",
+        "stage": "product",
+        "state": "awaiting_confirmation",
+        "revision": 2,
+        "runs": [
+          {
+            "id": "96a425a8-84d6-480c-ad8f-0ff706073432",
+            "role": "product",
+            "status": "completed",
+            "user_id": "1543a202-78b1-455d-b7bf-7c5ebfec1fb7",
+            "checkpoint": 8,
+            "group_revision": 1
+          }
+        ]
+      },
+      {
+        "label": "development_waiting_for_owner",
+        "stage": "development",
+        "state": "waiting_decision",
+        "revision": 3,
+        "runs": [
+          {
+            "id": "96a425a8-84d6-480c-ad8f-0ff706073432",
+            "role": "product",
+            "status": "completed",
+            "user_id": "1543a202-78b1-455d-b7bf-7c5ebfec1fb7",
+            "checkpoint": 8,
+            "group_revision": 1
+          },
+          {
+            "id": "2fcb0250-964e-4f00-b7ca-41c00b4ab234",
+            "role": "development",
+            "status": "waiting_decision",
+            "user_id": "86c57dfb-2ca3-49db-bd66-dee47b0ed6e7",
+            "checkpoint": 9,
+            "group_revision": 3
+          }
+        ]
+      },
+      {
+        "label": "testing_finished",
+        "stage": "testing",
+        "state": "active",
+        "revision": 8,
+        "runs": [
+          {
+            "id": "96a425a8-84d6-480c-ad8f-0ff706073432",
+            "role": "product",
+            "status": "completed",
+            "user_id": "1543a202-78b1-455d-b7bf-7c5ebfec1fb7",
+            "checkpoint": 8,
+            "group_revision": 1
+          },
+          {
+            "id": "2fcb0250-964e-4f00-b7ca-41c00b4ab234",
+            "role": "development",
+            "status": "completed",
+            "user_id": "86c57dfb-2ca3-49db-bd66-dee47b0ed6e7",
+            "checkpoint": 11,
+            "group_revision": 3
+          },
+          {
+            "id": "2d69ce8e-c373-48c6-8a1f-5d67d479c044",
+            "role": "testing",
+            "status": "completed",
+            "user_id": "143c1842-ff57-49f2-8428-1f6adcd8a745",
+            "checkpoint": 9,
+            "group_revision": 4
+          },
+          {
+            "id": "f106a168-b474-41f4-a82e-2cbfb693055a",
+            "role": "development",
+            "status": "completed",
+            "user_id": "86c57dfb-2ca3-49db-bd66-dee47b0ed6e7",
+            "checkpoint": 7,
+            "group_revision": 5
+          },
+          {
+            "id": "d9ebdb20-c7de-4a5f-8b04-ff8b7a7b9b5f",
+            "role": "testing",
+            "status": "completed",
+            "user_id": "143c1842-ff57-49f2-8428-1f6adcd8a745",
+            "checkpoint": 8,
+            "group_revision": 6
+          },
+          {
+            "id": "68afc1a0-ddce-468e-a0d0-2248b06c5d28",
+            "role": "development",
+            "status": "completed",
+            "user_id": "86c57dfb-2ca3-49db-bd66-dee47b0ed6e7",
+            "checkpoint": 7,
+            "group_revision": 7
+          }
+        ]
+      }
+    ],
+    "resume": {
+      "same_run_id": true,
+      "run_id": "2fcb0250-964e-4f00-b7ca-41c00b4ab234",
+      "before_checkpoint": 9,
+      "after_checkpoint": 11,
+      "question": "按 00《本次范围与真实需求》要求，研发必须先请本人在两个范围选项中选择，未答复不能自行选。请确认本次 #6 研发阶段采用哪个边界？（答复后将沿用当前运行编号 96a425a8-84d6-480c-ad8f-0ff706073432 及当前检查点继续，不新开运行）",
+      "answer": "仅复核已有实现和测试证据：不扩展外部编码执行器，只审阅 10/20 现有实现片段与 50 已有验证记录，明确标注最终回归尚未闭合"
+    },
+    "handoffs": [
+      {
+        "role": "product",
+        "verdict": "proposed",
+        "summary": "产品阶段方案（对应 #6 范围，仅确认方案，不做代码修改、不跑测试）\n\n一、范围锚定\n以 00《本次范围与真实需求》（来源 issue #6）为唯一范围来源。本次交付只覆盖\"一条需求一个群 + 产品确认 → 实现与自测 → 独立验收 → 质量复核的阶段流转与交接记录 + 本人决定与同运行恢复\"。版本范围与排期归 #16，不在本次交付；不宣称完成整条路线图。\n\n二、阶段与交接规则（方案口径）\n1. 一条正式需求对应一个需求群；产品确认（state=awaiting_confirmation）后才交研发，开发完成后交独立验收（testing active），验收通过交质量复核（quality awaiting_confirmation），全部通过才 completed。\n2. 验收被 rejected 时退回 development（active），不允许直接进入质量复核。\n3. 阶段流转必须校验\"群 revision + stage == 当前角色 + 角色负责人==运行人\"，不满足即 409 stage_changed / 403 permission_denied，由此保证迟到回调无法覆盖新阶段。\n4. 每次流转写一条群消息（含 from_stage/stage/revision/run_id/handoff 摘要、verdict、证据与上下文引用）并写项目事件 requirement_stage_changed，供时间线定位。\n5. 本人决定：resolved 状态重复提交同答案同备注按幂等处理；pending 时必须校验 expected_revision、generation、context_changed 与选项合法性（422）；答复后 run 置 paused 并以同一 run_id 同一 checkpoint 恢复，群状态回到 active 并记 decision_resolved 群消息。要求\"沿用相同运行编号及检查点接续\"，不接受新开运行替代。\n\n三、边界选择交本人（不由产品代选）\n00 明确\"研发必须先以 request_decision 请本人选择范围（选项：仅复核已有实现和测试证据 / 扩展外部编码执行器）\"。产品阶段只登记该边界存在并写入交接：是否扩展外部编码执行器，由研发在 development 阶段以 request_decision 提出，待本人答复后在同一运行编号与检查点接续。产品质量不得在方案中预设该项。\n\n四、证据口径与待核项（必须交给测试复核）\n1. 已有真实执行证据来自 50《实际验证记录》：执行者为开发工作中的 Codex（非本阶段模型）；PostgreSQL 16 隔离 schema；Pi SDK 1.5.2；全量 19 passed；tsc exit 0；Vite build exit 0；真实浏览器贯通立项→产品确认→开发决定恢复（run_id 不变、checkpoint 3→4）→测试查原文→质量放行；390px 深色视图通过。\n2. 该记录自述\"后续有权限重读和上下文确认小修，最终会再跑\"——即最终回归是否已复跑完成尚未在现有资料中闭合。研发交接须明确给出最终回归的结论或标注未完成；测试不得把\"最终会再跑\"当作已通过。\n3. 本模型无写文件/执行命令入口，只审阅已有实现与记录，后续测试须独立读 00 原文与回归记录，不得以研发自述替代独立核对。\n\n五、验收对照（产品侧自查）\n- 一条需求一个群、产品确认后才交研发、开发后交独立测试再交质量复核：方案已按 10 的 group_handoff 分支定义（product→awaiting_confirmation、development→testing active、rejected→development、其他→quality）。\n- 研发实际提出本人范围决策并在同一运行编号与检查点接续：方案明确该决策归研发 request_decision，20 中恢复路径为同一 run_id/checkpoint。\n- 独立测试引用原文与已有证据、明确模型未执行修改或命令：已写入第四部分，交由测试独立执行。",
+        "evidence": [
+          "00《本次范围与真实需求》(issue #6, rev1)：范围限定为需求群/阶段状态与交接记录/项目事件与按需上下文；明确“产品交方案；研发必须先以 request_decision 请本人选择范围（选项：仅复核已有实现和测试证据 / 扩展外部编码执行器），未答复不能自行选；已有决定后不再提问”；明确“此样本无写文件或运行命令工具，禁止声称模型改代码或跑测试”。",
+          "10《阶段流转实现》(repo://server/requirement_groups.py, rev1)：L62-67 check_group_run 校验 group revision、stage==run.role、角色负责人==user，否则 stage_changed 409 / permission_denied 403；L70-78 transition 更新 stage/state/revision 并写 group_message(transition) 与项目事件 requirement_stage_changed；L81-102 group_handoff 定义 product→awaiting_confirmation、development→testing active、verdict==rejected→development active、其他→quality awaiting_confirmation，交接消息载 run_id/verdict/requirement_revision/evidence/context_references/candidate_run。",
+          "20《本人决定与恢复实现》(repo://server/requirement_groups.py, rev1)：L275-278 decision 已 resolved 时同 answer/note 幂等，否则 operation_conflict 409；L279-286 pending 时校验 group run、revision、generation、context_changed、选项合法性(422) 才置 resolved；L287-295 run 置 paused、写入 decision_resolved 事件(含 checkpoint)、群 state=active 并写群消息后 background 恢复同一 run。",
+          "50《实际验证记录》(acceptance://local/20261118, rev1)：执行者为开发工作中的 Codex，非本次产品/研发/测试模型；PostgreSQL 16 隔离 schema、Pi SDK 1.5.2、确定性 HTTP 模型端点；全量 19 passed in 212.47s；tsc exit 0；Vite build exit 0；真实浏览器完成立项、产品确认、开发决定恢复 run_id 不变且 checkpoint 3→4、测试查原文、质量放行；390px 深色视图通过；记录自述“后续有权限重读和上下文确认小修，最终会再跑”。",
+          "本次会话工具执行记录：仅调用 list_context / read_group_messages / read_context 读取 00、10、20、50 与群消息（当前仅 sequence 1 立项创建消息，decisions 为空、previous_receipts 为空）；未调用任何写文件或命令执行工具，未修改代码、未运行测试，也未代本人选择“仅复核已有证据 / 扩展外部编码执行器”边界。"
+        ]
+      },
+      {
+        "role": "development",
+        "verdict": "delivered",
+        "summary": "研发阶段交接（#6 需求群、本人决定与阶段交接，rev1；按本人已答复边界执行）\n\n一、范围决策与接续情况（可核对）\n- 已按 00 原文要求，在 development 阶段以 request_decision 提出边界选择，选项与 00 完全一致（仅复核已有实现和测试证据 / 扩展外部编码执行器），未自行预选。\n- 本人在同一运行内答复：“仅复核已有实现和测试证据：不扩展外部编码执行器，只审阅 10/20 现有实现片段与 50 已有验证记录，明确标注最终回归尚未闭合”，备注“外部编码执行器留在 #14”。\n- decisions 列表中仅存在 1 条 decision（decision_id 36981d33-dac7-56e4-8ec4-828a3f7d151f，checkpoint 9，state=resolved），本次会话未发出第二次请求；当前检查点已推进至 10，群消息 sequence 5 = decision，sequence 6 = decision_resolved，未见新开运行替代记录。即“提出决策 → 待答复 → 同运行同检查点接续”链条在群记录中可追踪。\n\n二、已审阅实现证据（只读审阅，未改代码、未跑命令）\n1. 阶段流转（10《阶段流转实现》repo://server/requirement_groups.py rev1）\n   - L62-67 check_group_run：校验 group revision、stage == run.role、角色负责人 == 运行人；不匹配分别抛 stage_changed 409 / permission_denied 403 → 迟到回调因 revision/stage 不一致而无法覆盖新阶段。\n   - L70-78 transition：更新 stage/state/revision 与 last_handoff，写 transition 群消息（含 from_stage/stage/revision/run_id）并记录项目事件 requirement_stage_changed → 支持时间线定位与事件不重复回放的基础。\n   - L81-102 group_handoff 分支：product→product/awaiting_confirmation；development→testing/active；verdict==rejected→development/active；其余→quality/awaiting_confirmation；交接消息携带 run_id、role、verdict、requirement_revision、evidence、context_references、candidate_run。对应验收点“产品确认后才交研发、开发后交独立测试、再交质量复核、退回走 development”。\n2. 本人决定与恢复（20《本人决定与恢复实现》同文件 rev1）\n   - L275-278 已 resolved 时同 answer+note 幂等返回，不同则 operation_conflict 409（重复提交/丢回执重试不产生第二个结果）。\n   - L279-286 pending 校验 check_group_run、state、expected_revision、generation、context_changed 与选项合法性（invalid_request 422）。\n   - L287-295 置 resolved、run 置 paused、写 decision_resolved 事件（携 checkpoint）、群 state=active 并写 decision_resolved 群消息；L294 以 background 触发 service.resume(run['id']) → 恢复使用同一 run_id 与同一 checkpoint。\n\n三、证据缺口（必须在交接中标明，不得当作通过）\n- 50《实际验证记录》(acceptance://local/20261118 rev1) 记载：执行者为开发工作中的 Codex（非本阶段模型）；PostgreSQL 16 隔离 schema；Pi SDK 1.5.2；全量 19 passed in 212.47s；tsc exit 0；Vite build exit 0；真实浏览器贯通立项→产品确认→开发决定恢复（run_id 不变、checkpoint 3→4）→测试查原文→质量放行；390px 深色视图通过。\n- 但该记录自述“后续有权限重读和上下文确认小修，最终会再跑”，即最终回归在现有资料中未闭合。本阶段明确结论：最终回归 = 未闭合，不宣称通过。\n- 按本人所选边界，#14 的外部编码执行器未扩展：本样本无写文件/执行命令入口，本模型未修改任何文件、未执行任何测试或构建命令，以上全部为对已有实现片段与已有记录的只读审阅。\n\n四、交独立测试的核对要求\n测试须自行读取 00 原文、10/20 实现片段与 50 记录，逐条对照三条验收标准；不得以本交接自述替代独立核对；未闭合项（最终回归）不得判为通过。",
+        "evidence": [
+          "00《本次范围与真实需求》(https://github.com/lkun-lea/myagentdesk/issues/6, rev1) 全文 1266 字符：范围含“一条正式需求对应一个需求群”“需求确认、实现与自测、独立验收、质量复核的阶段状态与交接记录”“事件记录按项目和事件序号补读”；并写明“产品交方案；研发必须先以 request_decision 请本人选择范围（选项：仅复核已有实现和测试证据 / 扩展外部编码执行器），未答复不能自行选。已有决定后不再提问。”“此样本无写文件或运行命令工具，禁止声称模型改代码或跑测试。”",
+          "群消息 sequence 5（kind=decision，decision_id 36981d33-dac7-56e4-8ec4-828a3f7d151f）：request_decision 按 00 两个选项向本人提问，未自行选边。",
+          "群消息 sequence 6（kind=decision_resolved）本人答复原文：“仅复核已有实现和测试证据：不扩展外部编码执行器，只审阅 10/20 现有实现片段与 50 已有验证记录，明确标注最终回归尚未闭合”，note：“验收脚本选择仅复核已有实现和测试证据；外部编码执行器留在 #14。”",
+          "本轮 list_context 返回 decisions 仅 1 条（同一 decision_id，checkpoint=9，state=resolved），当前 requirement checkpoint=10；本次会话未再调用 request_decision 提出重复决定，符合“已有决定后不再提问”。",
+          "10《阶段流转实现》(repo://server/requirement_groups.py, rev1) L62-67：group revision 或 stage != run.role → Problem('stage_changed',409)；角色负责人 != 运行人 → Problem('permission_denied',403)。",
+          "10 同文 L70-78：transition 更新 stage/state/revision+1/last_handoff，写 group_message(kind='transition', 含 from_stage/stage/revision/run_id) 并 record(...,'requirement_stage_changed')。",
+          "10 同文 L81-102：group_handoff 分支 product→('product','awaiting_confirmation')、development→('testing','active')、verdict=='rejected'→('development','active')、否则→('quality','awaiting_confirmation')；交接消息载 run_id/role/verdict/requirement_revision/evidence/context_references/candidate_run；随后 transition 并将该 run 置 completed。",
+          "20《本人决定与恢复实现》(repo://server/requirement_groups.py, rev1) L275-278：decision state=='resolved' 且 answer/note 不同 → Problem('operation_conflict',409)，相同则幂等返回；L279-286 pending 路径校验 check_group_run、state、expected_revision、generation、context_changed(409)、answer in options(422)；L287-295 置 resolved、run status='paused'、event 'decision_resolved' 含 checkpoint、群 state='active' 并写群消息；L294 background.add_task(service.resume, run['id'], user['id'])。",
+          "50《实际验证记录》(acceptance://local/20261118, rev1) 全文 266 字符：“执行者：开发工作中的 Codex，非本次产品/研发/测试模型。PostgreSQL 16 隔离 schema；官方 Pi SDK 1.5.2；确定性 HTTP 模型端点。全量 19 passed in 212.47s（后续有权限重读和上下文确认小修，最终会再跑）。TypeScript 检查 exit 0；Vite build exit 0。真实浏览器完成立项、产品确认、开发决定恢复 run_id 不变且 checkpoint 3→4、测试查原文、质量放行；390px 深色视图通过。模型仅审阅这些已有结果，不能声称自己重新执行。”→ 最终回归未闭合，本阶段标注未完成、不宣称通过。",
+          "本次会话工具调用清单：read_group_messages、list_context、read_context（00/10/20/50）、submit_handoff；未调用任何写文件或命令执行工具，未修改代码、未运行测试或构建，未扩展外部编码执行器（按本人决定留至 #14）。"
+        ]
+      },
+      {
+        "role": "testing",
+        "verdict": "rejected",
+        "summary": "独立验收结论：#6 阶段流转/本人决定恢复的实现片段与研发交接引用逐行一致，但按验收条件仍不能判为通过，故 rejected。\n\n一、我实际做的（只读，无执行入口）\n工具仅调用 read_handoff、list_context（首次带 query 返回空，后无参返回 4 篇）、read_group_messages(after=0)、read_context(00/10/20/50 rev1 全文) 与本次 submit_handoff。本模型未修改任何文件、未运行测试/构建/命令，未接入外部编码执行器（按本人已答复“外部编码执行器留在 #14”）。\n\n二、已独立核对、与研发交接一致的项\n1. 10《阶段流转实现》(repo://server/requirement_groups.py rev1)：L63 `group['revision'] != run['group_revision'] or group['stage'] != run['role']` → L64 `Problem('stage_changed',409)`；L65-66 角色负责人≠运行人 → `permission_denied,403`。交接 L62-67 引用属实。\n2. 10 L71-78：UPDATE 写 stage/state/`revision=revision+1`/last_handoff；L75-77 写 kind='transition' 群消息带 from_stage/stage/revision/run_id；L78 `record(...,'requirement_stage_changed')`。属实。\n3. 10 L88-95 分支：product→(product,awaiting_confirmation)、development→(testing,active)、verdict=='rejected'→(development,active)、否则→(quality,awaiting_confirmation)；L96-100 handoff 消息含 run_id/role/verdict/requirement_revision/evidence/context_references/candidate_run；L101 transition、L102 run 置 completed。属实。\n4. 20《本人决定与恢复实现》(同文件 rev1)：L276 已 resolved 且 answer/note 不同 → `operation_conflict,409`（相同则走 L294-295 幂等返回）；L280 revision/generation 不符 → `version_conflict,409`；L282-283 context_changed 409；L284-285 answer 不在 options → `invalid_request,422`；L286 置 resolved；L287 run `status='paused'`；L288 event 'decision_resolved' 携 checkpoint；L289-293 群 `state='active'` + decision_resolved 群消息；L294 `background.add_task(service.resume, run['id'], user['id'])` 即同一 run_id 恢复。属实。\n5. 范围决策链（群消息）：seq5 kind=decision，options 与 00 原文两个选项字面一致，data.run_id=2fcb0250-964e-4f00-b7ca-41c00b4ab234；seq6 decision_resolved 同 decision_id 36981d33-dac7-56e4-8ec4-828a3f7d151f、同 run_id；seq7 handoff 与 seq8 transition 亦为该 run_id。数据层“提出→待答复→同运行接续”可追踪，未见新开运行替代。\n6. 阶段顺序（本群实况）：seq3 product/awaiting_confirmation → seq4 development → seq8 testing，即产品阶段交付后由本人确认才进研发、研发交付后进独立验收，与 10 分支一致。\n\n三、判为不通过的缺口（不得当作通过）\n1. 最终回归未闭合：50 原文自述“全量 19 passed in 212.47s（后续有权限重读和上下文确认小修，最终会再跑）”。即测试/构建（19 passed、tsc exit 0、Vite build exit 0）跑在小修之前，无法证明当前 rev1 代码片段对应的候选通过；研发交接已正确标注“未闭合”，但这也意味着没有任何证据链证明当前候选回归通过。\n2. 验收条件 1 的“一条需求一个群”缺证据：10/20 片段无群创建幂等逻辑（并发创建、丢回执重试只返回一个群），50 也未记录该场景回归；目前仅有“本次运行只观察到群 4cb3acef 绑定需求 9d7e7227”的单例观察，不能替代该条验证。“产品确认后才交研发”只有群消息序列层面的先后，未见把 awaiting_confirmation→development 做成门禁的代码片段。\n3. “再交质量复核 / 全部通过才 completed”未闭合：10 仅在 labels 里出现 'completed'，未见 testing 结论→quality→completed 的完整实现与回归记录；本群尚未发生该流转。\n4. 记录瑕疵：seq5 决策正文写“沿用当前运行编号 96a425a8-84d6-480c-ad8f-0ff706073432”（产品阶段 run 号），而其 data.run_id 为 2fcb0250…；正文与记录不一致，易造成“换了运行编号”的误解，需修正。\n5. 我无法独立核验的研发自述：交接称 decisions 仅 1 条（checkpoint=9）、当前 checkpoint=10；我的工具只能看到 seq5/seq6 一条 decision 及其答复，未见可直接查询 decisions/checkpoint 数值的入口，故 checkpoint 9→10 只作参考、不计为已核实证据。50 记的“checkpoint 3→4”与交接的 checkpoint 9 属不同运行，记录未标明所属运行。\n\n四、放行建议\n研发侧可保留“实现片段审阅一致”这一结论，但本阶段不放行。需本人就“是否接受最终回归未闭合即放行”作真实决定（属本人范围），或由执行环境补跑小修后的最终回归、补“一条需求一个群”幂等与 quality→completed 的证据后重交；另请修正 seq5 正文运行编号。",
+        "evidence": [
+          "read_handoff() 返回 run_id=2fcb0250-964e-4f00-b7ca-41c00b4ab234、verdict=delivered，其第三部分明确“最终回归在现有资料中未闭合”“不宣称通过”，与 50 原文自述一致；第四部分要求测试自读原文、不得以交接自述替代。",
+          "00《本次范围与真实需求》(https://github.com/lkun-lea/myagentdesk/issues/6, rev1, 全文 1266 字符，read_context 0-1266 实读)：验收标准含“有权限的人确认需求后建群；并发创建、丢回执重试只返回一个群”“用模拟成员跑完确认、提交、退回、再交接和复核，验证研发与独立验收由不同成员执行，迟到回调无法覆盖新阶段”；末段“研发必须先以 request_decision 请本人选择范围（选项：仅复核已有实现和测试证据 / 扩展外部编码执行器），未答复不能自行选。已有决定后不再提问。测试独立查原文和记录，不能把研发自述当成测试。此样本无写文件或运行命令工具，禁止声称模型改代码或跑测试。”",
+          "10《阶段流转实现》(repo://server/requirement_groups.py, rev1, read_context 0-2505 实读) 原文可见：L63 `if group['revision'] != run['group_revision'] or group['stage'] != run['role']:` L64 `raise Problem('stage_changed', 409)` L65-66 `permission_denied, 403`；L71-72 UPDATE stage/state/revision=revision+1/last_handoff；L75-77 group_message(kind='transition', {from_stage,stage,revision,run_id})；L78 record(...,'requirement_stage_changed')。",
+          "10 同文 L88-95 原文：product→('product','awaiting_confirmation')、development→('testing','active')、verdict=='rejected'→('development','active')、else→('quality','awaiting_confirmation')；L96-100 handoff 群消息字段 run_id/role/verdict/requirement_revision/evidence/context_references/candidate_run；L101 transition；L102 mad_agent_runs status='completed'。片段中无群创建幂等代码，'completed' 仅出现在 L73 labels。",
+          "20《本人决定与恢复实现》(repo://server/requirement_groups.py, rev1, read_context 0-3346 实读) 原文：L276 不同 answer/note→`operation_conflict',409`；L280 `version_conflict',409`；L282-283 `context_changed',409`；L284-285 `invalid_request',422`；L286 置 resolved；L287 run status='paused'；L288 event 'decision_resolved' 含 checkpoint；L289-293 群 state='active' + decision_resolved 群消息；L294 `background.add_task(service.resume, run['id'], user['id'])`；L295 返回 checkpoint=decision['checkpoint']。",
+          "50《实际验证记录》(acceptance://local/20261118, rev1, 全文 266 字符，read_context 0-266 实读) 原文：“执行者：开发工作中的 Codex，非本次产品/研发/测试模型……全量 19 passed in 212.47s（后续有权限重读和上下文确认小修，最终会再跑）。TypeScript 检查 exit 0；Vite build exit 0……模型仅审阅这些已有结果，不能声称自己重新执行。”→ 最终回归未在小修后复跑，证据与当前片段无法闭合。",
+          "read_group_messages(after=0) 返回 seq1 created；seq2 产品 handoff（verdict=proposed，run_id=96a425a8-84d6-480c-ad8f-0ff706073432）；seq3 transition stage=product revision=2；seq4 transition stage=development revision=3（“验收脚本确认仅推进 #6 已有实现的资料与证据核对，研发边界交研发本人决定”）；seq5 kind=decision，options 与 00 两个选项字面一致，data.run_id=2fcb0250-964e-4f00-b7ca-41c00b4ab234，decision_id=36981d33-dac7-56e4-8ec4-828a3f7d151f；seq6 decision_resolved 同 decision_id 同 run_id，answer 为“仅复核已有实现和测试证据…明确标注最终回归尚未闭合”；seq7 研发 handoff verdict=delivered；seq8 transition stage=testing revision=4 from_stage=development。",
+          "群消息 seq5 正文原文“答复后将沿用当前运行编号 96a425a8-84d6-480c-ad8f-0ff706073432 及当前检查点继续，不新开运行”，与其自身 data.run_id=2fcb0250-964e-4f00-b7ca-41c00b4ab234 不一致；seq6/seq7/seq8 的数据层 run_id 均为 2fcb0250…，说明数据链同一运行、正文表述需修正。",
+          "list_context(无参) 仅返回 4 篇文档（00 rev1、10 rev1、20 rev1、50 rev1），无独立回归/构建报告或群创建幂等用例记录；list_context(query='需求群 阶段流转 本人决定 验证记录') 返回 documents:[]。",
+          "本次会话工具调用清单：read_handoff、list_context、read_group_messages、read_context（d04bc572…/0caace87…/54062b59…/3e25ed83… 各 rev1）、submit_handoff；无任何写文件、命令执行或外部编码器调用，未修改代码、未运行测试或构建。"
+        ]
+      },
+      {
+        "role": "development",
+        "verdict": "delivered",
+        "summary": "研发阶段二次交接（#6 rev1，群 revision 5 / stage=development；承接测试 rejected 退回）\n\n一、本轮未重复请求决定\n- 本人已就研发边界答复并生效：seq6 decision_resolved（同 decision_id 36981d33-dac7-56e4-8ec4-828a3f7d151f、data.run_id=2fcb0250-964e-4f00-b7ca-41c00b4ab234），答案为“仅复核已有实现和测试证据：不扩展外部编码执行器，只审阅 10/20 现有实现片段与 50 已有验证记录，明确标注最终回归尚未闭合”。\n- 按 00 原文“已有决定后不再提问”，本轮未再调用 request_decision，也未改选边界。测试本次 rejected 的三条理由均不含新歧义，故不构成新决定请求。\n- 本轮工具仅 list_context、read_group_messages(after=0)、read_context(00/10/20/50 rev1)。未写文件、未执行命令、未跑测试或构建、未接入外部编码执行器（按本人答复留至 #14）。下文所有实现结论均来自只读审阅，不宣称模型改码或跑测。\n\n二、逐条处理测试 rejected 的缺口（不掩盖）\n1) 缺口“最终回归未闭合”：结论维持“未闭合”。50 rev1 原文自述“……全量 19 passed in 212.47s（后续有权限重读和上下文确认小修，最终会再跑）”，小修后未复跑。当前资料只有这 4 篇（list_context 无参返回 00/10/20/50），无复跑记录、无独立回归/构建报告 → 该项在本样本内不可闭合，本阶段明确不作为通过依据。要继续闭合只能走本人答复中已排除的“扩展外部编码执行器”，该选项按答复留在 #14，不属本次范围。\n2) 缺口“并发建群、丢回执重试只返回一个群无证据”：接受该判断。10 可见片段仅为 L62-104，20 可见片段仅为 L275-312，两段都不含建群/幂等入库代码；50 也未记载并发创建或丢回执重试用例。故 00 验收条第 1 项（“并发创建、丢回执重试只返回一个群”）判定为“无可见证据、未验证”，不得计为通过。可见片段内能确认的只有迟到回调保护：10 L63 `if group['revision'] != run['group_revision'] or group['stage'] != run['role']:` → L64 `raise Problem('stage_changed', 409)`，L65-66 `permission_denied, 403`。\n3) 缺口“seq5 正文 run_id 与 data.run_id 不一致”：属实，正文措辞不严谨。澄清：96a425a8-84d6-480c-ad8f-0ff706073432 是产品阶段推进的 run（seq2 handoff、seq3、seq4 的 data.run_id 均为该值）；2fcb0250-964e-4f00-b7ca-41c00b4ab234 是研发 run，seq5(decision)、seq6(decision_resolved)、seq7(研发 handoff)、seq8(transition to testing) 的 data.run_id 一致为 2fcb0250…，seq9 测试 handoff 的 candidate_run 亦为 2fcb0250…。“沿用当前运行编号”应指研发 run，历史群消息不可改写，特此以本交接更正；数据层“提出→答复→同 run 接续”链条仍可追踪，未见新开运行替代记录。另：checkpoint 数值（event/返回体中携带，见 20 L288、L295）在本次 4 篇资料中无 9→10 的独立审计轨迹，故不宣称具体 checkpoint 数字，只确认代码路径以同一 run['id'] 恢复（L294 `background.add_task(service.resume, run['id'], user['id'])`）。\n\n三、逐条验收条件对照（含状态标签）\n- “一条需求一个群，产品确认后才交研发，开发后交独立测试，再交质量复核”：实现片段可核对（10 L88-95 分支、L96-100 交接消息、L101 transition、L102 run completed；本群实况 seq3 product/awaiting_confirmation、seq4 development、seq8 testing、seq10 development 与分支一致）。建群幂等部分 = 无可见证据、未验证。\n- “研发实际提出本人范围决策，待答复后沿用相同运行编号及检查点接续”：决策环节可核对（seq5 decision 两选项与 00 字面一致且未预选；seq6 同 decision_id 同 run_id 答复；seq7/seq8 该 run 续用）。checkpoint 具体数字无独立轨迹，不宣称。\n- “独立测试引用项目原文和已有验证证据，明确模型没有执行文件修改或命令，未完成范围不当作通过”：本条属测试侧；研发侧提供可核对材料＝本交接已逐行给出 10/20 行号原文与 50 原文，并主动标注两处未完成（最终回归未闭合、建群幂等无证据），供测试独立复核。\n- “迟到回调无法覆盖新阶段”：代码层可核对（10 L62-67 revision/stage/负责人三重校验，不匹配 409/403），但无模拟迟到回调的执行记录 → 实现存在、行为验证未闭合。\n\n四、结论\n按本人已答复边界（仅复核已有实现和测试证据），本次可交付的是：阶段流转（10 L62-104）与本人决定/同 run 恢复（20 L275-295）的逐行只读核对结果，以及对本群真实流转记录（seq1-10）的核对。明确不通过项：①最终回归未闭合（50 自述小修后未复跑）；②并发建群/丢回执幂等无任何可见证据；③迟到回调无模拟执行记录；④checkpoint 具体数值无独立轨迹。以上四项不得被当作通过，测试可据此继续判 rejected；研发侧不再有可在本样本工具内补齐的证据入口。",
+        "evidence": [
+          "read_group_messages(after=0) 本轮实读：seq5 kind=decision，data.run_id=2fcb0250-964e-4f00-b7ca-41c00b4ab234，decision_id=36981d33-dac7-56e4-8ec4-828a3f7d151f，options 为“仅复核已有实现和测试证据…”与“扩展外部编码执行器…”两项；seq6 decision_resolved 同 decision_id、同 run_id，answer=“仅复核已有实现和测试证据：不扩展外部编码执行器，只审阅 10/20 现有实现片段与 50 已有验证记录，明确标注最终回归尚未闭合”；seq7 研发 handoff verdict=delivered 且 run_id=2fcb0250…；seq8 transition stage=testing revision=4 from_stage=development run_id=2fcb0250…；seq9 测试 handoff verdict=rejected、candidate_run=2fcb0250…；seq10 transition stage=development revision=5 from_stage=testing run_id=2d69ce8e-….",
+          "00《本次范围与真实需求》(https://github.com/lkun-lea/myagentdesk/issues/6, rev1, read_context 0-1266 实读) 原文含验收条：“有权限的人确认需求后建群；并发创建、丢回执重试只返回一个群。”“用模拟成员跑完确认、提交、退回、再交接和复核，验证研发与独立验收由不同成员执行，迟到回调无法覆盖新阶段。”末段原文：“本次仅审阅已实现的需求群、本人决定与阶段交接，不是完成全部路线图。产品交方案；研发必须先以 request_decision 请本人选择范围（选项：仅复核已有实现和测试证据 / 扩展外部编码执行器），未答复不能自行选。已有决定后不再提问。测试独立查原文和记录，不能把研发自述当成测试。此样本无写文件或运行命令工具，禁止声称模型改代码或跑测试。”",
+          "10《阶段流转实现》(repo://server/requirement_groups.py, rev1, read_context 0-2505 实读) 可见片段为 L62-104：L63 `if group['revision'] != run['group_revision'] or group['stage'] != run['role']:`；L64 `raise Problem('stage_changed', 409)`；L65-66 `permission_denied, 403`；L71-72 UPDATE stage/state/revision=revision+1/last_handoff；L73-74 labels/body；L75-77 group_message(kind='transition', {from_stage,stage,revision,run_id})；L78 record(...,'requirement_stage_changed')；L84 check_group_run；L86-87 handoff_outdated→context_changed 409；L88-95 product→('product','awaiting_confirmation')、development→('testing','active')、verdict=='rejected'→('development','active')、else→('quality','awaiting_confirmation')；L96-100 handoff 群消息字段 run_id/role/verdict/requirement_revision/evidence/context_references/candidate_run；L101 transition；L102 `UPDATE mad_agent_runs SET status='completed'`。片段起于 L62，不含建群/幂等代码。",
+          "20《本人决定与恢复实现》(repo://server/requirement_groups.py, rev1, read_context 0-3346 实读) 可见片段为 L275-312：L275-277 resolved 且 answer/note 不同→`operation_conflict',409`；L279 `check_group_run(db, run)`；L280-281 state/expected_revision/generation 不符→`version_conflict',409`；L282-283 context_changed 409；L284-285 answer 不在 options→`invalid_request',422`；L286 置 resolved；L287 run status='paused'；L288 event 'decision_resolved' 含 checkpoint；L289-293 群 state='active' + decision_resolved 群消息；L294 `background.add_task(service.resume, run['id'], user['id'])`；L295 返回 checkpoint=decision['checkpoint']、outcome='resolved'。（L297-312 为 reassign，其中 L309 role_required 409、L311 run_busy 409。）",
+          "50《实际验证记录》(acceptance://local/20261118, rev1, read_context 0-266 实读) 全文原文：“执行者：开发工作中的 Codex，非本次产品/研发/测试模型。PostgreSQL 16 隔离 schema；官方 Pi SDK 1.5.2；确定性 HTTP 模型端点。全量 19 passed in 212.47s（后续有权限重读和上下文确认小修，最终会再跑）。TypeScript 检查 exit 0；Vite build exit 0。真实浏览器完成立项、产品确认、开发决定恢复 run_id 不变且 checkpoint 3→4、测试查原文、质量放行；390px 深色视图通过。模型仅审阅这些已有结果，不能声称自己重新执行。”→ 小修后未复跑，最终回归未闭合；记录中无并发建群/丢回执重试用例，也无迟到回调模拟记录。",
+          "list_context(无参) 本轮返回 4 篇文档：00 (issue #6 rev1)、10 (repo://server/requirement_groups.py rev1)、20 (同文件 rev1)、50 (acceptance://local/20261118 rev1)。无复跑后的回归报告、无构建报告、无建群幂等用例记录、无迟到回调模拟记录 → 上述未完成项无可用证据入口。",
+          "本次会话工具调用清单：list_context()、read_group_messages(after=0)、read_context(d04bc572-ee30-4331-bae6-e039788e6cee 0-1266；0caace87-5b70-4ab7-b99e-9cc19d67d13f 0-2505；54062b59-1d33-4c1f-a728-6eea8ed8dcaf 0-3346；3e25ed83-d20d-4a97-8ae2-c551c8f9965c 0-266)、以及本次 submit_handoff。未调用任何写文件或命令执行工具，未修改代码、未运行测试或构建，未扩展外部编码执行器。",
+          "群消息 seq5 正文与数据不一致的原文对照：正文“…答复后将沿用当前运行编号 96a425a8-84d6-480c-ad8f-0ff706073432 及当前检查点继续，不新开运行”，而 data.run_id=2fcb0250-964e-4f00-b7ca-41c00b4ab234；seq2/seq3/seq4 的 data.run_id 均为 96a425a8…（产品阶段推进 run），seq5-8 的 data.run_id 均为 2fcb0250… → 正文所指“当前运行”应为研发 run 2fcb0250…，措辞不严谨，本交接予以更正。"
+        ]
+      },
+      {
+        "role": "testing",
+        "verdict": "rejected",
+        "summary": "独立验收结论（第 2 轮，群 revision 6 / stage=testing）：研发交接的行号引用与项目原文逐行一致，我未发现引用造假；但按当前验收条件仍不能判为通过，故 rejected——未完成范围（最终回归未闭合、建群并发幂等无证据、迟到回调无模拟执行记录、checkpoint 接续无审计轨迹）不当作通过。\n\n一、我实际做的（只读，无执行入口）\n本轮工具仅调用：read_handoff()、list_context()、read_context(00/10/20/50 各 rev1 全文)、read_group_messages(after=0)，以及本次 submit_handoff。本模型未修改任何文件、未运行测试/构建/命令，未接入外部编码执行器（按本人已答复“外部编码执行器留在 #14”）。以下结论均来自对原文与群记录的独立核对，不以研发自述替代。\n\n二、我独立核对并确认成立的部分\n1. 10《阶段流转实现》(repo://server/requirement_groups.py rev1) 实读 L62-104：L63 `if group['revision'] != run['group_revision'] or group['stage'] != run['role']:`；L64 `raise Problem('stage_changed', 409)`；L65-66 负责人≠运行人→`permission_denied, 403`；L71-72 UPDATE stage/state/revision+1/last_handoff；L73-74 labels/body；L75-77 group_message(kind='transition', {from_stage,stage,revision,run_id})；L78 `record(...,'requirement_stage_changed')`；L84 `check_group_run`；L86-87 handoff_outdated→`context_changed,409`；L88-95 product→('product','awaiting_confirmation')、development→('testing','active')、verdict=='rejected'→('development','active')、else→('quality','awaiting_confirmation')；L96-100 handoff 群消息字段 run_id/role/verdict/requirement_revision/evidence/context_references/candidate_run；L101 transition；L102 mad_agent_runs status='completed'。研发交接对其引用属实。\n2. 20《本人决定与恢复实现》(同文件 rev1) 实读 L275-295：L275-277 resolved 且 answer/note 不同→`operation_conflict,409`；L279 `check_group_run(db, run)`；L280-281 revision/generation 不符→`version_conflict,409`；L282-283 `context_changed,409`；L284-285 answer 不在 options→`invalid_request,422`；L286 置 resolved 并 revision+1；L287 run status='paused'；L288 event 'decision_resolved' 含 checkpoint；L289-293 群 state='active' + decision_resolved 群消息；L294 `background.add_task(service.resume, run['id'], user['id'])`（位于 else 之外，幂等命中也走同一恢复调用）；L295 返回 checkpoint/outcome='resolved'。研发交接对其引用属实。\n3. 范围决策链（数据层，seq5/seq6）：seq5 kind=decision，options 与 00 原文两个选项字面一致且未预选，data.run_id=2fcb0250-964e-4f00-b7ca-41c00b4ab234、decision_id=36981d33-dac7-56e4-8ec4-828a3f7d151f；seq6 kind=decision_resolved 同 decision_id、同 run_id；seq7 handoff、seq8 transition 的 run_id 亦为 2fcb0250… → “提出→答复→同运行续用”在数据层可追踪，未见新开运行替代。\n4. 阶段顺序（本群实况）：seq3 product/awaiting_confirmation → seq4 development（正文“验收脚本确认仅推进 #6 已有实现的资料与证据核对，研发边界交研发本人决定”）→ seq8 testing（dev run 2fcb0250…）→ seq9 测试 handoff verdict=rejected（testing run 2d69ce8e…，与研发 run 不同，独立性成立）→ seq10 退回 development（run 2d69ce8e…）→ seq12 testing（dev run f106a168…）。产品确认后才进研发、开发后交独立测试、退回走 development 与 10 分支一致；且 seq1 created 起始终为同一群 4cb3acef…、同一需求 9d7e7227…，无第二个群出现。\n5. 研发本轮未重复请求决定：seq11 未再出现 kind=decision，seq5/seq6 仍为唯一决策对，符合 00“已有决定后不再提问”。\n\n三、判为不通过的具体缺口（不当作通过）\n1. 最终回归未闭合：50《实际验证记录》(acceptance://local/20261118 rev1) 原文自述“全量 19 passed in 212.47s（后续有权限重读和上下文确认小修，最终会再跑）”，即小修后未复跑；list_context() 仅返回 00/10/20/50 四篇，无复跑后的回归、tsc、Vite 构建报告或 CI 记录。19 passed 与 tsc/build exit 0 均为小修前结果，不能作为当前候选的通过依据。\n2. 建群并发幂等无证据：10 可见片段起于 L62、20 可见片段起于 L275，均不含建群/去重/幂等入库代码；50 与群消息中亦无“并发创建、丢回执重试只返回一个群”的用例记录。00 验收条第 1 项的这一子项=无可见证据、未验证。\n3. 迟到回调保护仅有代码、无行为验证：10 L63-66 的三重校验可核对，但 50 与群记录中无模拟迟到回调被 409/403 拒绝的执行记录。\n4. checkpoint 接续无审计轨迹：群消息 seq5/seq6 均未携带 checkpoint 字段，20 的 checkpoint 只在事件与返回体中（L288、L295）；因此只能确认“同一 run_id 恢复”，无法确认“同一检查点接续”。且研发自身两份记录互相矛盾：seq7 交接声称“checkpoint 9、当前检查点已推进至 10”，seq11 交接撤回并改称“无独立审计轨迹、不宣称具体数字”——同一事实两次不同陈述，不能作为 checkpoint 接续的证据。\n5. seq5 正文与自身数据不一致：正文称“沿用当前运行编号 96a425a8-84d6-480c-ad8f-0ff706073432”，而其 data.run_id 为 2fcb0250…；我独立核对 seq2/3/4 为 96a425a8…（产品阶段 run），seq5-8 为 2fcb0250…（研发 run），seq9 candidate_run=2fcb0250…，seq10 为 2d69ce8e…，seq11/12 为 f106a168…。历史消息不可改写，该条正文仍与数据冲突，研发 seq11 的文字更正不等同于证据闭合。\n6. 质量复核环节无实况证据：“再交质量复核”目前只有 10 L94-95 代码分支，本群尚未发生 quality 阶段流转（当前仍 testing/development 往返）。\n\n四、按验收条件逐条结论（含状态标签）\n- “一条需求一个群，产品确认后才交研发，开发后交独立测试，再交质量复核”：阶段顺序与独立性＝代码+本群实况均为通过；“一条需求一个群”的并发/丢回执幂等＝无可见证据、未验证；“再交质量复核”＝仅有代码分支、无实况。整体＝不完全通过。\n- “研发实际提出本人范围决策，待答复后沿用相同运行编号及检查点接续”：提出与答复、同 run_id 续用＝通过（seq5/6/7/8 数据层一致）；同一检查点接续＝无审计轨迹、未验证，且研发两份交接自相矛盾。整体＝部分通过。\n- “独立测试引用项目原文和已有验证证据，明确模型没有执行文件修改或命令，未完成范围不当作通过”：本条由我在本交接落实（第二条给出原文引用，第一条给出工具清单，第三条明确未完成项不判通过）。本条＝通过。\n\n五、说明\n研发 seq11 已如实标注缺口 1、2、4 未闭合，并指出本样本工具内无补齐证据的入口；我据此维持 rejected，不因“已如实标注”而判通过。要闭合缺口只能走本人答复中已排除的“扩展外部编码执行器”（留在 #14），不属本次范围，故本阶段不存在可在本样本内继续推进的验证动作。",
+        "evidence": [
+          "本次会话工具调用清单（只读）：read_handoff()、list_context()、read_context(d04bc572-ee30-4331-bae6-e039788e6cee rev1 0-1266；0caace87-5b70-4ab7-b99e-9cc19d67d13f rev1 0-2505；54062b59-1d33-4c1f-a728-6eea8ed8dcaf rev1 0-3346；3e25ed83-d20d-4a97-8ae2-c551c8f9965c rev1 0-266)、read_group_messages(after=0)、submit_handoff。本模型未调用任何写文件或命令执行工具，未修改代码、未运行测试或构建，未接入外部编码执行器（按本人已答复“外部编码执行器留在 #14”）。",
+          "read_handoff() 返回 run_id=f106a168-b474-41f4-a82e-2cbfb693055a、verdict=delivered；其第二部分自认缺口“最终回归未闭合”“建群幂等无可见证据”“checkpoint 具体数字无独立轨迹”，第四部分原文“以上四项不得被当作通过，测试可据此继续判 rejected”。",
+          "00《本次范围与真实需求》(https://github.com/lkun-lea/myagentdesk/issues/6, rev1, read_context 0-1266 实读) 原文验收条：“有权限的人确认需求后建群；并发创建、丢回执重试只返回一个群。调研建议保留来源和待确认问题，由人确认立项。”“用模拟成员跑完确认、提交、退回、再交接和复核，验证研发与独立验收由不同成员执行，迟到回调无法覆盖新阶段。”末段原文：“研发必须先以 request_decision 请本人选择范围（选项：仅复核已有实现和测试证据 / 扩展外部编码执行器），未答复不能自行选。已有决定后不再提问。测试独立查原文和记录，不能把研发自述当成测试。此样本无写文件或运行命令工具，禁止声称模型改代码或跑测试。”",
+          "10《阶段流转实现》(repo://server/requirement_groups.py, rev1, read_context 0-2505 实读) 可见片段 L62-104 原文要点：L63 `if group['revision'] != run['group_revision'] or group['stage'] != run['role']:`；L64 `raise Problem('stage_changed', 409)`；L65-66 `permission_denied, 403`；L71-72 `UPDATE mad_requirement_groups SET stage=%s,state=%s,revision=revision+1,last_handoff=%s`；L75-77 `group_message(...,'transition',...,{'from_stage','stage','revision','run_id'})`；L78 `record(...,'requirement_stage_changed')`；L84 `check_group_run(db, run)`；L86-87 handoff_outdated→`context_changed, 409`；L88-95 四分支；L96-100 handoff 群消息字段；L101 transition；L102 `UPDATE mad_agent_runs SET status='completed'`。",
+          "10 同文证据缺口：可见片段起于 L62，不含任何建群/去重/幂等入库代码；本群消息 seq1-12 中亦无“并发创建/丢回执重试”用例记录 → 00 验收条 1 的这一子项判为无可见证据、未验证。",
+          "20《本人决定与恢复实现》(repo://server/requirement_groups.py, rev1, read_context 0-3346 实读) 可见片段 L275-312 原文要点：L275-277 resolved 且 answer/note 不同→`operation_conflict, 409`；L279 `check_group_run(db, run)`；L280-281→`version_conflict, 409`；L282-283→`context_changed, 409`；L284-285 answer 不在 options→`invalid_request, 422`；L286 `UPDATE mad_run_decisions SET state='resolved'...revision=revision+1`；L287 run `status='paused'`；L288 `event(...,'decision_resolved',{...'checkpoint': decision['checkpoint']})`；L289-293 群 `state='active'` + decision_resolved 群消息（含 decision_id/run_id/answer）；L294 `background.add_task(service.resume, run['id'], user['id'])`（位于 else 之外，幂等命中也走同一恢复调用）；L295 返回 `checkpoint=decision['checkpoint']`。可见片段内无 checkpoint 值的持久化审计轨迹。",
+          "50《实际验证记录》(acceptance://local/20261118, rev1, read_context 0-266 实读) 全文原文：“执行者：开发工作中的 Codex，非本次产品/研发/测试模型。PostgreSQL 16 隔离 schema；官方 Pi SDK 1.5.2；确定性 HTTP 模型端点。全量 19 passed in 212.47s（后续有权限重读和上下文确认小修，最终会再跑）。TypeScript 检查 exit 0；Vite build exit 0。真实浏览器完成立项、产品确认、开发决定恢复 run_id 不变且 checkpoint 3→4、测试查原文、质量放行；390px 深色视图通过。模型仅审阅这些已有结果，不能声称自己重新执行。”→ 小修后未复跑；无并发建群/丢回执用例；无迟到回调模拟记录。",
+          "list_context() 本轮仅返回 4 篇文档：00 (issue #6, rev1)、10 (repo://server/requirement_groups.py, rev1)、20 (同文件, rev1)、50 (acceptance://local/20261118, rev1)。无复跑后的回归/构建报告、无 CI 记录、无建群幂等用例、无迟到回调模拟记录 → 上述未完成项在本样本内无补齐入口。",
+          "read_group_messages(after=0) 实读 seq1-12：seq1 created；seq2 产品 handoff（verdict=proposed，run_id=96a425a8-84d6-480c-ad8f-0ff706073432）；seq3 transition stage=product revision=2；seq4 transition stage=development revision=3（正文“研发边界交研发本人决定”）；seq5 kind=decision，options 与 00 两选项字面一致，data.run_id=2fcb0250-964e-4f00-b7ca-41c00b4ab234，decision_id=36981d33-dac7-56e4-8ec4-828a3f7d151f；seq6 decision_resolved 同 decision_id、同 run_id；seq7 研发 handoff verdict=delivered run_id=2fcb0250…；seq8 transition stage=testing revision=4 from_stage=development run_id=2fcb0250…；seq9 测试 handoff verdict=rejected，run_id=2d69ce8e-c373-48c6-8a1f-5d67d479c044，candidate_run=2fcb0250…；seq10 transition stage=development revision=5 run_id=2d69ce8e…；seq11 研发二次 handoff verdict=delivered run_id=f106a168…；seq12 transition stage=testing revision=6 from_stage=development run_id=f106a168…（next_cursor=12）。全程仅一个群 4cb3acef…、一个需求 9d7e7227…，无新开运行替代。",
+          "研发两份记录自相矛盾（checkpoint）：seq7 交接正文称“decisions 列表中仅存在 1 条 decision（…checkpoint 9，state=resolved）…当前检查点已推进至 10”；seq11 交接改称“checkpoint 数值（event/返回体中携带，见 20 L288、L295）在本次 4 篇资料中无 9→10 的独立审计轨迹，故不宣称具体 checkpoint 数字”。同一事实两次不同陈述，且 seq5/seq6 群消息 data 中无 checkpoint 字段 → “同一检查点接续”无证据。",
+          "seq5 正文与自身数据冲突（原文对照）：正文“……答复后将沿用当前运行编号 96a425a8-84d6-480c-ad8f-0ff706073432 及当前检查点继续，不新开运行”，而 data.run_id=2fcb0250-964e-4f00-b7ca-41c00b4ab234；seq2/3/4 数据层为 96a425a8…（产品 run），seq5-8 为 2fcb0250…（研发 run）。因此“沿用相同运行编号”只能依数据层成立，消息正文仍与数据不一致。",
+          "按验收条件逐条结论：①一条需求一个群/产品确认后交研发/开发后交独立测试＝代码 10 L88-95 与本群 seq3→4→8→10→12 实况支持（通过）；其中“并发创建、丢回执重试只返回一个群”＝无可见证据（未验证）；“再交质量复核”＝仅 10 L94-95 代码分支，本群尚未发生 quality 流转（无实况证据）。②研发实际提出本人范围决策＝seq5 两选项与 00 字面一致且未预选（通过）；同 run_id 接续＝seq5/6/7/8 数据层一致（通过）；同一检查点接续＝无审计轨迹且有自相矛盾陈述（未验证）。③独立测试引用原文并声明未改码/未跑命令、未完成范围不判通过＝本交接第一至三条落实（通过）。综合仍为 rejected。"
+        ]
+      }
+    ],
+    "corrections": "Published fresh regression evidence; current run identity now explicit in Pi input; decision messages carry authoritative checkpoint/generation. Live acceptance changed to separately controlled stages after repeated rejection; product loop remains separately tested."
+  },
+  "previous_attempt_3": {
+    "outcome": "failed_invalid_tool_input",
+    "stages": [
+      {
+        "label": "product_proposed",
+        "stage": "product",
+        "state": "awaiting_confirmation",
+        "revision": 2,
+        "runs": [
+          {
+            "id": "114958f0-d3e3-4719-b509-f80aaa43649d",
+            "role": "product",
+            "status": "completed",
+            "user_id": "745404bf-fa90-44e8-9d0b-010eb887e39c",
+            "checkpoint": 9,
+            "group_revision": 1
+          }
+        ]
+      },
+      {
+        "label": "development_waiting_for_owner",
+        "stage": "development",
+        "state": "waiting_decision",
+        "revision": 3,
+        "runs": [
+          {
+            "id": "114958f0-d3e3-4719-b509-f80aaa43649d",
+            "role": "product",
+            "status": "completed",
+            "user_id": "745404bf-fa90-44e8-9d0b-010eb887e39c",
+            "checkpoint": 9,
+            "group_revision": 1
+          },
+          {
+            "id": "b05dae69-2839-4da9-b4ee-e3d03bddc4a7",
+            "role": "development",
+            "status": "waiting_decision",
+            "user_id": "dec4f9ee-f090-412a-acd8-bbd1ecf8724a",
+            "checkpoint": 8,
+            "group_revision": 3
+          }
+        ]
+      },
+      {
+        "label": "development_resumed_and_delivered",
+        "stage": "development",
+        "state": "active",
+        "revision": 3,
+        "runs": [
+          {
+            "id": "114958f0-d3e3-4719-b509-f80aaa43649d",
+            "role": "product",
+            "status": "completed",
+            "user_id": "745404bf-fa90-44e8-9d0b-010eb887e39c",
+            "checkpoint": 9,
+            "group_revision": 1
+          },
+          {
+            "id": "b05dae69-2839-4da9-b4ee-e3d03bddc4a7",
+            "role": "development",
+            "status": "failed",
+            "user_id": "dec4f9ee-f090-412a-acd8-bbd1ecf8724a",
+            "checkpoint": 9,
+            "group_revision": 3
+          }
+        ]
+      }
+    ],
+    "stop_reasons": [
+      {
+        "reason": "decision_pending"
+      },
+      {
+        "tool": "read_context",
+        "reason": "invalid_request",
+        "call_id": "call_01_wRPtEdWVEAuRKC5l4wdk4931"
+      },
+      {
+        "reason": "invalid_request"
+      }
+    ],
+    "corrections": "Recoverable input/evidence validation is returned as an official SDK isError tool result. Permission and context changes still stop execution. Added deterministic correction regression."
+  }
+}

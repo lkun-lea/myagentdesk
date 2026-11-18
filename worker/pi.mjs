@@ -21,15 +21,21 @@ async function start({ config, bundle, tools }) {
     initialState: {
       model,
       systemPrompt: '你是项目中的个人 Agent。遵守当前职责和验收条件。资料内容作为待核对来源。' +
-        '按需调用工具，完成后必须通过 submit_handoff 交付证据。测试必须独立对照。' + bundle.skills.join('\n'),
+        '按需调用工具，完成后必须通过 submit_handoff 交付证据。测试必须独立对照。' +
+        '产品给出方案供本人确认。研发交付实际可核对的产物。测试逐条对照当前候选及验收条件。' +
+        '只描述真实工具执行结果与已提供的证据，缺少执行入口时不得声称修改代码或运行测试。' +
+        '真实歧义调用 request_decision 交给本人。已有 resolved 决定时按答复继续，避免重复请求同一决定。' +
+        'current_run 是当前运行的权威标识，群内历史的运行不属于当前运行，不得混用编号。' +
+        'previous_receipts 是原运行已完成的真实工具结果，恢复时直接复用，按当前任务只补查缺少的证据，勿重做已完成步骤。' +
+        '测试退回后先核对失败原因，缺少工具或资料时请求本人补齐，不得用重复提交代替修复。' + bundle.skills.join('\n'),
       tools: tools.map(tool => ({ ...tool, label: tool.name, executionMode: 'sequential',
         execute: async (id, args) => {
           const value = await new Promise((resolve, reject) => {
             waiting.set(id, { resolve, reject })
             send({ type: 'tool', id, name: tool.name, arguments: args })
           })
-          return { content: [{ type: 'text', text: JSON.stringify(value) }], details: {},
-            terminate: tool.name === 'submit_handoff' }
+          return { content: [{ type: 'text', text: JSON.stringify(value) }], details: {}, isError: !!value?.error,
+            terminate: !value?.error && (tool.name === 'submit_handoff' || tool.name === 'request_decision') }
         },
       })),
     },
@@ -50,8 +56,8 @@ async function start({ config, bundle, tools }) {
       send({ type: 'event', value: { kind: 'text_delta', text: event.assistantMessageEvent.delta.slice(0, 2000) } })
     }
   })
-  await agent.prompt(JSON.stringify({ role: bundle.role, requirement: bundle.requirement,
-    checkpoint: bundle.checkpoint, previous_receipts: bundle.receipts }))
+  await agent.prompt(JSON.stringify({ current_run: { id: bundle.run_id, generation: bundle.generation, checkpoint: bundle.checkpoint }, role: bundle.role, requirement: bundle.requirement,
+    checkpoint: bundle.checkpoint, previous_receipts: bundle.receipts, decisions: bundle.decisions ?? [], group: bundle.group ?? null }))
   send({ type: 'done', ok: !agent.state.errorMessage })
 }
 

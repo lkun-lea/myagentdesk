@@ -1,5 +1,7 @@
 # 项目上下文与 Agent 交接
 
+需求群、三岗位接力和本人决策的进一步实现见[需求群与阶段设计](REQUIREMENT_GROUPS.md)。
+
 实施由 [#5](https://github.com/lkun-lea/myagentdesk/issues/5) 和 [#6](https://github.com/lkun-lea/myagentdesk/issues/6) 共同完成。每个账号持有稳定的个人 Agent，任务运行和个人会话分别隔离。项目服务持有共享需求、资料、决定、交接和证据，各角色的 Agent 通过受权工具按需读取同一份来源。
 
 ```mermaid

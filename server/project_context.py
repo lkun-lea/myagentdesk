@@ -41,7 +41,7 @@ def context_changed(db, run):
         prior = db.execute("SELECT result FROM mad_run_receipts WHERE run_id=%s AND generation=%s AND tool='read_handoff' LIMIT 1",
                            (run["id"], run["generation"])).fetchone()
         if prior:
-            candidate = db.execute("""SELECT * FROM mad_handoffs WHERE project_id=%s AND requirement_id=%s
+            candidate = db.execute("SELECT * FROM mad_handoffs WHERE run_id=%s", (run['candidate_run'],)).fetchone() if run.get('candidate_run') else db.execute("""SELECT * FROM mad_handoffs WHERE project_id=%s AND requirement_id=%s
                                       AND requirement_revision=%s AND role='development' ORDER BY created_at DESC LIMIT 1""",
                                    (run["project_id"], run["requirement_id"], run["requirement_revision"])).fetchone()
             if not candidate or str(candidate["run_id"]) != prior["result"]["run_id"] or handoff_outdated(db, candidate):
@@ -64,6 +64,10 @@ def handoff_outdated(db, handoff):
                             (handoff["project_id"], ref["document_id"])).fetchone()["revision"]
         if latest != ref["revision"]:
             return True
+    if handoff['candidate_run']:
+        candidate = db.execute('SELECT * FROM mad_handoffs WHERE run_id=%s', (handoff['candidate_run'],)).fetchone()
+        if not candidate or handoff_outdated(db, candidate):
+            return True
     return False
 
 
@@ -73,12 +77,18 @@ def authorized_run(db, run_id, user_id, *, lock=False):
     if not row:
         raise Problem("run_not_found", 404)
     membership(db, row["project_id"], user_id, write=True)
-    if lock:
-        row = db.execute("SELECT * FROM mad_agent_runs WHERE id=%s FOR UPDATE", (run_id,)).fetchone()
+    # Membership takes the project lock; a reassignment may have completed while waiting.
+    row = db.execute("SELECT * FROM mad_agent_runs WHERE id=%s" + (" FOR UPDATE" if lock else ""), (run_id,)).fetchone()
+    if str(row['user_id']) != str(user_id):
+        raise Problem("run_not_found", 404)
     role = db.execute("SELECT role FROM mad_project_roles WHERE project_id=%s AND user_id=%s",
                       (row["project_id"], user_id)).fetchone()
     if not role or role["role"] != row["role"]:
         raise Problem("permission_denied", 403)
+    if row['role'] == 'testing' and db.execute('''SELECT 1 FROM mad_run_contributors c JOIN mad_agent_runs r ON r.id=c.run_id
+            WHERE r.project_id=%s AND r.requirement_id=%s AND c.role='development' AND c.user_id=%s AND r.checkpoint>0 LIMIT 1''',
+                                             (row['project_id'], row['requirement_id'], user_id)).fetchone():
+        raise Problem('independent_review_required', 409)
     return row
 
 
@@ -90,8 +100,22 @@ def document_list(db, project, query=""):
                       (project, query)).fetchall()
 
 
-def context_tool(db, run, tool, args):
+def context_tool(db, run, tool, args, call_id=None):
     project = run["project_id"]
+    if tool == 'request_decision':
+        from server.requirement_groups import request_decision
+        return request_decision(db, run, args, call_id)
+    if tool == 'read_group_messages':
+        if not run.get('group_id'):
+            raise Problem('group_not_found', 404)
+        from server.requirement_groups import group_scope
+        group_scope(db, run['group_id'], run['user_id'])
+        after = args.get('after', 0)
+        if not isinstance(after, int) or not 0 <= after < 2**63:
+            raise Problem('invalid_request', 422)
+        rows = db.execute('''SELECT sequence,kind,left(body,2000) AS body,data FROM mad_group_messages
+                             WHERE group_id=%s AND sequence>%s ORDER BY sequence LIMIT 20''', (run['group_id'], after)).fetchall()
+        return {'messages': rows, 'next_cursor': rows[-1]['sequence'] if rows else after}
     if tool == "list_context":
         return {"documents": document_list(db, project, str(args.get("query", ""))[:120])}
     if tool == "read_context":
@@ -121,7 +145,7 @@ def context_tool(db, run, tool, args):
         return {"id": str(doc), "revision": revision, "source": row["source"], "title": row["title"],
                 "start": start, "end": end, "text": row["body"][start:end]}
     if tool == "read_handoff":
-        handoff = db.execute("""SELECT h.* FROM mad_handoffs h JOIN mad_agent_runs r ON r.id=h.run_id
+        handoff = db.execute("SELECT * FROM mad_handoffs WHERE run_id=%s", (run['candidate_run'],)).fetchone() if run.get('candidate_run') else db.execute("""SELECT h.* FROM mad_handoffs h JOIN mad_agent_runs r ON r.id=h.run_id
                                 WHERE h.project_id=%s AND h.requirement_id=%s AND h.requirement_revision=%s
                                 AND h.role='development' AND h.author<>%s ORDER BY h.created_at DESC LIMIT 1""",
                              (project, run["requirement_id"], run["requirement_revision"], run["user_id"])).fetchone()
@@ -153,6 +177,8 @@ def context_tool(db, run, tool, args):
             verdict = args.get("verdict")
             if verdict not in {"passed", "rejected"}:
                 raise Problem("invalid_request", 422)
+        elif run['role'] == 'product' and run.get('group_id'):
+            verdict = 'proposed'
         elif run["role"] != "development":
             raise Problem("permission_denied", 403)
         references = db.execute("SELECT document_id,revision,start_offset,end_offset FROM mad_run_references WHERE run_id=%s AND active",
@@ -189,6 +215,8 @@ def context_router(url, identity):
                 raise Problem("version_conflict", 409)
             db.execute("INSERT INTO mad_context_documents (project_id,id,revision,title,source,body,author) VALUES (%s,%s,%s,%s,%s,%s,%s)",
                        (project_id, data.id, previous + 1, data.title, data.source, data.body, user["id"]))
+            from server.requirement_groups import invalidate_group_context
+            invalidate_group_context(db, project_id, data.id, user['id'])
             record(db, project_id, user["id"], data.id, "context_published")
             return {"id": data.id, "revision": previous + 1}
 
@@ -221,6 +249,8 @@ def context_router(url, identity):
                 raise Problem("version_conflict", 409)
             db.execute("INSERT INTO mad_requirements (project_id,id,revision,title,body,criteria,author) VALUES (%s,%s,%s,%s,%s,%s,%s)",
                        (project_id, data.id, previous + 1, data.title, data.body, Jsonb(data.criteria), user["id"]))
+            from server.requirement_groups import restart_group
+            restart_group(db, project_id, data.id, previous + 1, user['id'])
             record(db, project_id, user["id"], data.id, "requirement_confirmed")
             return {"id": data.id, "revision": previous + 1}
 

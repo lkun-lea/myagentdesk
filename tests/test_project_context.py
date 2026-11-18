@@ -44,7 +44,7 @@ class ModelEndpoint(BaseHTTPRequestHandler):
                 results[names[message["tool_call_id"]]] = json.loads(message["content"])
         if "list_context" not in results:
             name, args = "list_context", {}
-        elif "read_context" not in results:
+        elif "read_context" not in results or results['read_context'].get('error'):
             doc = results["list_context"]["documents"][0]
             name, args = "read_context", {"id": doc["id"], "revision": doc["revision"], "start": 0, "end": 2000}
         elif bundle["role"] == "testing" and "read_handoff" not in results:
@@ -52,6 +52,8 @@ class ModelEndpoint(BaseHTTPRequestHandler):
         else:
             name, args = "submit_handoff", {"summary": "按当前资料完成独立对照", "evidence": [results["read_context"]["text"]],
                                             "verdict": "passed" if bundle["role"] == "testing" else "delivered"}
+        if hasattr(self.server, 'plan'):
+            name, args = self.server.plan(bundle, results, name, args)
         call_id = "call_" + name
         chunk = {"id": "fixture", "object": "chat.completion.chunk", "created": 1, "model": "context-fixture",
                  "choices": [{"index": 0, "delta": {"role": "assistant", "tool_calls": [{"index": 0, "id": call_id,

@@ -9,6 +9,11 @@ import pytest
 from server.db import migrate
 
 
+class IsolatedDatabaseURL(str):
+    def __repr__(self):
+        return '<isolated PostgreSQL test database>'
+
+
 @pytest.fixture
 def isolated_database():
     url = os.environ.get("MAD_TEST_DATABASE_URL")
@@ -18,7 +23,7 @@ def isolated_database():
     with psycopg.connect(url, autocommit=True, connect_timeout=5) as admin:
         admin.execute(sql.SQL("CREATE SCHEMA {}").format(sql.Identifier(schema)))
         try:
-            yield make_conninfo(url, options=f"-csearch_path={schema}")
+            yield IsolatedDatabaseURL(make_conninfo(url, options=f"-csearch_path={schema}"))
         finally:
             admin.execute(sql.SQL("DROP SCHEMA {} CASCADE").format(sql.Identifier(schema)))
 

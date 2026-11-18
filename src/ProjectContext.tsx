@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Alert, Button, Input, Select, Spin, Tag } from 'antd'
 import { api, errorCode, messageFor } from './accounts-api'
 import type { Project } from './Workbench'
+import { RequirementGroups } from './RequirementGroups'
 
 type Agent = { id: string; revision: number; model: string; skills: string[] }
 type Configuration = { agent: Agent; models: string[]; skills: string[]; available: boolean }
@@ -52,8 +53,8 @@ export function MyAgent() {
   </section>
 }
 
-export function ProjectContext({ project, page, onUnavailable }: {
-  project: Project; page: 'requirements' | 'materials'; onUnavailable: (code: string) => void
+export function ProjectContext({ project, page, userId, onUnavailable }: {
+  project: Project; page: 'requirements' | 'materials'; userId: string; onUnavailable: (code: string) => void
 }) {
   const path = '/projects/' + project.id
   const manager = project.role !== 'member'
@@ -72,6 +73,7 @@ export function ProjectContext({ project, page, onUnavailable }: {
   const [busy, setBusy] = useState(false)
   const [reload, setReload] = useState(0)
   const [ready, setReady] = useState(false)
+  const [grouped, setGrouped] = useState(false)
   const pendingRun = useRef<{ id: string; requirement: string } | undefined>(undefined)
 
   useEffect(() => {
@@ -152,15 +154,17 @@ export function ProjectContext({ project, page, onUnavailable }: {
       {selected && <section className="mad-context-card"><h3>{selected.title} · v{selected.revision}</h3><p>{selected.body}</p>
         <ul>{selected.criteria.map((criterion, index) => <li key={index}>{criterion}</li>)}</ul>
         <div className="account-actions">
-          <Button type="primary" loading={busy} onClick={() => void act(async () => {
+          {!grouped && <Button type="primary" loading={busy} onClick={() => void act(async () => {
             if (pendingRun.current?.requirement !== selected.id) pendingRun.current = { id: crypto.randomUUID(), requirement: selected.id }
             const run = await api<Run>(path + '/runs', 'POST', { id: pendingRun.current.id, requirement_id: selected.id })
             pendingRun.current = undefined
             setDetails(run)
-          })}>创建本阶段运行</Button>
+          })}>创建本阶段运行</Button>}
           {manager && <Button onClick={() => { setEditing(selected); setEditingOpen(true) }}>修改需求版本</Button>}
         </div>
       </section>}
+      {selected && <RequirementGroups key={selected.id} project={project} userId={userId} requirementId={selected.id}
+        onGroup={setGrouped} onUnavailable={onUnavailable} />}
       {manager && editingOpen && <form className="mad-context-form" onSubmit={event => {
         event.preventDefault(); void act(async () => {
           await api(path + '/requirements', 'PUT', { ...editing, expected_revision: editing.revision })

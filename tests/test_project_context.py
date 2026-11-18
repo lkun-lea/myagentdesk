@@ -44,7 +44,7 @@ class ModelEndpoint(BaseHTTPRequestHandler):
                 results[names[message["tool_call_id"]]] = json.loads(message["content"])
         if "list_context" not in results:
             name, args = "list_context", {}
-        elif "read_context" not in results:
+        elif "read_context" not in results or results['read_context'].get('error'):
             doc = results["list_context"]["documents"][0]
             name, args = "read_context", {"id": doc["id"], "revision": doc["revision"], "start": 0, "end": 2000}
         elif bundle["role"] == "testing" and "read_handoff" not in results:

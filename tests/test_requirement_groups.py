@@ -26,6 +26,9 @@ def workflow(database, tmp_path):
     endpoint.ask, endpoint.reject = False, False
 
     def plan(bundle, results, name, args):
+        if name == 'read_context' and getattr(endpoint, 'invalid_read', False):
+            endpoint.invalid_read = False
+            return name, {**args, 'end': 5000}
         if name == 'submit_handoff' and bundle['role'] == 'development' and endpoint.ask and not bundle.get('decisions'):
             endpoint.ask = False
             return 'request_decision', {'question': '本阶段采用哪种范围？', 'options': ['保留首版范围', '扩大范围'], 'evidence': [results['read_context']['text']]}
@@ -220,3 +223,15 @@ def test_automatic_agents_handoff_stops_for_human_and_quality(workflow):
     assert restored['id'] == original['id'] and restored['checkpoint'] > original['checkpoint']
     assert len(current['runs']) == 3
     assert advance(product, current)['stage'] == 'completed'
+
+
+def test_invalid_tool_range_can_be_corrected_without_success_receipt(workflow):
+    (product, _, _, _), _, project, _, _, spec, endpoint = workflow
+    endpoint.invalid_read = True
+    group = create_group(product, project, spec)
+    run = stage_run(product, group)
+    assert run['status'] == 'completed' and run['checkpoint'] == 3
+    refused = [e for e in run['events'] if e['kind'] == 'tool_refused']
+    assert len(refused) == 1 and refused[0]['data']['reason'] == 'invalid_request'
+    reads = [e for e in run['events'] if e['kind'] == 'tool_result' and e['data']['tool'] == 'read_context']
+    assert len(reads) == 1

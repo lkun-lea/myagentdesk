@@ -124,6 +124,12 @@ class AgentService:
                         except Problem as exc:
                             event(db, run_id, "tool_refused", {"tool": name, "call_id": call_id, "reason": exc.code})
                             db.commit()
+                            if exc.code in {'invalid_request', 'evidence_required', 'handoff_not_found'}:
+                                return {'error': exc.code, 'message': {
+                                    'invalid_request': '工具参数无效。read_context 需 0 <= start < end <= start + 4000，按目录中真实 id 和版本分段读取；其他工具请核对参数定义。',
+                                    'evidence_required': '交接须先读取原文并给出具体证据；独立测试还须先读取当前研发交接。',
+                                    'handoff_not_found': '当前需求尚无可供独立测试读取的研发交接，请核对阶段及已有工具结果。',
+                                }[exc.code]}
                             raise
                         db.execute("INSERT INTO mad_run_receipts VALUES (%s,%s,%s,%s,%s,%s)",
                                    (run_id, call_id, active["generation"], name, Jsonb(arguments), Jsonb(result)))

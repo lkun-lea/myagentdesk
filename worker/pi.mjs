@@ -34,8 +34,8 @@ async function start({ config, bundle, tools }) {
             waiting.set(id, { resolve, reject })
             send({ type: 'tool', id, name: tool.name, arguments: args })
           })
-          return { content: [{ type: 'text', text: JSON.stringify(value) }], details: {},
-            terminate: tool.name === 'submit_handoff' || tool.name === 'request_decision' }
+          return { content: [{ type: 'text', text: JSON.stringify(value) }], details: {}, isError: !!value?.error,
+            terminate: !value?.error && (tool.name === 'submit_handoff' || tool.name === 'request_decision') }
         },
       })),
     },

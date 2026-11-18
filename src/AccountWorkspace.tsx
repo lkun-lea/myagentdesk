@@ -136,7 +136,7 @@ function ProjectPanel({ project, onExpired, onUnavailable }: {
   useEffect(() => {
     mounted.current = true
     let alive = true
-    let activityRefresh: ReturnType<typeof window.setTimeout> | undefined
+    let activityRefresh: number | undefined
     const load = () => {
       const request = ++generation.current
       Promise.all([api<Project>(path), api<Member[]>(path + '/members'), manager ? api<Invite[]>(path + '/invites') : Promise.resolve([]),

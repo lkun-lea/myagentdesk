@@ -56,8 +56,8 @@ async function start({ config, bundle, tools }) {
       send({ type: 'event', value: { kind: 'text_delta', text: event.assistantMessageEvent.delta.slice(0, 2000) } })
     }
   })
-  await agent.prompt(JSON.stringify({ current_run: { id: bundle.run_id, generation: bundle.generation, checkpoint: bundle.checkpoint }, role: bundle.role, requirement: bundle.requirement,
-    checkpoint: bundle.checkpoint, previous_receipts: bundle.receipts, decisions: bundle.decisions ?? [], group: bundle.group ?? null }))
+  await agent.prompt(JSON.stringify({ current_run: { id: bundle.run_id, generation: bundle.generation, execution_revision: bundle.execution_revision, checkpoint: bundle.checkpoint }, role: bundle.role, requirement: bundle.requirement,
+    checkpoint: bundle.checkpoint, resources: bundle.resources ?? [], previous_receipts: bundle.receipts, decisions: bundle.decisions ?? [], group: bundle.group ?? null }))
   send({ type: 'done', ok: !agent.state.errorMessage })
 }
 

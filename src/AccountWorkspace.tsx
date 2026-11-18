@@ -5,6 +5,7 @@ import { api, errorCode, isUnauthorized, messageFor } from './accounts-api'
 import { PersonalCalendar, PersonalTasks } from './PersonalPlanning'
 import { MyAgent, ProjectContext } from './ProjectContext'
 import { DecisionInbox, ProjectChats } from './RequirementGroups'
+import { ResourcePermissions } from './ResourcePermissions'
 import { globalViews, ProjectContent, projectPages, Workbench } from './Workbench'
 import type { OpenRoute, Project, ProjectPage, View } from './Workbench'
 import './accounts.css'
@@ -135,6 +136,7 @@ function ProjectPanel({ project, onExpired, onUnavailable }: {
   useEffect(() => {
     mounted.current = true
     let alive = true
+    let activityRefresh: number | undefined
     const load = () => {
       const request = ++generation.current
       Promise.all([api<Project>(path), api<Member[]>(path + '/members'), manager ? api<Invite[]>(path + '/invites') : Promise.resolve([]),
@@ -159,7 +161,7 @@ function ProjectPanel({ project, onExpired, onUnavailable }: {
         if (!alive) return
         setActivity(JSON.parse(event.data))
         setStreamStatus('')
-        load()
+        if(activityRefresh===undefined) activityRefresh=window.setTimeout(()=>{activityRefresh=undefined;load()},100)
       }
       stream.onerror = () => {
         if (!alive) return
@@ -182,6 +184,7 @@ function ProjectPanel({ project, onExpired, onUnavailable }: {
       mounted.current = false
       generation.current++
       window.clearInterval(poll)
+      window.clearTimeout(activityRefresh)
       stream?.close()
       window.removeEventListener('focus', load)
     }
@@ -257,6 +260,7 @@ function ProjectPanel({ project, onExpired, onUnavailable }: {
       </li>)}</ul>
       <p className="account-muted" role="status">{streamStatus || (activity ? '最近活动 · ' + (activities[activity.action] ?? activity.action) : '暂无成员活动')}</p>
     </>}
+    <ResourcePermissions projectId={project.id} members={members} manager={manager} />
   </section>
 }
 
@@ -424,7 +428,7 @@ export function AccountWorkspace({ dark, onDemo, toggleTheme }: {
         {!inviteId && view === 'workbench' && <Workbench key={user.id} projects={projects} refresh={reload} navigate={navigate} />}
         {!inviteId && view === 'chat' && <ProjectChats key={user.id} projects={projects} userId={user.id}
           selectedProject={projectId || undefined} initialGroup={location.get('group') ?? undefined} navigate={navigate} onUnavailable={projectError} />}
-        {!inviteId && view === 'decisions' && <DecisionInbox key={user.id} />}
+        {!inviteId && view === 'decisions' && <DecisionInbox key={user.id} initialDecision={validId(location.get('decision')) ?? undefined} />}
         {!inviteId && view === 'calendar' && <PersonalCalendar key={user.id} navigate={navigate} taskId={taskId} onExpired={expired} />}
         {!inviteId && view === 'tasks' && <PersonalTasks key={user.id} navigate={navigate} taskId={taskId} onExpired={expired} />}
         {!inviteId && view === 'agent' && <MyAgent key={user.id} />}

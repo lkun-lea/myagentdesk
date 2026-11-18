@@ -56,6 +56,18 @@ uv run --locked uvicorn server.main:create_app --factory --env-file .env --host 
 
 项目需求页可为已确认的需求立项建群，分配产品、研发、测试和质量负责人。群内 Agent 自动接力，产品方案、本人决策和质量复核保留人工确认。聊天入口与项目页共享阶段、消息和证据，查看[需求群及分阶段验收](docs/design/REQUIREMENT_GROUPS.md)。文件执行和正式发布由对应执行器与发布模块接入。
 
+## 本人决策与重启恢复
+
+「待我决策」可查看待确认、已确认待继续和历史记录。本人答复与续跑请求在同一事务保存。目录授权不足时，决定保留为已确认，原运行等待授权；管理员恢复权限或改派合格替补后接着推进。项目成员页管理产物目录授权，需求群立项时可选择研发所需目录。
+
+`MAD_RESOURCE_ROOT` 设置应用管理的产物存储根目录，例如 `E:/MyAgentDeskData/artifacts`。该工具只能发布当前运行绑定、当前成员获准写入的不可变文本，不能执行任意代码或命令。应用默认启用续跑队列的启动恢复，也可设置 `MAD_RESUME_WORKER=0`，单独运行：
+
+```sh
+uv run --locked python -m server.resume_worker
+```
+
+独立 Worker 从本地 `.env` 读取同一数据库和模型配置。多个进程使用数据库租约领取同一运行；决定、回执与文件产物的重启验收见[本人决策设计](docs/design/DECISIONS.md)。
+
 ## 与 tebb 的关系
 
 设计来源是 [tebb #314](https://github.com/lkun-lea/tebb/issues/314)。可从 tebb 复用的候选包括目录授权与沙箱、运行回执与证据、账号登录交互和日程交互。官方 Skill 使用 [tebb-skills](https://github.com/lkun-lea/tebb-skills) 固定版本。是否直接复用代码由 [基座与复用边界](https://github.com/lkun-lea/myagentdesk/issues/2) 逐项验证并记录来源和许可。

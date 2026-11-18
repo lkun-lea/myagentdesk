@@ -11,6 +11,8 @@ class Settings:
     session_key: str = field(default="", repr=False)
     model_env_file: str = ""
     node_binary: str = "node"
+    resource_root: str = ""
+    resume_worker: bool = False
 
     @classmethod
     def from_env(cls):
@@ -22,4 +24,6 @@ class Settings:
             session_key=environ.get("MAD_SESSION_KEY", ""),
             model_env_file=environ.get("MAD_MODEL_ENV_FILE", ""),
             node_binary=environ.get("MAD_NODE_BINARY", "node"),
+            resource_root=environ.get("MAD_RESOURCE_ROOT", ""),
+            resume_worker=environ.get("MAD_RESUME_WORKER", "1") == "1",
         )

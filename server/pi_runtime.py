@@ -94,6 +94,9 @@ class PiRuntime:
 
 
 TOOLS = [
+    {"name": "publish_artifact", "description": "向本运行绑定且当前已授权的项目产物目录发布不可变文本。operation_key 是同一业务动作的稳定编号，重启及重试复用该键；不同内容不能覆盖已发布产物。", "parameters": {
+        "type": "object", "properties": {"resource_id": {"type": "string"}, "operation_key": {"type": "string"}, "content": {"type": "string"}},
+        "required": ["resource_id", "operation_key", "content"], "additionalProperties": False}},
     {"name": "read_group_messages", "description": "按消息游标读取当前需求群的历史讨论、决定与交接，每次最多20条。", "parameters": {
         "type": "object", "properties": {"after": {"type": "integer"}}, "additionalProperties": False}},
     {"name": "request_decision", "description": "遇到真实歧义时，带具体问题、选项和已有证据交给本人决定，等待答复后继续同一运行。", "parameters": {

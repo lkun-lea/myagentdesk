@@ -1,6 +1,7 @@
 from typing import Literal
 from uuid import UUID, uuid4
 import time
+from threading import Event
 
 from fastapi import APIRouter, BackgroundTasks, Depends
 from fastapi.encoders import jsonable_encoder
@@ -14,6 +15,7 @@ from server.pi_runtime import PiRuntime, SKILLS, TOOLS
 from server.project_context import authorized_run, context_changed, context_tool, event, latest_requirement
 from server.projects import membership, record
 from server.requirement_groups import check_group_run, group_handoff, group_message, groups_router
+from server.resources import bind_resources, missing_resources, publish_artifact, resources_router
 
 
 class AgentInput(BaseModel):
@@ -30,6 +32,7 @@ class NewRun(BaseModel):
     id: UUID
     requirement_id: UUID
     group_id: UUID | None = None
+    resource_ids: list[UUID] = Field(default_factory=list, max_length=8)
 
 
 class VersionConfirmation(BaseModel):
@@ -47,9 +50,23 @@ class AgentService:
     def __init__(self, settings):
         self.url = settings.database_url
         self.runtime = PiRuntime(settings)
+        self.settings = settings
+        self.stopping = Event()
+
+    def drain_jobs(self):
+        from server.recovery import drain_jobs
+        drain_jobs(self)
+
+    def process_job(self, run_id):
+        from server.recovery import process_job
+        return process_job(self, run_id)
 
     def check(self, db, run):
         current = authorized_run(db, run["id"], run["user_id"])
+        if current['execution_revision'] != run['execution_revision']:
+            raise Problem('execution_replaced', 409)
+        if self.stopping.is_set():
+            raise Problem('worker_stopping', 409)
         if current["status"] == "cancelled":
             raise Problem("run_cancelled", 409)
         if current['status'] == 'waiting_decision':
@@ -58,9 +75,12 @@ class AgentService:
             check_group_run(db, current)
         if context_changed(db, current):
             raise Problem("context_changed", 409)
+        if missing_resources(db, current):
+            raise Problem('authorization_required', 409)
         return current
 
     def execute(self, run_id, user_id):
+        run = None
         with connect(self.url) as lease:
             locked = lease.execute("SELECT pg_try_advisory_lock(hashtextextended(%s,0)) AS acquired", (str(run_id),)).fetchone()["acquired"]
             lease.commit()
@@ -78,14 +98,16 @@ class AgentService:
                     if config["model"] != run["config"]["model"] or config["base"] != run["config"]["base"]:
                         raise Problem("model_configuration_changed", 409)
                     requirement = latest_requirement(db, run["project_id"], run["requirement_id"])
-                    receipts = db.execute("SELECT tool,result FROM mad_run_receipts WHERE run_id=%s AND generation=%s ORDER BY call_id",
+                    receipts = db.execute("SELECT tool,result FROM mad_run_receipts WHERE run_id=%s AND generation=%s ORDER BY created_at,call_id",
                                           (run_id, run["generation"])).fetchall()
-                    bundle = {"run_id": str(run['id']), "generation": run['generation'], "role": run["role"], "requirement": {key: requirement[key] for key in ("id", "revision", "title", "body", "criteria")},
+                    bundle = {"run_id": str(run['id']), "generation": run['generation'], "execution_revision":run['execution_revision'],"role": run["role"], "requirement": {key: requirement[key] for key in ("id", "revision", "title", "body", "criteria")},
                               "checkpoint": run["checkpoint"], "receipts": receipts,
                               "skills": [SKILLS[name] for name in run["config"]["skills"]]}
                     bundle['decisions'] = db.execute('''SELECT question,answer,note,checkpoint FROM mad_run_decisions
                                                        WHERE run_id=%s AND generation=%s AND state='resolved' ORDER BY created_at''',
                                                     (run_id, run['generation'])).fetchall()
+                    bundle['resources'] = db.execute('''SELECT p.id,p.name FROM mad_run_resources rr JOIN mad_project_resources p
+                        ON p.id=rr.resource_id WHERE rr.run_id=%s''', (run_id,)).fetchall()
                     if run['group_id']:
                         group = check_group_run(db, run)
                         bundle['group'] = {'id': str(group['id']), 'stage': group['stage'], 'revision': group['revision'],
@@ -118,7 +140,8 @@ class AgentService:
                                 raise Problem("operation_conflict", 409)
                             return prior["result"]
                         try:
-                            result = jsonable_encoder(context_tool(db, active, name, arguments, call_id))
+                            result = jsonable_encoder(publish_artifact(db, active, arguments, self.settings) if name=='publish_artifact'
+                                                      else context_tool(db, active, name, arguments, call_id))
                             if name == 'submit_handoff':
                                 group_handoff(db, active, result)
                         except Problem as exc:
@@ -131,7 +154,7 @@ class AgentService:
                                     'handoff_not_found': '当前需求尚无可供独立测试读取的研发交接，请核对阶段及已有工具结果。',
                                 }[exc.code]}
                             raise
-                        db.execute("INSERT INTO mad_run_receipts VALUES (%s,%s,%s,%s,%s,%s)",
+                        db.execute("INSERT INTO mad_run_receipts (run_id,call_id,generation,tool,arguments,result) VALUES (%s,%s,%s,%s,%s,%s)",
                                    (run_id, call_id, active["generation"], name, Jsonb(arguments), Jsonb(result)))
                         db.execute("UPDATE mad_agent_runs SET checkpoint=checkpoint+1 WHERE id=%s", (run_id,))
                         event(db, run_id, "tool_result", {"tool": name, "call_id": call_id, "result": result})
@@ -148,10 +171,15 @@ class AgentService:
             except (Problem, OSError, ValueError, KeyError, TypeError, psycopg.Error) as exc:
                 code = exc.code if isinstance(exc, Problem) else "runtime_unavailable"
                 status = {"context_changed": "stale", "run_cancelled": "cancelled", 'decision_pending': 'waiting_decision',
-                          'run_completed': 'completed', 'stage_changed': 'stale'}.get(code, "failed")
+                          'run_completed': 'completed', 'stage_changed': 'stale', 'authorization_required': 'waiting_authorization',
+                          'worker_stopping': 'paused'}.get(code, "failed")
                 with connect(self.url) as db:
-                    db.execute("UPDATE mad_agent_runs SET status=%s WHERE id=%s AND status<>'cancelled'", (status, run_id))
-                    event(db, run_id, "stopped", {"reason": code})
+                    changed = db.execute('''UPDATE mad_agent_runs SET status=%s WHERE id=%s AND status<>'cancelled'
+                        AND execution_revision=%s RETURNING *''', (status, run_id, run['execution_revision'] if run else -1)).fetchone()
+                    if changed and code=='authorization_required':
+                        from server.recovery import block_run
+                        block_run(db, changed, code)
+                    event(db, run_id, "stopped", {"reason": code,'execution_revision':run['execution_revision'] if run else None,'state_changed':bool(changed)})
             finally:
                 lease.execute("SELECT pg_advisory_unlock(hashtextextended(%s,0))", (str(run_id),))
 
@@ -195,6 +223,9 @@ class AgentService:
         if not run or run['group_id'] != group['id'] or run['group_revision'] != group['revision']:
             raise Problem('operation_conflict', 409)
         db.execute('INSERT INTO mad_run_contributors VALUES (%s,%s,%s) ON CONFLICT DO NOTHING', (identifier, owner, role))
+        if role=='development':
+            identifiers = [r['resource_id'] for r in db.execute('SELECT resource_id FROM mad_group_resources WHERE group_id=%s', (group['id'],))]
+            bind_resources(db, identifier, group['project_id'], owner, identifiers)
         return run
 
     def drive(self, group_id):
@@ -227,10 +258,10 @@ class AgentService:
                 lease.execute('SELECT pg_advisory_unlock(hashtextextended(%s,0))', (key,))
 
 
-def agents_router(settings, identity):
+def agents_router(settings, identity, service=None):
     router = APIRouter(prefix="/api")
     authenticated = Depends(identity)
-    service = AgentService(settings)
+    service = service or AgentService(settings)
 
     @router.get("/agent")
     def agent(user=authenticated):
@@ -293,6 +324,13 @@ def agents_router(settings, identity):
             if role["role"] == "testing" and db.execute("""SELECT 1 FROM mad_handoffs WHERE project_id=%s AND requirement_id=%s
                                                           AND role='development' AND author=%s""", (project_id, data.requirement_id, user["id"])).fetchone():
                 raise Problem("independent_review_required", 409)
+            existing=db.execute('SELECT id FROM mad_agent_runs WHERE id=%s',(data.id,)).fetchone()
+            if existing:
+                prior=authorized_run(db,data.id,user['id'])
+                bound={row['resource_id'] for row in db.execute('SELECT resource_id FROM mad_run_resources WHERE run_id=%s',(data.id,))}
+                if prior['project_id']!=project_id or prior['requirement_id']!=data.requirement_id or bound!=set(data.resource_ids):
+                    raise Problem('operation_conflict',409)
+                return prior
             personal = personal_agent(db, user["id"], config["model"])
             if personal["model"] != config["model"]:
                 raise Problem("model_configuration_changed", 409)
@@ -302,6 +340,7 @@ def agents_router(settings, identity):
                        (data.id, project_id, data.requirement_id, requirement["revision"], user["id"], personal["id"], role["role"], Jsonb(snapshot),
                         data.group_id, group['revision'] if group else None, group['last_handoff'] if group and role['role']=='testing' else None))
             row = authorized_run(db, data.id, user["id"])
+            bind_resources(db, data.id, project_id, user['id'], data.resource_ids)
             db.execute('INSERT INTO mad_run_contributors VALUES (%s,%s,%s) ON CONFLICT DO NOTHING', (data.id, user['id'], role['role']))
             if row["project_id"] != project_id or row["requirement_id"] != data.requirement_id:
                 raise Problem("operation_conflict", 409)
@@ -326,6 +365,8 @@ def agents_router(settings, identity):
                     event(db, run_id, "worker_interrupted", {"checkpoint": row["checkpoint"]})
             row["context_changed"] = context_changed(db, row)
             row["references"] = db.execute("SELECT document_id,revision,start_offset,end_offset,active FROM mad_run_references WHERE run_id=%s", (run_id,)).fetchall()
+            row['missing_resources'] = missing_resources(db, row)
+            row['resume_job'] = db.execute('SELECT state,reason,attempts FROM mad_resume_jobs WHERE run_id=%s', (run_id,)).fetchone()
             row["events"] = db.execute("SELECT id,kind,data,created_at FROM mad_run_events WHERE run_id=%s ORDER BY id LIMIT 500", (run_id,)).fetchall()
             return row
 
@@ -338,7 +379,11 @@ def agents_router(settings, identity):
             check_group_run(db, row)
             if row['status'] == 'waiting_decision':
                 raise Problem('decision_pending', 409)
-        background.add_task(service.resume, run_id, user["id"])
+            if row['status']=='cancelled':
+                row=db.execute("UPDATE mad_agent_runs SET status='paused' WHERE id=%s RETURNING *",(run_id,)).fetchone()
+            from server.recovery import enqueue
+            enqueue(db, row)
+        background.add_task(service.process_job, run_id)
         return {"id": run_id, "outcome": "accepted"}
 
     @router.post("/runs/{run_id}/cancel")
@@ -346,7 +391,7 @@ def agents_router(settings, identity):
         with connect(settings.database_url) as db:
             row = authorized_run(db, run_id, user["id"], lock=True)
             if row["status"] != "completed":
-                db.execute("UPDATE mad_agent_runs SET status='cancelled' WHERE id=%s", (run_id,))
+                db.execute("UPDATE mad_agent_runs SET status='cancelled',execution_revision=execution_revision+1 WHERE id=%s", (run_id,))
                 event(db, run_id, "cancelled", {})
             return {"outcome": "completed" if row["status"] == "completed" else "cancelled"}
 
@@ -370,10 +415,11 @@ def agents_router(settings, identity):
             if row['group_id']:
                 group = check_group_run(db, row)
                 db.execute("UPDATE mad_requirement_groups SET state='active' WHERE id=%s", (group['id'],))
-            db.execute("UPDATE mad_agent_runs SET requirement_revision=%s,status='paused',generation=generation+1,confirmed_at=now() WHERE id=%s",
+            db.execute("UPDATE mad_agent_runs SET requirement_revision=%s,status='paused',generation=generation+1,execution_revision=execution_revision+1,confirmed_at=now() WHERE id=%s",
                        (requirement["revision"], run_id))
             event(db, run_id, "context_confirmed", {"from_revision": row["requirement_revision"], "revision": requirement["revision"]})
             return {"id": run_id, "outcome": "confirmed"}
 
     router.include_router(groups_router(settings, identity, service))
+    router.include_router(resources_router(settings, identity, service))
     return router

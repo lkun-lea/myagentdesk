@@ -212,6 +212,8 @@ def projects_router(url, identity):
                 if target["role"] == "owner" or (target["role"] == "admin" and actor["role"] != "owner"):
                     raise Problem("permission_denied", 403)
                 db.execute("DELETE FROM mad_memberships WHERE project_id = %s AND user_id = %s", (project_id, member_id))
+                db.execute('''DELETE FROM mad_resource_grants g USING mad_project_resources r
+                    WHERE g.resource_id=r.id AND r.project_id=%s AND g.user_id=%s''',(project_id,member_id))
                 db.execute("UPDATE mad_invites SET revoked_at = now() WHERE project_id = %s AND creator = %s AND accepted_by IS NULL",
                            (project_id, member_id))
                 record(db, project_id, user["id"], member_id, "member_removed")

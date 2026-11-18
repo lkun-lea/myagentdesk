@@ -54,7 +54,7 @@ class ModelEndpoint(BaseHTTPRequestHandler):
                                             "verdict": "passed" if bundle["role"] == "testing" else "delivered"}
         if hasattr(self.server, 'plan'):
             name, args = self.server.plan(bundle, results, name, args)
-        call_id = "call_" + name
+        call_id = "call_" + name + ('_' + args['operation_key'] if name=='publish_artifact' else '')
         chunk = {"id": "fixture", "object": "chat.completion.chunk", "created": 1, "model": "context-fixture",
                  "choices": [{"index": 0, "delta": {"role": "assistant", "tool_calls": [{"index": 0, "id": call_id,
                  "type": "function", "function": {"name": name, "arguments": json.dumps(args)}}]}, "finish_reason": None}]}

@@ -1,0 +1,452 @@
+{
+  "created_at": "2026-11-18T14:14:50.916747+00:00",
+  "source": "https://github.com/lkun-lea/myagentdesk/issues/7",
+  "implementation_commit": "32f7e1e408b9f98aba353aa7f8e7562a86efacc1",
+  "scope": "Real application/Pi SDK/Worker paths, isolated auth and deterministic model endpoint; real temporary filesystem artifact effects; no live provider or real mailbox claim.",
+  "local_full_suite": {
+    "tests": 29,
+    "seconds": "495.064",
+    "errors": 0,
+    "failures": 0,
+    "cases": [
+      {
+        "name": "test_otp_failures_receipts_and_login_expiry",
+        "class": "tests.test_accounts",
+        "seconds": "4.886",
+        "outcome": "passed"
+      },
+      {
+        "name": "test_two_accounts_invite_permissions_and_revocation",
+        "class": "tests.test_accounts",
+        "seconds": "10.847",
+        "outcome": "passed"
+      },
+      {
+        "name": "test_invalid_config_and_validation_never_echo_secrets",
+        "class": "tests.test_accounts",
+        "seconds": "1.624",
+        "outcome": "passed"
+      },
+      {
+        "name": "test_supabase_email_code_length[031408]",
+        "class": "tests.test_accounts",
+        "seconds": "2.495",
+        "outcome": "passed"
+      },
+      {
+        "name": "test_supabase_email_code_length[03140827]",
+        "class": "tests.test_accounts",
+        "seconds": "2.110",
+        "outcome": "passed"
+      },
+      {
+        "name": "test_supabase_email_code_length[0314082759]",
+        "class": "tests.test_accounts",
+        "seconds": "1.836",
+        "outcome": "passed"
+      },
+      {
+        "name": "test_workbench_favorites_and_project_timeline_follow_membership",
+        "class": "tests.test_accounts",
+        "seconds": "7.312",
+        "outcome": "passed"
+      },
+      {
+        "name": "test_calendar_uses_absolute_times_and_keeps_task_associations_private",
+        "class": "tests.test_accounts",
+        "seconds": "5.725",
+        "outcome": "passed"
+      },
+      {
+        "name": "test_directory_revocation_keeps_decision_then_restores_once",
+        "class": "tests.test_decision_recovery",
+        "seconds": "26.476",
+        "outcome": "passed"
+      },
+      {
+        "name": "test_reassignment_requires_current_grants_and_invalidates_original_entry",
+        "class": "tests.test_decision_recovery",
+        "seconds": "26.627",
+        "outcome": "passed"
+      },
+      {
+        "name": "test_resolved_blocked_run_can_be_taken_over_without_redeciding",
+        "class": "tests.test_decision_recovery",
+        "seconds": "26.442",
+        "outcome": "passed"
+      },
+      {
+        "name": "test_replaced_request_and_changed_version_reject_old_confirmation",
+        "class": "tests.test_decision_recovery",
+        "seconds": "21.846",
+        "outcome": "passed"
+      },
+      {
+        "name": "test_inflight_revocation_stops_before_next_protected_write",
+        "class": "tests.test_decision_recovery",
+        "seconds": "24.582",
+        "outcome": "passed"
+      },
+      {
+        "name": "test_transfer_back_still_rejects_original_execution_revision",
+        "class": "tests.test_decision_recovery",
+        "seconds": "20.794",
+        "outcome": "passed"
+      },
+      {
+        "name": "test_restart_after_committed_confirmation_and_concurrent_workers",
+        "class": "tests.test_decision_recovery",
+        "seconds": "33.611",
+        "outcome": "passed"
+      },
+      {
+        "name": "test_application_startup_recovers_queue_without_manual_click",
+        "class": "tests.test_decision_recovery",
+        "seconds": "29.135",
+        "outcome": "passed"
+      },
+      {
+        "name": "test_worker_crash_after_file_publish_before_receipt_does_not_write_twice",
+        "class": "tests.test_decision_recovery",
+        "seconds": "28.447",
+        "outcome": "passed"
+      },
+      {
+        "name": "test_clean_install_home_health_and_migrations",
+        "class": "tests.test_foundation",
+        "seconds": "2.408",
+        "outcome": "passed"
+      },
+      {
+        "name": "test_missing_or_wrong_config_never_falls_back_to_tebb",
+        "class": "tests.test_foundation",
+        "seconds": "4.147",
+        "outcome": "passed"
+      },
+      {
+        "name": "test_upstream_time_example_and_fake_adapters",
+        "class": "tests.test_foundation",
+        "seconds": "0.002",
+        "outcome": "passed"
+      },
+      {
+        "name": "test_pi_sdk_shared_context_and_independent_handoff",
+        "class": "tests.test_project_context",
+        "seconds": "17.858",
+        "outcome": "passed"
+      },
+      {
+        "name": "test_version_confirmation_cancel_resume_and_revocation",
+        "class": "tests.test_project_context",
+        "seconds": "39.201",
+        "outcome": "passed"
+      },
+      {
+        "name": "test_failed_provider_and_abandoned_process_restore_receipts",
+        "class": "tests.test_project_context",
+        "seconds": "11.836",
+        "outcome": "passed"
+      },
+      {
+        "name": "test_initiation_and_product_stage",
+        "class": "tests.test_requirement_groups",
+        "seconds": "14.549",
+        "outcome": "passed"
+      },
+      {
+        "name": "test_development_decision_and_same_checkpoint_resume",
+        "class": "tests.test_requirement_groups",
+        "seconds": "22.539",
+        "outcome": "passed"
+      },
+      {
+        "name": "test_testing_return_rework_and_quality_gate",
+        "class": "tests.test_requirement_groups",
+        "seconds": "44.630",
+        "outcome": "passed"
+      },
+      {
+        "name": "test_decision_takeover_revocation_and_revision_invalidation",
+        "class": "tests.test_requirement_groups",
+        "seconds": "22.104",
+        "outcome": "passed"
+      },
+      {
+        "name": "test_automatic_agents_handoff_stops_for_human_and_quality",
+        "class": "tests.test_requirement_groups",
+        "seconds": "25.285",
+        "outcome": "passed"
+      },
+      {
+        "name": "test_invalid_tool_range_can_be_corrected_without_success_receipt",
+        "class": "tests.test_requirement_groups",
+        "seconds": "14.584",
+        "outcome": "passed"
+      }
+    ]
+  },
+  "followup_resource_and_crash": {
+    "tests": 2,
+    "seconds": "52.978",
+    "errors": 0,
+    "failures": 0,
+    "cases": [
+      {
+        "name": "test_directory_revocation_keeps_decision_then_restores_once",
+        "class": "tests.test_decision_recovery",
+        "seconds": "25.814",
+        "outcome": "passed"
+      },
+      {
+        "name": "test_worker_crash_after_file_publish_before_receipt_does_not_write_twice",
+        "class": "tests.test_decision_recovery",
+        "seconds": "26.089",
+        "outcome": "passed"
+      }
+    ]
+  },
+  "followup_version": {
+    "tests": 1,
+    "seconds": "24.954",
+    "errors": 0,
+    "failures": 0,
+    "cases": [
+      {
+        "name": "test_replaced_request_and_changed_version_reject_old_confirmation",
+        "class": "tests.test_decision_recovery",
+        "seconds": "23.986",
+        "outcome": "passed"
+      }
+    ]
+  },
+  "browser": {
+    "actors": [
+      "product@example.com",
+      "developer@example.com",
+      "replacement@example.com"
+    ],
+    "checks": [
+      "owner confirmation persisted while directory permission absent",
+      "no eligible replacement and escalation",
+      "grant qualified replacement and remove original owner",
+      "original owner deep link denied",
+      "replacement reused saved answer and original run",
+      "Tab focus, Enter activation, 390px dark layout"
+    ],
+    "decision": {
+      "id": "d02e0af9-9d62-5713-a87a-b206696867fb",
+      "run_id": "54b2dd63-9e21-4b7f-a030-dec22572ddc4",
+      "owner_id": "98dd8111-9b52-414c-8f08-9eea807fab17",
+      "state": "resolved",
+      "revision": 3,
+      "answer": "继续首版",
+      "note": "本人确认继续首版，等待目录授权恢复。",
+      "checkpoint": 4,
+      "receipt": {
+        "id": "d02e0af9-9d62-5713-a87a-b206696867fb",
+        "run_id": "54b2dd63-9e21-4b7f-a030-dec22572ddc4",
+        "outcome": "resolved",
+        "checkpoint": 4,
+        "execution_state": "waiting_authorization"
+      },
+      "context_references": [
+        {
+          "revision": 1,
+          "end_offset": 32,
+          "document_id": "7d1853af-4970-48fa-a236-ec1ae5df61f5",
+          "start_offset": 0
+        }
+      ]
+    },
+    "run": {
+      "id": "54b2dd63-9e21-4b7f-a030-dec22572ddc4",
+      "user_id": "98dd8111-9b52-414c-8f08-9eea807fab17",
+      "role": "development",
+      "status": "completed",
+      "checkpoint": 6,
+      "execution_revision": 3,
+      "generation": 0
+    },
+    "queue": {
+      "state": "completed",
+      "reason": null,
+      "attempts": 2,
+      "execution_revision": 3
+    },
+    "events": [
+      {
+        "kind": "started",
+        "data": {
+          "checkpoint": 0
+        },
+        "created_at": "2026-11-18 21:57:54.773269+08:00"
+      },
+      {
+        "kind": "tool_result",
+        "data": {
+          "tool": "list_context",
+          "result": {
+            "documents": [
+              {
+                "id": "7d1853af-4970-48fa-a236-ec1ae5df61f5",
+                "title": "需求约定",
+                "source": "fixture://issue6",
+                "summary": "需求群应共享同一版本的方案，遇到歧义交给本人，决定后保留原运行。",
+                "revision": 1
+              }
+            ]
+          },
+          "call_id": "call_list_context"
+        },
+        "created_at": "2026-11-18 21:57:56.496917+08:00"
+      },
+      {
+        "kind": "tool_result",
+        "data": {
+          "tool": "read_context",
+          "result": {
+            "id": "7d1853af-4970-48fa-a236-ec1ae5df61f5",
+            "end": 32,
+            "text": "需求群应共享同一版本的方案，遇到歧义交给本人，决定后保留原运行。",
+            "start": 0,
+            "title": "需求约定",
+            "source": "fixture://issue6",
+            "revision": 1
+          },
+          "call_id": "call_read_context"
+        },
+        "created_at": "2026-11-18 21:57:57.091053+08:00"
+      },
+      {
+        "kind": "tool_result",
+        "data": {
+          "tool": "publish_artifact",
+          "result": {
+            "bytes": 13,
+            "digest": "87c08cae6fbe5ed322b6e54b2b1139390ea308d1c9e009d2c450952b1a01a0fc",
+            "reused": false,
+            "artifact_id": "593a3a80-25bd-5aad-9622-b3d240915e3f",
+            "resource_id": "a77a3659-caa8-4afb-b344-f0b4b8b2dd06",
+            "operation_key": "draft"
+          },
+          "call_id": "call_publish_artifact_draft"
+        },
+        "created_at": "2026-11-18 21:57:57.723021+08:00"
+      },
+      {
+        "kind": "decision_requested",
+        "data": {
+          "checkpoint": 4,
+          "decision_id": "d02e0af9-9d62-5713-a87a-b206696867fb"
+        },
+        "created_at": "2026-11-18 21:57:58.410618+08:00"
+      },
+      {
+        "kind": "tool_result",
+        "data": {
+          "tool": "request_decision",
+          "result": {
+            "state": "pending",
+            "owner_id": "0f073524-2482-4819-9ede-10f8986b7bfe",
+            "decision_id": "d02e0af9-9d62-5713-a87a-b206696867fb"
+          },
+          "call_id": "call_request_decision"
+        },
+        "created_at": "2026-11-18 21:57:58.410618+08:00"
+      },
+      {
+        "kind": "stopped",
+        "data": {
+          "reason": "execution_replaced",
+          "state_changed": false,
+          "execution_revision": 1
+        },
+        "created_at": "2026-11-18 21:57:58.686834+08:00"
+      },
+      {
+        "kind": "decision_resolved",
+        "data": {
+          "note": "本人确认继续首版，等待目录授权恢复。",
+          "answer": "继续首版",
+          "checkpoint": 4,
+          "decision_id": "d02e0af9-9d62-5713-a87a-b206696867fb"
+        },
+        "created_at": "2026-11-18 21:58:52.784620+08:00"
+      },
+      {
+        "kind": "decision_reassigned",
+        "data": {
+          "to": "98dd8111-9b52-414c-8f08-9eea807fab17",
+          "from": "0f073524-2482-4819-9ede-10f8986b7bfe",
+          "checkpoint": 4
+        },
+        "created_at": "2026-11-18 22:02:38.794321+08:00"
+      },
+      {
+        "kind": "started",
+        "data": {
+          "checkpoint": 4
+        },
+        "created_at": "2026-11-18 22:04:56.956064+08:00"
+      },
+      {
+        "kind": "tool_result",
+        "data": {
+          "tool": "publish_artifact",
+          "result": {
+            "bytes": 16,
+            "digest": "3b1698580da742407583708ba40ccc0484d44f8848d62ddccc6940023aa1f13c",
+            "reused": false,
+            "artifact_id": "22f8f856-0088-5e79-bf08-b33a01e182b8",
+            "resource_id": "a77a3659-caa8-4afb-b344-f0b4b8b2dd06",
+            "operation_key": "approved"
+          },
+          "call_id": "call_publish_artifact_approved"
+        },
+        "created_at": "2026-11-18 22:04:58.581724+08:00"
+      },
+      {
+        "kind": "tool_result",
+        "data": {
+          "tool": "submit_handoff",
+          "result": {
+            "run_id": "54b2dd63-9e21-4b7f-a030-dec22572ddc4",
+            "verdict": "delivered",
+            "submitted": true
+          },
+          "call_id": "call_submit_handoff"
+        },
+        "created_at": "2026-11-18 22:04:59.153034+08:00"
+      },
+      {
+        "kind": "completed",
+        "data": {},
+        "created_at": "2026-11-18 22:04:59.573974+08:00"
+      }
+    ],
+    "artifacts": [
+      {
+        "id": "22f8f856-0088-5e79-bf08-b33a01e182b8",
+        "operation_key": "approved",
+        "digest": "3b1698580da742407583708ba40ccc0484d44f8848d62ddccc6940023aa1f13c",
+        "bytes": 16
+      },
+      {
+        "id": "593a3a80-25bd-5aad-9622-b3d240915e3f",
+        "operation_key": "draft",
+        "digest": "87c08cae6fbe5ed322b6e54b2b1139390ea308d1c9e009d2c450952b1a01a0fc",
+        "bytes": 13
+      }
+    ],
+    "original_membership_after_removal": [],
+    "original_directory_grant_after_removal": []
+  },
+  "source_hashes": {
+    "server/agents.py": "f745352d7e4ecbe6124c54504a4dd4c971eef0294931df1271be903f58df934b",
+    "server/decisions.py": "e4e69bb140e4c2be53c8f3c183226b51041305ff8ae39248e93a678661bae124",
+    "server/recovery.py": "cb2cca2ca8d8f9de3d142bd6e1376046a88001b82939c2c3e6705157a4322207",
+    "server/resources.py": "f6f5d03d101c70c4d4fb2f3c45c8d321bbff2f92723524484e0859d2fa8b0868",
+    "server/resume_worker.py": "df7606d5a34711d992612f8c209e92e5869da1b30fe687e1cb5772f2577534e0",
+    "tests/test_decision_recovery.py": "3587e0315ca18501f6a78644950d131947156f6f994e6be3e46e2f49f22a8a21"
+  }
+}

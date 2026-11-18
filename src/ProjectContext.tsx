@@ -16,6 +16,7 @@ type Handoff = { run_id: string; role: string; summary: string; evidence: string
 
 const statuses: Record<string, string> = {
   queued: '待开始', running: '执行中', paused: '已暂停', stale: '上下文已变化', completed: '已交接', failed: '执行失败', cancelled: '已取消',
+  waiting_decision: '等待本人决定', waiting_authorization: '已确认，等待授权',
 }
 
 export function MyAgent() {

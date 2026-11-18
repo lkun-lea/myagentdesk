@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@ant-design/icons": "^5.6.1",
+    "@douyinfe/semi-icons": "2.105.0",
+    "@douyinfe/semi-ui": "2.105.0",
     "@earendil-works/pi-agent-core": "1.5.2",
     "@earendil-works/pi-ai": "1.5.2",
     "antd": "^5.29.3",

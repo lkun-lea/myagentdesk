@@ -1,5 +1,5 @@
 {
-  "date": "2026-11-13",
+  "date": "2026-11-19",
   "issues": [
     {
       "number": 1,
@@ -33,6 +33,7 @@
       "title": "账号登录、工作区与项目成员",
       "state": "OPEN",
       "url": "https://github.com/lkun-lea/myagentdesk/issues/3",
+      "updatedAt": "2026-11-15T14:41:30Z",
       "assignees": [],
       "milestone": null,
       "criteria": [
@@ -72,6 +73,7 @@
       "title": "需求群、项目时间线与阶段交接",
       "state": "OPEN",
       "url": "https://github.com/lkun-lea/myagentdesk/issues/6",
+      "updatedAt": "2026-11-18T13:38:31Z",
       "assignees": [],
       "milestone": null,
       "criteria": [
@@ -85,6 +87,7 @@
       "title": "待我决策与原运行检查点续跑",
       "state": "OPEN",
       "url": "https://github.com/lkun-lea/myagentdesk/issues/7",
+      "updatedAt": "2026-11-18T14:18:11Z",
       "assignees": [],
       "milestone": null,
       "criteria": [
@@ -113,6 +116,7 @@
       "title": "项目子页面：GitHub Issues 只读看板",
       "state": "OPEN",
       "url": "https://github.com/lkun-lea/myagentdesk/issues/9",
+      "updatedAt": "2026-11-18T14:46:59Z",
       "assignees": [],
       "milestone": null,
       "criteria": [
@@ -141,6 +145,7 @@
       "title": "独立验收、质量复核与交付试点",
       "state": "OPEN",
       "url": "https://github.com/lkun-lea/myagentdesk/issues/11",
+      "updatedAt": "2026-11-13T08:47:55Z",
       "assignees": [],
       "milestone": null,
       "criteria": [
@@ -183,6 +188,7 @@
       "title": "tebb 本机任务派发、回执补传与完成通知",
       "state": "OPEN",
       "url": "https://github.com/lkun-lea/myagentdesk/issues/14",
+      "updatedAt": "2026-11-13T08:47:57Z",
       "assignees": [],
       "milestone": null,
       "criteria": [
@@ -211,6 +217,7 @@
       "title": "版本计划与项目时间线：排期、范围修订和发布关联",
       "state": "OPEN",
       "url": "https://github.com/lkun-lea/myagentdesk/issues/16",
+      "updatedAt": "2026-11-18T15:15:33Z",
       "assignees": [],
       "milestone": null,
       "criteria": [
@@ -221,6 +228,20 @@
         "真实需求关联原 GitHub Issue，先排期，再调整一次日期或范围，核对时间线、交接、独立验收、构建和实际发布回执指向同一条需求。",
         "从全宽时间轴点 #11 或其「等待前置」，核对 #5、#6、#7 属于开发前置，#14、#16 属于产品联调。点 #14 后同一右栏显示验收标准和 GitHub 原文，按 Esc 后焦点回到 #11。",
         "从时间线进入 Issues，核对完整快照、分组与来源状态。未分配负责人或未设 GitHub 里程碑时如实显示。窄窗口详情下移，键盘可打开、切换和关闭，无横向溢出。"
+      ]
+    },
+    {
+      "number": 18,
+      "title": "Gmail 未收到登录验证码，Brevo 显示 Delivered",
+      "state": "OPEN",
+      "url": "https://github.com/lkun-lea/myagentdesk/issues/18",
+      "updatedAt": "2026-11-15T14:40:59Z",
+      "assignees": [],
+      "milestone": null,
+      "criteria": [
+        "用已开通的 Gmail 测试账号从登录页申请验证码，在 Gmail 实际找到新邮件，通过该邮件的验证码完成登录。",
+        "将发码回执、Brevo 事件和 Gmail 实际收信结果关联到同一次测试，记录时间、状态及必要的认证结果。公开记录中排除完整邮箱地址、验证码、邮件原文和凭据。",
+        "同配置复跑 QQ 收件及登录，确认两个测试邮箱都通过。"
       ]
     }
   ]

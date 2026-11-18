@@ -1,4 +1,4 @@
-import { StrictMode, useEffect, useRef, useState } from 'react'
+import { lazy, StrictMode, Suspense, useEffect, useRef, useState } from 'react'
 import type { FormEvent, MouseEvent, ReactNode } from 'react'
 import { createRoot } from 'react-dom/client'
 import {
@@ -21,7 +21,9 @@ import { IssueDetails, IssuesList, IssueTimeline } from './ProjectRoadmap'
 import { issuesByNumber, roadmapIssues } from './roadmap'
 import { AccountWorkspace } from './AccountWorkspace'
 import './style.css'
+import './demo-requirements.css'
 
+const DemoRequirements = lazy(() => import('./DemoRequirements'))
 const tabs = ['时间线', '需求', '规格', 'Issues', '构建与发布'] as const
 type Tab = typeof tabs[number]
 const stageNames = ['版本排期', '规格确认', '研发执行', '独立验收', '质量放行', '发布回执']
@@ -105,6 +107,7 @@ function Workspace({ dark, toggleTheme, onAccounts }: { dark: boolean; toggleThe
   const [state, setState] = useState(loadDemo)
   const [role, setRole] = useState<Role>('owner')
   const [tab, setTab] = useState<Tab>('时间线')
+  const [showPilotRequirement, setShowPilotRequirement] = useState(false)
   const [history, setHistory] = useState(false)
   const [selection, setSelection] = useState<{ number: number; pilot: boolean } | null>(null)
   const mainRef = useRef<HTMLDivElement>(null)
@@ -121,19 +124,26 @@ function Workspace({ dark, toggleTheme, onAccounts }: { dark: boolean; toggleThe
   const blocker = state.dispatch?.status === 'unknown' ? '启动结果待核对 · 等待顾言确认原设备'
     : state.dispatch?.status === 'decision' ? '等待陈舟确认 · 检查点 CP-02' : null
   const stage = currentStep(state)
+  const compactRequirements = tab === '需求' && !showPilotRequirement
 
   useEffect(() => saveDemo(state), [state])
   useEffect(() => {
     if (!selection) return
     const close = mainRef.current?.querySelector<HTMLButtonElement>('[data-drawer-close]')
     close?.focus({ preventScroll: true })
-    if (window.matchMedia('(max-width: 730px)').matches) close?.scrollIntoView({ block: 'nearest' })
+    if (window.matchMedia('(max-width: 775px)').matches) close?.scrollIntoView({ block: 'nearest' })
   }, [selection])
 
   function navigate(page: Tab) {
     setSelection(null)
     origin.current = null
+    setShowPilotRequirement(false)
     setTab(page)
+  }
+
+  function openPilotRequirement() {
+    navigate('需求')
+    setShowPilotRequirement(true)
   }
 
   function openIssue(number: number, event: MouseEvent<HTMLElement>, pilot = false) {
@@ -147,7 +157,7 @@ function Workspace({ dark, toggleTheme, onAccounts }: { dark: boolean; toggleThe
     origin.current = null
     if (trigger?.isConnected) {
       trigger.focus({ preventScroll: true })
-      if (window.matchMedia('(max-width: 730px)').matches) trigger.scrollIntoView({ block: 'nearest' })
+      if (window.matchMedia('(max-width: 775px)').matches) trigger.scrollIntoView({ block: 'nearest' })
     }
   }
 
@@ -219,22 +229,18 @@ function Workspace({ dark, toggleTheme, onAccounts }: { dark: boolean; toggleThe
     </dl>
     <div className="pilot-links">
       {plan && canEdit && <Button size="small" onClick={editPlan}>调整目标日期</Button>}
-      <Button size="small" type="link" onClick={() => navigate('需求')}>试点需求</Button>
+      <Button size="small" type="link" onClick={openPilotRequirement}>试点需求</Button>
       <Button size="small" type="link" onClick={() => navigate('构建与发布')}>构建与发布</Button>
       {state.events.length > 0 && <Button size="small" type="link" onClick={() => { navigate('时间线'); setHistory(true) }}>查看版本决定</Button>}
     </div>
   </div>
 
-  return <div className="app-shell">
-    <aside className="sidebar">
-      <div className="brand" aria-label="MyAgentDesk"><span className="brand-mark">m.</span></div>
-      <button className="side-project" aria-current="page" aria-label="打开 MyAgentDesk 项目" onClick={() => { navigate('时间线'); setHistory(false) }}>
-        <FolderOpenOutlined /><span>项目</span>
-      </button>
-    </aside>
-    <div className="app-body">
+  return <div className="demo-project-shell">
+    <div className="demo-project-body">
       <header className="topbar">
-        <div className="breadcrumb"><span>项目</span><span aria-hidden="true">/</span><strong>MyAgentDesk</strong></div>
+        <div className="breadcrumb">
+          <span className="demo-app-mark" aria-hidden="true">M</span><span>项目空间</span>
+        </div>
         <div className="top-actions">
           <Button type="text" onClick={onAccounts}>账号工作区</Button>
           <Button type="text" onClick={event => openIssue(1, event, true)}>试点演示</Button>
@@ -246,79 +252,92 @@ function Workspace({ dark, toggleTheme, onAccounts }: { dark: boolean; toggleThe
           <Button type="text" icon={<ReloadOutlined />} aria-label="重置演示" onClick={() => setResetting(true)} />
         </div>
       </header>
-      <main className="workspace">
-        <header className="project-head">
-          <div className="project-name"><span className="project-icon"><FolderOpenOutlined /></span>
-            <div className="title-row"><h1>MyAgentDesk</h1></div>
-          </div>
-          <a className="github-link" href={issuesByNumber.get(1)?.url} target="_blank" rel="noreferrer"><GithubOutlined /> 首版路线图 #1<LinkOutlined /></a>
-        </header>
-        <nav className="project-tabs" aria-label="项目页面">
-          {tabs.map(item => <button key={item} type="button" aria-current={tab === item ? 'page' : undefined}
-            onClick={() => { navigate(item); if (item === '时间线') setHistory(false) }}>{item}{item === 'Issues' && ` ${roadmapIssues.length}`}</button>)}
-        </nav>
-        <div ref={mainRef} className={`content-grid ${selection ? 'has-drawer' : ''}`} onKeyDown={event => {
-          if (event.key === 'Escape' && selection && !editing && !resetting) closeIssue()
-        }}>
-          <div className="main-column">
-            {tab === '时间线' && <>
-              <section className="calendar-page" aria-label="项目时间线">
-                <div className="calendar-toolbar">
-                  <h2>{history ? '试点事件记录' : '首版交付'}</h2>
-                  {!history && <span>11 月 16–27 日 · 排期示意</span>}
-                  <div className="view-switch">
-                    <Button size="small" type={history ? 'text' : 'default'} aria-pressed={!history} onClick={() => setHistory(false)}>版本</Button>
-                    <Button size="small" type={history ? 'default' : 'text'} aria-pressed={history} icon={<HistoryOutlined />} onClick={() => setHistory(true)}>事件记录</Button>
+      <div className="demo-project-workspace">
+        <aside className="demo-project-rail" aria-label="项目入口">
+          <button type="button" aria-label="打开 MyAgentDesk 项目" title="MyAgentDesk"
+            onClick={() => { navigate('时间线'); setHistory(false) }}>
+            <FolderOpenOutlined aria-hidden="true" /><span>项目</span>
+          </button>
+        </aside>
+        <main className="demo-project-content">
+          <header className="demo-project-info">
+            <div><span className="demo-project-icon"><FolderOpenOutlined aria-hidden="true" /></span><h1>MyAgentDesk</h1></div>
+            <a href={issuesByNumber.get(1)?.url} target="_blank" rel="noreferrer">
+              <GithubOutlined aria-hidden="true" /> 首版路线图 #1 <LinkOutlined aria-hidden="true" />
+            </a>
+          </header>
+          <nav className="project-tabs" aria-label="项目页面">
+            {tabs.map(item => <button key={item} type="button" aria-current={tab === item ? 'page' : undefined}
+              onClick={() => { navigate(item); if (item === '时间线') setHistory(false) }}>
+              {item}{item === 'Issues' && ` ${roadmapIssues.length}`}
+            </button>)}
+          </nav>
+          <div ref={mainRef} className={`content-grid ${selection ? 'has-drawer' : ''}`} onKeyDown={event => {
+            if (event.key === 'Escape' && selection && !editing && !resetting) closeIssue()
+          }}>
+            <div className="main-column">
+              {tab === '时间线' && <>
+                <section className="calendar-page" aria-label="项目时间线">
+                  <div className="calendar-toolbar">
+                    <h2>{history ? '试点事件记录' : '首版交付'}</h2>
+                    {!history && <span>11 月 16–27 日 · 排期示意</span>}
+                    <div className="view-switch">
+                      <Button size="small" type={history ? 'text' : 'default'} aria-pressed={!history} onClick={() => setHistory(false)}>版本</Button>
+                      <Button size="small" type={history ? 'default' : 'text'} aria-pressed={history} icon={<HistoryOutlined />} onClick={() => setHistory(true)}>事件记录</Button>
+                    </div>
                   </div>
-                </div>
-                {history ? <div className="history-body"><Records state={state} /></div>
-                  : <IssueTimeline selected={selection?.number ?? null} open={openIssue} showAll={() => navigate('Issues')}
-                    blocker={blocker ? `模拟阻塞 · ${blocker}` : null}
-                    openBlocker={event => openIssue(14, event, true)} />}
-              </section>
-            </>}
-            {tab === '需求' && <>
-              <section className="panel">
-                <SectionTitle icon={<FileTextOutlined />} title="需求详情" extra={<Tag color="blue">#{issue.number}</Tag>} />
-                <h3 className="requirement-title">{issue.demoScope}</h3>
-                <p className="muted">{issue.title}</p>
-                <Steps size="small" current={state.receipt ? stageNames.length : stage} items={stageNames.map(title => ({ title }))} />
-                <dl className="details">
-                  <div><dt>当前阶段</dt><dd>{state.receipt ? '已收到模拟发布回执' : stageNames[stage]}</dd></div>
-                  <div><dt>派发编号</dt><dd>{state.dispatch?.id ?? '待派发'}</dd></div>
-                  <div><dt>设备与启动</dt><dd>{state.dispatch ? 'DEV-01 · 启动 1 次' : '—'}</dd></div>
-                  <div><dt>完成通知</dt><dd>{state.candidate ? '1 条' : '0 条'}</dd></div>
-                </dl>
-                {state.candidate > 0 && <details className="artifact">
-                  <summary><CodeOutlined /> reconnect-task.patch</summary>
+                  {history ? <div className="history-body"><Records state={state} /></div>
+                    : <IssueTimeline selected={selection?.number ?? null} open={openIssue} showAll={() => navigate('Issues')}
+                      blocker={blocker ? `模拟阻塞 · ${blocker}` : null}
+                      openBlocker={event => openIssue(14, event, true)} />}
+                </section>
+              </>}
+              {compactRequirements && <Suspense fallback={<p className="demo-requirements-footer" role="status">正在加载需求…</p>}>
+                <DemoRequirements />
+              </Suspense>}
+              {tab === '需求' && showPilotRequirement && <>
+                <section className="panel">
+                  <SectionTitle icon={<FileTextOutlined />} title="需求详情" extra={<Tag color="blue">#{issue.number}</Tag>} />
+                  <h3 className="requirement-title">{issue.demoScope}</h3>
+                  <p className="muted">{issue.title}</p>
+                  <Steps size="small" current={state.receipt ? stageNames.length : stage} items={stageNames.map(title => ({ title }))} />
                   <dl className="details">
-                    <div><dt>本机运行</dt><dd>RUN-0313-01</dd></div>
-                    <div><dt>回传来源</dt><dd>tebb · 研发自测 · 模拟</dd></div>
-                    <div><dt>原始候选</dt><dd>{buildId(1)} · {commitId(1)}</dd></div>
+                    <div><dt>当前阶段</dt><dd>{state.receipt ? '已收到模拟发布回执' : stageNames[stage]}</dd></div>
+                    <div><dt>派发编号</dt><dd>{state.dispatch?.id ?? '待派发'}</dd></div>
+                    <div><dt>设备与启动</dt><dd>{state.dispatch ? 'DEV-01 · 启动 1 次' : '—'}</dd></div>
+                    <div><dt>完成通知</dt><dd>{state.candidate ? '1 条' : '0 条'}</dd></div>
                   </dl>
-                  <pre>{'test:reconnect\nPASS  reconnect retains task ID\nPASS  replay starts no additional task\nexit 0'}</pre>
-                </details>}
-                <div className="inline-links">
-                  <Button size="small" type="link" onClick={() => navigate('规格')}>查看规格 <ArrowRightOutlined /></Button>
-                  <Button size="small" type="link" onClick={() => navigate('构建与发布')}>查看构建 <ArrowRightOutlined /></Button>
-                </div>
-              </section>
-              <EvidencePanel state={state} />
-            </>}
-            {tab === '规格' && <section className="panel">
-              <SectionTitle icon={<FileTextOutlined />} title="规格与验收条件" extra={<Tag color={state.spec ? 'green' : 'default'}>{state.spec ? '产品已确认' : '待确认'}</Tag>} />
-              <p className="muted">OpenSpec 示例 · {specId}</p>
-              <ol className="criteria">{issue.criteria.map(criterion => <li key={criterion}>{criterion}</li>)}</ol>
-              <Button size="small" type="link" icon={<ArrowLeftOutlined />} onClick={() => navigate('需求')}>返回需求</Button>
-            </section>}
-            {tab === 'Issues' && <IssuesList selected={selection?.number ?? null} open={openIssue} />}
-            {tab === '构建与发布' && <><BuildPanel state={state} /><EvidencePanel state={state} /></>}
+                  {state.candidate > 0 && <details className="artifact">
+                    <summary><CodeOutlined /> reconnect-task.patch</summary>
+                    <dl className="details">
+                      <div><dt>本机运行</dt><dd>RUN-0313-01</dd></div>
+                      <div><dt>回传来源</dt><dd>tebb · 研发自测 · 模拟</dd></div>
+                      <div><dt>原始候选</dt><dd>{buildId(1)} · {commitId(1)}</dd></div>
+                    </dl>
+                    <pre>{'test:reconnect\nPASS  reconnect retains task ID\nPASS  replay starts no additional task\nexit 0'}</pre>
+                  </details>}
+                  <div className="inline-links">
+                    <Button size="small" type="link" onClick={() => navigate('规格')}>查看规格 <ArrowRightOutlined /></Button>
+                    <Button size="small" type="link" onClick={() => navigate('构建与发布')}>查看构建 <ArrowRightOutlined /></Button>
+                  </div>
+                </section>
+                <EvidencePanel state={state} />
+              </>}
+              {tab === '规格' && <section className="panel">
+                <SectionTitle icon={<FileTextOutlined />} title="规格与验收条件" extra={<Tag color={state.spec ? 'green' : 'default'}>{state.spec ? '产品已确认' : '待确认'}</Tag>} />
+                <p className="muted">OpenSpec 示例 · {specId}</p>
+                <ol className="criteria">{issue.criteria.map(criterion => <li key={criterion}>{criterion}</li>)}</ol>
+                <Button size="small" type="link" icon={<ArrowLeftOutlined />} onClick={openPilotRequirement}>返回需求</Button>
+              </section>}
+              {tab === 'Issues' && <IssuesList selected={selection?.number ?? null} open={openIssue} />}
+              {tab === '构建与发布' && <><BuildPanel state={state} /><EvidencePanel state={state} /></>}
+            </div>
+            {selection && <IssueDetails key={`${selection.number}-${selection.pilot}`} number={selection.number}
+              open={openIssue} close={closeIssue} showPilot={selection.pilot}
+              pilot={[1, 6, 11, 14, 16].includes(selection.number) ? pilotControls : undefined} />}
           </div>
-          {selection && <IssueDetails key={`${selection.number}-${selection.pilot}`} number={selection.number}
-            open={openIssue} close={closeIssue} showPilot={selection.pilot}
-            pilot={[1, 6, 11, 14, 16].includes(selection.number) ? pilotControls : undefined} />}
-        </div>
-      </main>
+        </main>
+      </div>
     </div>
     <Modal open={editing} title={plan ? '调整目标日期' : `安排 ${version} 发布`} footer={null} onCancel={() => setEditing(false)} destroyOnHidden>
       <form className="plan-form" onSubmit={submitPlan}>

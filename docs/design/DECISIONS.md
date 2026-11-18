@@ -36,3 +36,9 @@ PostgreSQL 的续跑队列与决定回执在同一事务提交。应用启动时
 3. 改派：移除原成员、旧通知拒绝；同岗且有资源权限的替补接手相同证据及检查点，旧执行修订不能写入或覆盖新状态；不合格替补被拒，无替补时保留等待及升级记录。
 4. 重启：在确认已提交但 Worker 未启动、Worker 正在执行、外部文件已发布但数据库回执未提交三处中断，再启动 Worker，原运行可恢复，已成功步骤及同一产物不重复发布。
 5. 界面：从通知深链接打开、确认后查看等待状态、管理员恢复授权、替补接手、原成员旧入口失效；验证错误、键盘、深浅色和窄窗口。
+
+## 实现界面和证据
+
+界面按待确认、已确认待继续和历史区分记录，处理列表合并前两类，历史由范围选择切换。当前需求/资料版本变化后显示过期，保留原答复和证据，确认与续跑按钮受当前版本保护。问题替换后旧入口可查其被替换状态，不能再确认。
+
+[已确认、等待授权](project-pages/decision-waiting-authorization.png) · [窄窗口深色](project-pages/decision-waiting-mobile.png) · [无合格替补与升级](project-pages/decision-no-replacement.png) · [替补核对后完成](project-pages/decision-takeover-completed.png)。逐项断言、真实进程中断及文件幂等的验证见[验收记录](../evals/decision-recovery-20261118.md)。

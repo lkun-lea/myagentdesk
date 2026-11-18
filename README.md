@@ -24,6 +24,8 @@ npm run dev
 
 打开终端显示的地址并选择「打开 Demo」，也可直接访问 `/?demo=1`。项目默认使用全宽时间线，按首版路线图展示交付顺序。点里程碑、Issue 或「等待前置」打开右栏，查看开发前置、产品联调、验收标准和 GitHub 原文。右栏关闭时恢复全宽。「Issues」显示 MyAgentDesk 的 GitHub 只读快照，时间轴日期用于排期演示。
 
+「需求」打开 Semi Design 紧凑列表。点 [#18](https://github.com/lkun-lea/myagentdesk/issues/18) 查看全宽流程，再点「Gmail 实收登录」查看负责人、阻塞原因和验收证据。也可从列表的「验收阻塞」直接到达节点。证据链接指向 GitHub 原始记录，流程和岗位为演示编排。
+
 右上角「试点演示」打开同一流程的模拟操作。沿着版本排期、规格确认、tebb 派发、独立验收、质量放行和发布回执推进。模拟断网或请求产品决策后可恢复原运行，独立验收后可模拟集成包变更。试点来源是 [tebb #313](https://github.com/lkun-lea/tebb/issues/313)，进度保存在当前浏览器。生产构建使用 `npm run build`。
 
 [项目五页设计与可点预览](docs/design/project-pages/README.md) · [项目开发规则](AGENTS.md)

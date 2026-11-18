@@ -101,7 +101,7 @@ export function IssueDetails({ number, open, close, pilot, showPilot }: {
   const item = roadmap[number]
   const waiting = openPrerequisites(number)
   const related = [
-    { title: item ? '开发前置' : '首版交付顺序', items: item?.prerequisites ?? mainPath },
+    { title: item ? '开发前置' : '首版交付顺序', items: item?.prerequisites ?? (number === 1 ? mainPath : []) },
     { title: '产品联调', items: item?.integration ?? [] },
     { title: '后续依赖本项', items: downstreamIssues(number) },
   ]
@@ -124,6 +124,7 @@ export function IssueDetails({ number, open, close, pilot, showPilot }: {
       {tab === 'flow' && <>
         {waiting.length > 0 && <div className="drawer-blocked"><strong>等待开发前置</strong><span>{waiting.map(id => `#${id}`).join('、')} 在 GitHub 仍开放</span></div>}
         {followUp.includes(number) && <p className="muted">首版验收后交付。</p>}
+        {!item && number !== 1 && <p className="muted">没有已记录的项目依赖。</p>}
         {related.filter(group => group.items.length).map(group => <section className="related-group" key={group.title}>
           <h3>{group.title}</h3>
           <div>{group.items.map(id => <button key={id} onClick={event => open(id, event)}>#{id} {issueLabel(id)}</button>)}</div>

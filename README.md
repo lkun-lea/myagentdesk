@@ -15,7 +15,7 @@ MyAgentDesk 是个人 Agent 工作台。每个账号绑定一个 Agent。成员�
 
 ## 首版 Demo
 
-需要 Node.js 20+。在仓库根目录运行：
+需要 Node.js 22.19+。在仓库根目录运行：
 
 ```sh
 npm ci
@@ -45,6 +45,14 @@ uv run --locked uvicorn server.main:create_app --factory --env-file .env --host 
 基座的复用与验收方式见 [运行基座与 tebb 复用清单](docs/design/FOUNDATION.md)。
 
 首页支持邮箱登录、项目创建、邀请与成员管理。接入独立 Supabase 后可使用真实邮箱登录，完整配置与测试步骤见 [账号与项目成员](docs/design/ACCOUNTS.md#配置真实邮箱验收)。
+
+## Pi SDK 与项目上下文
+
+「我的 Agent」保存个人模型与 Skill 配置，项目成员页分配研发或独立测试岗位。项目管理员在「资料」发布原文，在「需求」确认内容及验收条件。成员创建本阶段运行后，可以执行、取消、查看按需读取的来源和工具回执。需求或已读资料变化后，核对并确认新版本，从原运行继续。
+
+模型由官方 Pi SDK 执行。`MAD_MODEL_ENV_FILE` 可指向现有模型配置文件，支持 `ATLAS_API_KEY`、`ATLAS_BASE_URL` 和 `ATLAS_MODEL`。也可通过服务进程的 `MAD_MODEL_API_KEY`、`MAD_MODEL_BASE_URL`、`MAD_MODEL` 配置兼容 OpenAI 的服务。凭据只在服务端读取。`MAD_NODE_BINARY` 指定 Node.js 22.19+ 可执行文件。
+
+设计、交接与恢复验收见 [项目上下文](docs/design/PROJECT_CONTEXT.md)。当前切片提供项目资料审阅闭环，完整需求群、文件执行授权和发布流程继续由对应 issue 交付。
 
 ## 与 tebb 的关系
 

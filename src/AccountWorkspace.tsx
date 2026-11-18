@@ -3,6 +3,7 @@ import { Alert, Button, Input, Select, Spin, Tabs } from 'antd'
 import { MoonOutlined, SunOutlined } from '@ant-design/icons'
 import { api, errorCode, isUnauthorized, messageFor } from './accounts-api'
 import { PersonalCalendar, PersonalTasks } from './PersonalPlanning'
+import { MyAgent, ProjectContext } from './ProjectContext'
 import { globalViews, ProjectContent, projectPages, Workbench } from './Workbench'
 import type { OpenRoute, Project, ProjectPage, View } from './Workbench'
 import './accounts.css'
@@ -125,6 +126,7 @@ function ProjectPanel({ project, onExpired, onUnavailable }: {
   const [fault, setFault] = useState('')
   const [busy, setBusy] = useState(false)
   const [streamStatus, setStreamStatus] = useState('')
+  const [assignments, setAssignments] = useState<{user_id: string; role: string}[]>([])
   const inviteRequest = useRef<{ id: string; email: string } | null>(null)
   const generation = useRef(0)
   const mounted = useRef(false)
@@ -134,11 +136,12 @@ function ProjectPanel({ project, onExpired, onUnavailable }: {
     let alive = true
     const load = () => {
       const request = ++generation.current
-      Promise.all([api<Project>(path), api<Member[]>(path + '/members'), manager ? api<Invite[]>(path + '/invites') : Promise.resolve([])])
-        .then(([current, people, links]) => {
+      Promise.all([api<Project>(path), api<Member[]>(path + '/members'), manager ? api<Invite[]>(path + '/invites') : Promise.resolve([]),
+        api<{user_id: string; role: string}[]>(path + '/roles')])
+        .then(([current, people, links, positions]) => {
           if (!alive || request !== generation.current) return
           if (current.role !== project.role) onUnavailable('role_changed')
-          else { setMembers(people); setInvites(links) }
+          else { setMembers(people); setInvites(links); setAssignments(positions) }
         })
         .catch(error => {
           if (!alive || request !== generation.current) return
@@ -216,6 +219,12 @@ function ProjectPanel({ project, onExpired, onUnavailable }: {
         options={[{ value: 'admin', label: '管理员' }, { value: 'member', label: '成员' }]}
         onChange={role => mutate(() => api(path + '/members/' + member.id, 'PATCH', { role }))} />
         : <span>{roles[member.role]}</span>}
+      {manager ? <Select aria-label={member.email + ' 的岗位'} placeholder="分配岗位" disabled={busy}
+        value={assignments.find(item => item.user_id === member.id)?.role}
+        options={[{ value: 'product', label: '产品' }, { value: 'development', label: '研发' }, { value: 'testing', label: '独立测试' }]}
+        onChange={role => mutate(() => api(path + '/roles/' + member.id, 'PUT', { role }))} />
+        : <span>{({ product: '产品', development: '研发', testing: '独立测试' } as Record<string, string>)[
+          assignments.find(item => item.user_id === member.id)?.role ?? ''] ?? '未分配岗位'}</span>}
       {manager && member.role !== 'owner' && (project.role === 'owner' || member.role === 'member')
         && <Button danger type="text" disabled={busy} onClick={() => mutate(() => api(path + '/members/' + member.id, 'DELETE'))}>移除</Button>}
     </li>)}</ul>
@@ -408,6 +417,7 @@ export function AccountWorkspace({ dark, onDemo, toggleTheme }: {
         </section>}
         {!inviteId && view === 'calendar' && <PersonalCalendar key={user.id} navigate={navigate} taskId={taskId} onExpired={expired} />}
         {!inviteId && view === 'tasks' && <PersonalTasks key={user.id} navigate={navigate} taskId={taskId} onExpired={expired} />}
+        {!inviteId && view === 'agent' && <MyAgent key={user.id} />}
         {!inviteId && view === 'projects' && <section className="mad-page mad-projects-page">
           <nav className="account-projects" aria-label="已授权的项目">
             <Button type="link" onClick={() => navigate('projects')}>全部项目</Button>
@@ -421,7 +431,9 @@ export function AccountWorkspace({ dark, onDemo, toggleTheme }: {
               items={Object.entries(projectPages).map(([key, label]) => ({ key, label }))} />
             {page === 'members' ? <ProjectPanel key={user.id + ':' + current.id + ':' + current.role} project={current}
               onExpired={expired} onUnavailable={unavailable} />
-              : <ProjectContent key={user.id + ':' + current.id + ':' + page} project={current} page={page} onUnavailable={projectError} />}
+              : page === 'requirements' || page === 'materials'
+                ? <ProjectContext key={user.id + ':' + current.id + ':' + page} project={current} page={page} onUnavailable={projectError} />
+                : <ProjectContent key={user.id + ':' + current.id + ':' + page} project={current} page={page} onUnavailable={projectError} />}
           </>}
           {projectId && !current && !fault && <Spin aria-label="正在核验项目权限" />}
           {!projectId && <><h1>项目</h1>

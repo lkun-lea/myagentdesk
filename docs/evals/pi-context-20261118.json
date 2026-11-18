@@ -1,0 +1,73 @@
+{
+  "date": "2026-11-18",
+  "runtime": "Pi SDK 1.5.2",
+  "model": "deepseek-flash",
+  "scope": "Project document review and independent handoff",
+  "identity": "Two isolated test accounts via a mail-protocol fixture",
+  "storage": "Isolated PostgreSQL schema removed after test",
+  "runs": [
+    {
+      "role": "development",
+      "run_id": "1b034c0b-71b7-4dbb-bdf1-4787f1d7a5ae",
+      "status": "completed",
+      "checkpoint": 4,
+      "tool_calls": [
+        "list_context",
+        "read_context",
+        "list_context",
+        "submit_handoff"
+      ],
+      "reads": [
+        {
+          "id": "e15b7a7d-d89c-4f26-8986-770e8e7b54c9",
+          "end": 188,
+          "text": "The release codename is Cedar. The handoff must include the codename, the original source URI, and any unresolved issues. This is a document review task with no code or external execution.",
+          "start": 0,
+          "title": "Release rules",
+          "source": "fixture://release-rules/v1",
+          "revision": 1
+        }
+      ],
+      "verdict": "delivered",
+      "candidate_run": null,
+      "outdated": false,
+      "criteria_checked": [
+        true,
+        true
+      ]
+    },
+    {
+      "role": "testing",
+      "run_id": "18c5ba54-ab63-460f-a02b-b6554941ecc8",
+      "status": "completed",
+      "checkpoint": 7,
+      "tool_calls": [
+        "list_context",
+        "list_context",
+        "read_context",
+        "read_handoff",
+        "list_context",
+        "list_context",
+        "submit_handoff"
+      ],
+      "reads": [
+        {
+          "id": "e15b7a7d-d89c-4f26-8986-770e8e7b54c9",
+          "end": 188,
+          "text": "The release codename is Cedar. The handoff must include the codename, the original source URI, and any unresolved issues. This is a document review task with no code or external execution.",
+          "start": 0,
+          "title": "Release rules",
+          "source": "fixture://release-rules/v1",
+          "revision": 1
+        }
+      ],
+      "verdict": "passed",
+      "candidate_run": "1b034c0b-71b7-4dbb-bdf1-4787f1d7a5ae",
+      "outdated": false,
+      "criteria_checked": [
+        true,
+        true
+      ]
+    }
+  ]
+}

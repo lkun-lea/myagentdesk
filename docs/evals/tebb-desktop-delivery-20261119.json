@@ -1,0 +1,176 @@
+{
+  "issue": "https://github.com/lkun-lea/myagentdesk/issues/10",
+  "candidate": "c6fbba0e950239555c8ca1ff651ea9077b44d804",
+  "winner": "fd8b9902-5627-49f1-9307-67825cc3ed93",
+  "loser": "8ab67a3b-075e-46ba-b7f3-29d80ba3f405",
+  "claim_and_receipt_acks_dropped": 2,
+  "recovered": {
+    "id": "dc54a47c-9428-463e-aa35-556f7ba2c437",
+    "title": "#10 项目规格页：OpenSpec 变更、校验与关联",
+    "stage": "development",
+    "input": {
+      "base": "4425b7cb4cc8c9a775717d8bcd1ab4f2240dd275",
+      "checks": [],
+      "commit": "c6fbba0e950239555c8ca1ff651ea9077b44d804",
+      "digest": null,
+      "plan_id": "affe2ef3-94da-463e-a055-2de2ce3f811f",
+      "criteria": [
+        "完整提交定位规则",
+        "历史证据可回查"
+      ],
+      "repository": "lkun-lea/myagentdesk",
+      "candidate_id": null,
+      "plan_revision": 1,
+      "repository_id": 1455643579,
+      "requested_commit": "c6fbba0e950239555c8ca1ff651ea9077b44d804",
+      "criteria_revision": 2,
+      "connection_revision": 1,
+      "requirement_revision": 2
+    },
+    "source": "https://github.com/lkun-lea/myagentdesk/issues/10",
+    "phase": "outbox",
+    "receipt_status": "succeeded",
+    "runs": [
+      "049fd89a7cf74303bdb68e47f28c6ae8"
+    ],
+    "error": ""
+  },
+  "unknown": {
+    "id": "09e62607-5558-4168-8b87-456463f22404",
+    "title": "#10 项目规格页：OpenSpec 变更、校验与关联",
+    "stage": "testing",
+    "input": {
+      "base": "4425b7cb4cc8c9a775717d8bcd1ab4f2240dd275",
+      "checks": [],
+      "commit": "c6fbba0e950239555c8ca1ff651ea9077b44d804",
+      "digest": "52aa8990dab1037790ca1fb9edfc11dfe99a413d5b87b213d8c066a54a26b8b4",
+      "plan_id": "affe2ef3-94da-463e-a055-2de2ce3f811f",
+      "criteria": [
+        "完整提交定位规则",
+        "历史证据可回查"
+      ],
+      "repository": "lkun-lea/myagentdesk",
+      "candidate_id": "dc54a47c-9428-463e-aa35-556f7ba2c437",
+      "plan_revision": 1,
+      "repository_id": 1455643579,
+      "requested_commit": null,
+      "criteria_revision": 2,
+      "connection_revision": 1,
+      "requirement_revision": 2
+    },
+    "source": "https://github.com/lkun-lea/myagentdesk/issues/10",
+    "phase": "uploaded",
+    "receipt_status": "needs_review",
+    "runs": [],
+    "error": ""
+  },
+  "dispatches": [
+    {
+      "id": "09e62607-5558-4168-8b87-456463f22404",
+      "group_id": "e7a5cbe7-e2bd-4ed4-b51a-df42135a4c2d",
+      "group_revision": 4,
+      "actor": "ad1e76e7-61e6-468e-bb0a-cffc6373ae00",
+      "stage": "testing",
+      "input": {
+        "base": "4425b7cb4cc8c9a775717d8bcd1ab4f2240dd275",
+        "checks": [],
+        "commit": "c6fbba0e950239555c8ca1ff651ea9077b44d804",
+        "digest": "52aa8990dab1037790ca1fb9edfc11dfe99a413d5b87b213d8c066a54a26b8b4",
+        "plan_id": "affe2ef3-94da-463e-a055-2de2ce3f811f",
+        "criteria": [
+          "完整提交定位规则",
+          "历史证据可回查"
+        ],
+        "repository": "lkun-lea/myagentdesk",
+        "candidate_id": "dc54a47c-9428-463e-aa35-556f7ba2c437",
+        "plan_revision": 1,
+        "repository_id": 1455643579,
+        "requested_commit": null,
+        "criteria_revision": 2,
+        "connection_revision": 1,
+        "requirement_revision": 2
+      },
+      "status": "needs_review",
+      "receipt": {
+        "checks": [],
+        "commit": "c6fbba0e950239555c8ca1ff651ea9077b44d804",
+        "digest": "52aa8990dab1037790ca1fb9edfc11dfe99a413d5b87b213d8c066a54a26b8b4",
+        "status": "needs_review"
+      },
+      "created_at": "2026-11-19T04:34:07.382309+08:00",
+      "has_artifact": false
+    },
+    {
+      "id": "dc54a47c-9428-463e-aa35-556f7ba2c437",
+      "group_id": "e7a5cbe7-e2bd-4ed4-b51a-df42135a4c2d",
+      "group_revision": 3,
+      "actor": "ee07d952-3105-4dd5-b5ea-742ef7313725",
+      "stage": "development",
+      "input": {
+        "base": "4425b7cb4cc8c9a775717d8bcd1ab4f2240dd275",
+        "checks": [],
+        "commit": "c6fbba0e950239555c8ca1ff651ea9077b44d804",
+        "digest": null,
+        "plan_id": "affe2ef3-94da-463e-a055-2de2ce3f811f",
+        "criteria": [
+          "完整提交定位规则",
+          "历史证据可回查"
+        ],
+        "repository": "lkun-lea/myagentdesk",
+        "candidate_id": null,
+        "plan_revision": 1,
+        "repository_id": 1455643579,
+        "requested_commit": "c6fbba0e950239555c8ca1ff651ea9077b44d804",
+        "criteria_revision": 2,
+        "connection_revision": 1,
+        "requirement_revision": 2
+      },
+      "status": "succeeded",
+      "receipt": {
+        "checks": [
+          {
+            "key": "implementation",
+            "run": "049fd89a7cf74303bdb68e47f28c6ae8",
+            "output": "Candidate syntax, fixed-reference migration and proposal present\r\n",
+            "command": "/usr/bin/python3 -c 'from pathlib import Path; import ast; src=Path('\"'\"'server/specifications.py'\"'\"'); ast.parse(src.read_text(encoding='\"'\"'utf-8'\"'\"')); assert Path('\"'\"'server/migrations/009_fixed_specifications.sql'\"'\"').is_file(); assert Path('\"'\"'openspec/changes/pin-requirement-specification/proposal.md'\"'\"').is_file(); print('\"'\"'Candidate syntax, fixed-reference migration and proposal present'\"'\"')'",
+            "exit_code": 0,
+            "environment": "WSL + bubblewrap / Ubuntu"
+          }
+        ],
+        "commit": "c6fbba0e950239555c8ca1ff651ea9077b44d804",
+        "digest": "52aa8990dab1037790ca1fb9edfc11dfe99a413d5b87b213d8c066a54a26b8b4",
+        "status": "succeeded"
+      },
+      "created_at": "2026-11-19T04:33:30.400411+08:00",
+      "has_artifact": true
+    }
+  ],
+  "notifications": [
+    {
+      "sequence": 5,
+      "id": "06d4ff6a-995a-4649-9fb4-50dc635a3918",
+      "group_id": "e7a5cbe7-e2bd-4ed4-b51a-df42135a4c2d",
+      "author": "ee07d952-3105-4dd5-b5ea-742ef7313725",
+      "kind": "executor",
+      "body": "tebb 执行回执已入档。",
+      "data": {
+        "status": "succeeded",
+        "dispatch_id": "dc54a47c-9428-463e-aa35-556f7ba2c437"
+      },
+      "created_at": "2026-11-19T04:34:03.58252+08:00"
+    },
+    {
+      "sequence": 8,
+      "id": "03b82e1f-257a-422f-8a81-58078400658a",
+      "group_id": "e7a5cbe7-e2bd-4ed4-b51a-df42135a4c2d",
+      "author": "ad1e76e7-61e6-468e-bb0a-cffc6373ae00",
+      "kind": "executor_review",
+      "body": "tebb 启动结果待核对。",
+      "data": {
+        "status": "needs_review",
+        "dispatch_id": "09e62607-5558-4168-8b87-456463f22404"
+      },
+      "created_at": "2026-11-19T04:34:16.048226+08:00"
+    }
+  ]
+}

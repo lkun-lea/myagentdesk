@@ -16,8 +16,68 @@ type Release = { plan_id: string; plan_revision: number; candidate_id: string; p
   payload: { commit: string; digest: string; channel: string; filename: string } }
 type Delivery = { dispatches: Dispatch[]; builds: Build[]; releases: Release[]; publishers: string[]; can_grant: boolean }
 type Member = { id: string; email: string }
+type Device = { id: string; label: string; activated: boolean; revoked_at: string | null }
 const statusNames: Record<string, string> = { queued: '待领取', running: '运行中', succeeded: '已回传', failed: '失败',
   cancelled: '已取消', needs_review: '待核对', historical: '历史回执' }
+
+function code() {
+  return Array.from(crypto.getRandomValues(new Uint8Array(32)), value => value.toString(16).padStart(2, '0')).join('')
+}
+
+function DevicePairing() {
+  const [devices, setDevices] = useState<Device[]>()
+  const [label, setLabel] = useState('')
+  const [pack, setPack] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [status, setStatus] = useState('')
+  const [fault, setFault] = useState('')
+  const [modal, modalHolder] = Modal.useModal()
+  const pending = useRef<{ id: string; label: string; secret: string }>(undefined)
+  const path = '/delivery/devices'
+
+  async function act(action: () => Promise<unknown>) {
+    setBusy(true); setFault('')
+    try { await action(); setDevices(await api<Device[]>(path)) }
+    catch (error) { setFault(messageFor(errorCode(error))) }
+    finally { setBusy(false) }
+  }
+
+  return <details onToggle={event => {
+    if (event.currentTarget.open && !devices && !busy) void act(async () => {})
+  }}><summary>配对 tebb 设备</summary>
+    {modalHolder}
+    {fault && <Alert type="error" message={fault} showIcon />}
+    <form className="mad-context-form" onSubmit={event => {
+      event.preventDefault()
+      if (!pending.current || pending.current.label !== label.trim()) {
+        pending.current = { id: crypto.randomUUID(), label: label.trim(), secret: code() }
+      }
+      const request = pending.current
+      void act(async () => {
+        await api(path, 'POST', request)
+        setPack(JSON.stringify({ origin: location.origin, id: request.id, code: request.secret }))
+        setStatus(''); setLabel(''); pending.current = undefined
+      })
+    }}>
+      <label>设备名称<Input required maxLength={80} value={label} onChange={event => setLabel(event.target.value)} /></label>
+      <Button htmlType="submit" loading={busy} disabled={!label.trim()}>生成一次性配对信息</Button>
+    </form>
+    {pack && <div className="mad-context-form">
+      <label>一次性配对信息<Input.Password readOnly value={pack} /></label>
+      <Button onClick={async () => {
+        try { await navigator.clipboard.writeText(pack); setStatus('已复制，到 tebb 的「连接与网络」粘贴。') }
+        catch { setStatus('复制未完成，请展开字段并手动复制。') }
+      }}>复制配对信息</Button>
+      {status && <p role="status">{status}</p>}
+    </div>}
+    {devices?.map(device => <p key={device.id}>{device.label} · {device.revoked_at ? '已撤销' : device.activated ? '已配对' : '等待配对'}{' '}
+      {!device.revoked_at && <Button type="link" onClick={() => modal.confirm({
+        title: '撤销该设备的派发与回传权限？', okText: '撤销', cancelText: '取消',
+        onOk: () => act(async () => { await api(path + '/' + device.id, 'DELETE'); setPack('') }),
+      })}>撤销授权</Button>}</p>)}
+    <Button onClick={() => void act(async () => {})} loading={busy}>刷新设备</Button>
+  </details>
+}
 
 function Evidence({ attempt, project }: { attempt: Dispatch; project: Project }) {
   const data = attempt.receipt
@@ -40,11 +100,12 @@ export function GroupDelivery({ group, project, userId }: { group: Group; projec
   const [attempts, setAttempts] = useState<Dispatch[]>([])
   const [plan, setPlan] = useState<string>()
   const [commit, setCommit] = useState('')
+  const [channel, setChannel] = useState<'desktop' | 'manual'>('desktop')
   const [shown, setShown] = useState<{ id: string; secret: string }>()
   const [busy, setBusy] = useState(false)
   const [fault, setFault] = useState('')
   const [refresh, setRefresh] = useState(0)
-  const pending = useRef<{ id: string; secret: string; revision: number; plan_id: string; commit?: string }>(undefined)
+  const pending = useRef<{ id: string; secret?: string; desktop: boolean; revision: number; plan_id: string; commit?: string }>(undefined)
   const path = '/projects/' + project.id
   const groupPath = '/groups/' + group.id + '/dispatches'
   const canDispatch = !group.auto_run && group.state === 'active' && (
@@ -75,17 +136,24 @@ export function GroupDelivery({ group, project, userId }: { group: Group; projec
   return <section className="mad-context-card">
     <div className="mad-page-heading"><h3>tebb 执行与证据</h3><Button onClick={() => setRefresh(value => value + 1)}>刷新回执</Button></div>
     {fault && <Alert type="error" message={fault} showIcon />}
+    {canDispatch && <DevicePairing />}
     {canDispatch && !openAttempt && (!planId ? <p>先在项目时间线确认仅包含本需求的版本计划，并固定 OpenSpec 规格。</p> :
       <form className="mad-context-form" onSubmit={event => {
         event.preventDefault()
         const sha = group.stage === 'development' ? commit.trim().toLowerCase() : undefined
-        if (!pending.current || pending.current.revision !== group.revision || pending.current.plan_id !== planId || pending.current.commit !== sha) {
-          const secret = Array.from(crypto.getRandomValues(new Uint8Array(32)), value => value.toString(16).padStart(2, '0')).join('')
-          pending.current = { id: crypto.randomUUID(), secret, revision: group.revision, plan_id: planId, commit: sha }
+        const desktop = channel === 'desktop'
+        if (!pending.current || pending.current.revision !== group.revision || pending.current.plan_id !== planId || pending.current.commit !== sha || pending.current.desktop !== desktop) {
+          pending.current = { id: crypto.randomUUID(), desktop, secret: desktop ? undefined : code(), revision: group.revision, plan_id: planId, commit: sha }
         }
         const request = pending.current
-        void act(async () => { await api(groupPath, 'POST', request); setShown(request); pending.current = undefined })
+        void act(async () => {
+          await api(groupPath, 'POST', request)
+          setShown(request.secret ? { id: request.id, secret: request.secret } : undefined)
+          pending.current = undefined
+        })
       }}>
+        <label>领取方式<Select aria-label="领取方式" value={channel} onChange={setChannel}
+          options={[{ value: 'desktop', label: '已配对的 tebb 桌面' }, { value: 'manual', label: '手动令牌' }]} /></label>
         <label>版本计划<Select aria-label="版本计划" value={planId} onChange={setPlan}
           options={plans.map(item => ({ value: item.plan_id, label: item.name + ' v' + item.revision }))} /></label>
         {group.stage === 'development' && <label>候选完整提交 SHA<Input required value={commit} pattern="[a-fA-F0-9]{40}"

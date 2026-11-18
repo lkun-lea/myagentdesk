@@ -14,6 +14,7 @@ from psycopg.types.json import Jsonb
 from pydantic import BaseModel, Field, StringConstraints, model_validator
 
 from server.db import connect
+from server.delivery_devices import authorize_device, delivery_devices_router, token_matches
 from server.errors import Problem
 from server.github_issues import GitHubIssues, active_connection, connection
 from server.project_context import handoff_outdated, latest_requirement
@@ -29,10 +30,17 @@ MAX_ARTIFACT = 512 * 1024
 
 class DispatchInput(BaseModel):
     id: UUID
-    secret: Digest
+    secret: Digest | None = None
+    desktop: bool = False
     revision: int = Field(ge=1)
     plan_id: UUID
     commit: Commit | None = None
+
+    @model_validator(mode='after')
+    def transport(self):
+        if self.desktop == (self.secret is not None):
+            raise ValueError('Use a paired device or an individual dispatch token')
+        return self
 
 
 class DeviceInput(BaseModel):
@@ -216,6 +224,7 @@ def local_receipt(root, candidate, plan):
 
 def delivery_router(settings, identity, service, github_transport=None):
     router = APIRouter(prefix='/api')
+    devices = delivery_devices_router(settings.database_url, identity)
     authenticated = Depends(identity)
     github = GitHubIssues(settings.github_read_token, github_transport)
 
@@ -224,11 +233,11 @@ def delivery_router(settings, identity, service, github_transport=None):
         with connect(settings.database_url) as db:
             group = group_scope(db, group_id, user['id'])
             prior = db.execute('SELECT * FROM mad_delivery_dispatches WHERE id=%s', (data.id,)).fetchone()
-            secret = sha256(data.secret.encode()).digest()
+            secret = sha256((data.secret or '').encode()).digest()
             if prior:
                 if (prior['group_id'] != group_id or prior['actor'] != user['id'] or prior['group_revision'] != data.revision
                         or prior['input']['plan_id'] != str(data.plan_id) or prior['input']['requested_commit'] != data.commit
-                        or not compare_digest(prior['secret_digest'], secret)):
+                        or prior['desktop'] != data.desktop or not compare_digest(prior['secret_digest'], secret)):
                     raise Problem('operation_conflict', 409)
                 authorize_actor(db, group, user['id'], prior['stage'])
                 return view(prior)
@@ -268,16 +277,19 @@ def delivery_router(settings, identity, service, github_transport=None):
                       'requirement_revision': requirement['revision'], 'criteria_revision': pin['criteria_revision'],
                       'criteria': requirement['criteria'], 'checks': plan['required_checks'], 'plan_id': str(data.plan_id),
                       'plan_revision': plan['revision']}
-            row = db.execute('''INSERT INTO mad_delivery_dispatches (id,project_id,group_id,group_revision,actor,stage,secret_digest,input)
-                       VALUES (%s,%s,%s,%s,%s,%s,%s,%s) RETURNING *''',
-                       (data.id, group['project_id'], group_id, group['revision'], user['id'], stage, secret, Jsonb(frozen))).fetchone()
+            row = db.execute('''INSERT INTO mad_delivery_dispatches (id,project_id,group_id,group_revision,actor,stage,secret_digest,input,desktop)
+                       VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING *''',
+                       (data.id, group['project_id'], group_id, group['revision'], user['id'], stage, secret, Jsonb(frozen), data.desktop)).fetchone()
             record(db, group['project_id'], user['id'], data.id, 'tebb_dispatched')
             return view(row)
 
-    def worker(db, identifier, authorization):
+    def worker(db, identifier, device, authorization):
         row = dispatch_row(db, identifier)
-        value = authorization.removeprefix('Bearer ')
-        if not authorization.startswith('Bearer ') or not compare_digest(row['secret_digest'], sha256(value.encode()).digest()):
+        if row['desktop']:
+            paired = authorize_device(db, device, authorization)
+            if paired['actor'] != row['actor']:
+                raise Problem('dispatch_not_found', 404)
+        elif not token_matches(row['secret_digest'], authorization):
             raise Problem('dispatch_not_found', 404)
         group = group_scope(db, row['group_id'], row['actor'])
         authorize_actor(db, group, row['actor'], row['stage'])
@@ -286,7 +298,7 @@ def delivery_router(settings, identity, service, github_transport=None):
     @router.post('/executor/{identifier}/claim')
     def claim(identifier: UUID, data: DeviceInput, authorization: Annotated[str, Header()] = ''):
         with connect(settings.database_url) as db:
-            row, group = worker(db, identifier, authorization)
+            row, group = worker(db, identifier, data.device, authorization)
             if row['device'] is not None and row['device'] != data.device:
                 raise Problem('dispatch_claimed', 409)
             if row['status'] in {'queued', 'running'} and not fresh(db, row, group):
@@ -299,7 +311,7 @@ def delivery_router(settings, identity, service, github_transport=None):
     @router.put('/executor/{identifier}/receipt')
     def receive(identifier: UUID, data: ExecutionReceipt, authorization: Annotated[str, Header()] = ''):
         with connect(settings.database_url) as db:
-            row, group = worker(db, identifier, authorization)
+            row, group = worker(db, identifier, data.device, authorization)
             if row['device'] != data.device:
                 raise Problem('dispatch_claimed', 409)
             receipt = data.model_dump(mode='json', exclude={'artifact', 'device'})
@@ -326,7 +338,8 @@ def delivery_router(settings, identity, service, github_transport=None):
             status = data.status if fresh(db, row, group) else 'historical'
             row = db.execute('''UPDATE mad_delivery_dispatches SET status=%s,receipt=%s,artifact=%s WHERE id=%s RETURNING *''',
                              (status, Jsonb(receipt), artifact, identifier)).fetchone()
-            group_message(db, group, row['actor'], 'executor', 'tebb 执行回执已入档。', {'dispatch_id': str(identifier), 'status': status})
+            kind, message = ('executor_review', 'tebb 启动结果待核对。') if data.status == 'needs_review' else ('executor', 'tebb 执行回执已入档。')
+            group_message(db, group, row['actor'], kind, message, {'dispatch_id': str(identifier), 'status': status})
             record(db, row['project_id'], row['actor'], identifier, 'tebb_receipt_recorded')
             if status == 'succeeded':
                 terminal_handoff(db, service, group, row, data)
@@ -432,4 +445,7 @@ def delivery_router(settings, identity, service, github_transport=None):
             return db.execute('''INSERT INTO mad_delivery_releases VALUES (%s,%s,%s,%s,%s,%s,%s) RETURNING *''',
                               (*key, candidate['id'], user['id'], Jsonb(payload), published)).fetchone()
 
-    return router
+    combined = APIRouter()
+    combined.include_router(router)
+    combined.include_router(devices)
+    return combined

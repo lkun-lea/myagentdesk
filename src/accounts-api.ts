@@ -22,6 +22,8 @@ export async function api<T>(path: string, method = 'GET', body?: object): Promi
 
 const messages: Record<string, string> = {
   dispatch_not_found: '找不到该派发，请核对领取令牌。',
+  device_not_paired: '设备尚未配对或授权已撤销。',
+  device_claimed: '一次性配对信息已有设备使用。',
   dispatch_claimed: '该派发已经由另一台设备领取。',
   external_execution_required: '该需求的研发和独立验收从 tebb 领取。',
   delivery_plan_changed: '试点需要当前已承诺、仅包含本需求的计划修订。请核对计划。',

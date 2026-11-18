@@ -13,6 +13,7 @@ class Settings:
     node_binary: str = "node"
     resource_root: str = ""
     resume_worker: bool = False
+    github_read_token: str = field(default='', repr=False)
 
     @classmethod
     def from_env(cls):
@@ -26,4 +27,5 @@ class Settings:
             node_binary=environ.get("MAD_NODE_BINARY", "node"),
             resource_root=environ.get("MAD_RESOURCE_ROOT", ""),
             resume_worker=environ.get("MAD_RESUME_WORKER", "1") == "1",
+            github_read_token=environ.get('MAD_GITHUB_READ_TOKEN', ''),
         )

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Alert, Button, Input, Select, Spin, Tag } from 'antd'
 import { api, errorCode, messageFor } from './accounts-api'
-import type { Project } from './Workbench'
+import type { OpenRoute, Project } from './Workbench'
 import { RequirementGroups } from './RequirementGroups'
 
 type Agent = { id: string; revision: number; model: string; skills: string[] }
@@ -54,8 +54,9 @@ export function MyAgent() {
   </section>
 }
 
-export function ProjectContext({ project, page, userId, onUnavailable }: {
-  project: Project; page: 'requirements' | 'materials'; userId: string; onUnavailable: (code: string) => void
+export function ProjectContext({ project, page, userId, initialRequirement, navigate, onUnavailable }: {
+  project: Project; page: 'requirements' | 'materials'; userId: string; initialRequirement?: string;
+  navigate: OpenRoute; onUnavailable: (code: string) => void
 }) {
   const path = '/projects/' + project.id
   const manager = project.role !== 'member'
@@ -75,6 +76,7 @@ export function ProjectContext({ project, page, userId, onUnavailable }: {
   const [reload, setReload] = useState(0)
   const [ready, setReady] = useState(false)
   const [grouped, setGrouped] = useState(false)
+  const [sources, setSources] = useState<{ requirement: string; links: { issue_number: number; connection_revision: number }[] }>()
   const pendingRun = useRef<{ id: string; requirement: string } | undefined>(undefined)
 
   useEffect(() => {
@@ -83,7 +85,7 @@ export function ProjectContext({ project, page, userId, onUnavailable }: {
       api<Run[]>(path + '/runs'), api<Handoff[]>(path + '/handoffs')]).then(([req, docs, running, shared]) => {
       if (!active) return
       setRequirements(req); setDocuments(docs); setRuns(running); setHandoffs(shared); setReady(true)
-      setSelected(previous => req.find(item => item.id === previous?.id) ?? req[0])
+      setSelected(previous => req.find(item => item.id === (previous?.id ?? initialRequirement)) ?? req[0])
     }).catch(error => {
       if (!active) return
       const code = errorCode(error)
@@ -92,7 +94,26 @@ export function ProjectContext({ project, page, userId, onUnavailable }: {
       if (code === 'login_required' || code === 'project_not_found') onUnavailable(code)
     })
     return () => { active = false }
-  }, [path, reload, onUnavailable])
+  }, [path, reload, initialRequirement, onUnavailable])
+
+  useEffect(() => {
+    const requirement = selected?.id
+    if (page !== 'requirements' || !requirement) return
+    let active = true
+    const read = () => {
+      setSources(undefined)
+      void api<{ issue_number: number; connection_revision: number }[]>(`${path}/github/requirements/${requirement}/links`)
+        .then(links => { if (active) setSources({ requirement, links }) })
+        .catch(error => {
+          if (!active) return
+          const code = errorCode(error)
+          if (code === 'login_required' || code === 'project_not_found') onUnavailable(code)
+        })
+    }
+    read()
+    window.addEventListener('focus', read)
+    return () => { active = false; window.removeEventListener('focus', read) }
+  }, [path, page, selected?.id, reload, onUnavailable])
 
   useEffect(() => {
     if (!details) return
@@ -154,6 +175,11 @@ export function ProjectContext({ project, page, userId, onUnavailable }: {
       </div>
       {selected && <section className="mad-context-card"><h3>{selected.title} · v{selected.revision}</h3><p>{selected.body}</p>
         <ul>{selected.criteria.map((criterion, index) => <li key={index}>{criterion}</li>)}</ul>
+        {sources?.requirement === selected.id && sources.links.length > 0 && <div className="account-actions" aria-label="GitHub 来源">
+          {sources.links.map(source => <Button key={source.issue_number} onClick={() => navigate('projects', {
+            project: project.id, page: 'issues', issue: String(source.issue_number), sourceRevision: String(source.connection_revision),
+          })}>核对 GitHub Issue #{source.issue_number}</Button>)}
+        </div>}
         <div className="account-actions">
           {!grouped && <Button type="primary" loading={busy} onClick={() => void act(async () => {
             if (pendingRun.current?.requirement !== selected.id) pendingRun.current = { id: crypto.randomUUID(), requirement: selected.id }

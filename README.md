@@ -77,3 +77,7 @@ MyAgentDesk 独立管理应用、账号空间、项目状态和数据，使用�
 两端通过 GitHub Issue、PR 和构建链接定位原记录。首版试点把研发任务派给 tebb Agent，把完成通知、产物和证据带回原需求。试点验收后通过同一协议接入本机 Codex。详见 [联动架构与验收](docs/design/TEBB_INTEGRATION.md)。
 
 [工作台与项目页设计](https://github.com/lkun-lea/tebb/blob/3769741dc807c55c52c9ea9a768633ba21d4fff2/docs/design/workbench/README.md) · [账号与个人 Agent 设计](https://github.com/lkun-lea/tebb/blob/3769741dc807c55c52c9ea9a768633ba21d4fff2/docs/design/workbench/ACCOUNT_DESIGN.md) · [MIT 许可证](LICENSE)
+
+## GitHub Issue 读入与关联
+
+在项目的「Issues」页，由管理员填写 `owner/repository` 连接公开仓库。成员可以按编号打开 Issue 或跳转 GitHub。管理员可以关联已有需求，也可以确认内部标题、说明及验收条件后创建需求。需求页和项目时间线可回到关联记录。公开来源默认匿名读取，遇到限流可配置服务端 `MAD_GITHUB_READ_TOKEN`，仅授予读取所需权限。操作及验收见[只读关联设计](docs/design/GITHUB_ISSUES.md)。

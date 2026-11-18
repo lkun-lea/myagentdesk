@@ -107,3 +107,5 @@
 @media (forced-colors: active) {
   .mad-rail [aria-current], .mad-categories [aria-pressed='true'] { border: 1px solid Highlight; }
 }
+.mad-github-issue { overflow-wrap: anywhere; }
+.mad-github-issue pre { white-space: pre-wrap; overflow-wrap: anywhere; }

@@ -118,7 +118,7 @@ def projects_router(url, identity):
             membership(db, project_id, user["id"], write=True)
             return db.execute("""SELECT id, action, target, occurred_at FROM mad_project_events WHERE project_id = %s
                                  AND action IN ('project_created','requirement_group_created','requirement_stage_changed',
-                                                'requirement_confirmed','context_published') ORDER BY id""", (project_id,)).fetchall()
+                                                'requirement_confirmed','context_published','github_issue_linked') ORDER BY id""", (project_id,)).fetchall()
 
     @router.post("/projects/{project_id}/invites")
     def invite(project_id: UUID, data: InviteInput, user=authenticated):

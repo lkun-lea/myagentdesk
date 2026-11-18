@@ -15,7 +15,7 @@ def isolated_database():
     if not url:
         pytest.fail("Set MAD_TEST_DATABASE_URL to a dedicated PostgreSQL test database")
     schema = f"mad_test_{uuid4().hex}"
-    with psycopg.connect(url, autocommit=True) as admin:
+    with psycopg.connect(url, autocommit=True, connect_timeout=5) as admin:
         admin.execute(sql.SQL("CREATE SCHEMA {}").format(sql.Identifier(schema)))
         try:
             yield make_conninfo(url, options=f"-csearch_path={schema}")

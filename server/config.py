@@ -9,6 +9,8 @@ class Settings:
     supabase_url: str = ""
     publishable_key: str = field(default="", repr=False)
     session_key: str = field(default="", repr=False)
+    model_env_file: str = ""
+    node_binary: str = "node"
 
     @classmethod
     def from_env(cls):
@@ -18,4 +20,6 @@ class Settings:
             supabase_url=environ.get("MAD_SUPABASE_URL", "").rstrip("/"),
             publishable_key=environ.get("MAD_SUPABASE_PUBLISHABLE_KEY", ""),
             session_key=environ.get("MAD_SESSION_KEY", ""),
+            model_env_file=environ.get("MAD_MODEL_ENV_FILE", ""),
+            node_binary=environ.get("MAD_NODE_BINARY", "node"),
         )

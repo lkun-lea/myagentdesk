@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Alert, Button, Modal, Select, Spin, Tag, Timeline } from 'antd'
 import {
   AppstoreOutlined, CalendarOutlined, CheckSquareOutlined, ClockCircleOutlined,
-  FileTextOutlined, FolderOpenOutlined, GithubOutlined, MessageOutlined,
+  FileTextOutlined, FolderOpenOutlined, GithubOutlined, MessageOutlined, RobotOutlined,
   RocketOutlined, SafetyCertificateOutlined, StarFilled, StarOutlined,
 } from '@ant-design/icons'
 import { api, errorCode, messageFor } from './accounts-api'
@@ -12,7 +12,7 @@ export const projectPages = {
   issues: 'Issues', build: '构建与发布', members: '成员',
 } as const
 export type ProjectPage = keyof typeof projectPages
-export type View = 'workbench' | 'chat' | 'projects' | 'calendar' | 'tasks'
+export type View = 'workbench' | 'chat' | 'projects' | 'calendar' | 'tasks' | 'agent'
 export type OpenRoute = (view: View, params?: Record<string, string>, replace?: boolean) => void
 
 export type Project = {
@@ -25,6 +25,7 @@ export const globalViews = [
   { id: 'calendar', label: '日程', icon: <CalendarOutlined /> },
   { id: 'tasks', label: '事项', icon: <CheckSquareOutlined /> },
   { id: 'workbench', label: '工作台', icon: <AppstoreOutlined /> },
+  { id: 'agent', label: '我的 Agent', icon: <RobotOutlined /> },
 ] as const
 
 const icons: Record<string, React.ComponentType> = {

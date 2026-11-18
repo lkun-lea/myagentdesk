@@ -16,7 +16,7 @@ from server.accounts import enable_accounts
 from server.errors import Problem
 
 
-def create_app(settings: Settings | None = None, *, static_dir: Path | None = None, auth_transport=None):
+def create_app(settings: Settings | None = None, *, static_dir: Path | None = None, auth_transport=None, github_transport=None):
     settings = settings or Settings.from_env()
     @asynccontextmanager
     async def lifespan(app):
@@ -75,7 +75,7 @@ def create_app(settings: Settings | None = None, *, static_dir: Path | None = No
             return JSONResponse({"status": "unavailable", "reason": "database_unreachable"}, status_code=503)
         return JSONResponse({"status": "unavailable", "reason": "migration_required"}, status_code=503)
 
-    enable_accounts(app, settings, auth_transport)
+    enable_accounts(app, settings, auth_transport, github_transport)
     assets = static_dir or Path(__file__).resolve().parent.parent / "dist"
     if assets.is_dir():
         add_type("text/javascript", ".js")

@@ -12,6 +12,7 @@ from server.sessions import Sessions, new_flow
 from server.workbench import workbench_router
 from server.project_context import context_router
 from server.agents import agents_router, AgentService
+from server.github_issues import github_router
 
 
 class SendCode(BaseModel):
@@ -24,7 +25,7 @@ class VerifyCode(SendCode):
     code: str = Field(pattern=r"^[0-9]{6,10}$")
 
 
-def enable_accounts(app, settings, transport):
+def enable_accounts(app, settings, transport, github_transport=None):
     origin = urlsplit(settings.origin)
     is_loopback = origin.scheme == "http" and origin.hostname in {"127.0.0.1", "localhost", "::1"}
     origin_valid = (origin.scheme == "https" or is_loopback) and origin.netloc and not (
@@ -164,3 +165,4 @@ def enable_accounts(app, settings, transport):
     service=AgentService(settings)
     app.state.agent_service=service
     app.include_router(agents_router(settings, identity, service))
+    app.include_router(github_router(settings.database_url, identity, settings.github_read_token, github_transport))

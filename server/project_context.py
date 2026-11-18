@@ -2,7 +2,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends
 from psycopg.types.json import Jsonb
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from server.db import connect
 from server.errors import Problem
@@ -17,12 +17,37 @@ class DocumentInput(BaseModel):
     body: str = Field(min_length=1, max_length=50000)
 
 
-class RequirementInput(BaseModel):
-    id: UUID
-    expected_revision: int = Field(ge=0)
+class RequirementContent(BaseModel):
     title: str = Field(min_length=1, max_length=120)
     body: str = Field(min_length=1, max_length=12000)
     criteria: list[str] = Field(min_length=1, max_length=20)
+
+    @field_validator('criteria')
+    @classmethod
+    def validate_criteria(cls, criteria):
+        if any(not item.strip() or len(item) > 1000 for item in criteria):
+            raise ValueError('Invalid acceptance criterion')
+        return criteria
+
+
+class RequirementInput(RequirementContent):
+    id: UUID
+    expected_revision: int = Field(ge=0)
+
+
+def save_requirement(db, project_id, data, author):
+    previous = db.execute('SELECT coalesce(max(revision),0) AS revision FROM mad_requirements WHERE project_id=%s AND id=%s',
+                          (project_id, data.id)).fetchone()['revision']
+    if previous != data.expected_revision:
+        raise Problem('version_conflict', 409)
+    revision = previous + 1
+    db.execute('INSERT INTO mad_requirements (project_id,id,revision,title,body,criteria,author) VALUES (%s,%s,%s,%s,%s,%s,%s)',
+               (project_id, data.id, revision, data.title, data.body, Jsonb(data.criteria), author))
+    if previous:
+        from server.requirement_groups import restart_group
+        restart_group(db, project_id, data.id, revision, author)
+    record(db, project_id, author, data.id, 'requirement_confirmed')
+    return {'id': data.id, 'revision': revision}
 
 
 def latest_requirement(db, project, requirement):
@@ -239,20 +264,9 @@ def context_router(url, identity):
 
     @router.put("/requirements")
     def confirm_requirement(project_id: UUID, data: RequirementInput, user=authenticated):
-        if any(not item.strip() or len(item) > 1000 for item in data.criteria):
-            raise Problem("invalid_request", 422)
         with connect(url) as db:
             membership(db, project_id, user["id"], write=True, manage=True)
-            previous = db.execute("SELECT coalesce(max(revision),0) AS revision FROM mad_requirements WHERE project_id=%s AND id=%s",
-                                  (project_id, data.id)).fetchone()["revision"]
-            if previous != data.expected_revision:
-                raise Problem("version_conflict", 409)
-            db.execute("INSERT INTO mad_requirements (project_id,id,revision,title,body,criteria,author) VALUES (%s,%s,%s,%s,%s,%s,%s)",
-                       (project_id, data.id, previous + 1, data.title, data.body, Jsonb(data.criteria), user["id"]))
-            from server.requirement_groups import restart_group
-            restart_group(db, project_id, data.id, previous + 1, user['id'])
-            record(db, project_id, user["id"], data.id, "requirement_confirmed")
-            return {"id": data.id, "revision": previous + 1}
+            return save_requirement(db, project_id, data, user['id'])
 
     @router.get("/handoffs")
     def handoffs(project_id: UUID, user=authenticated):

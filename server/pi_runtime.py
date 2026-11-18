@@ -94,6 +94,11 @@ class PiRuntime:
 
 
 TOOLS = [
+    {"name": "read_group_messages", "description": "按消息游标读取当前需求群的历史讨论、决定与交接，每次最多20条。", "parameters": {
+        "type": "object", "properties": {"after": {"type": "integer"}}, "additionalProperties": False}},
+    {"name": "request_decision", "description": "遇到真实歧义时，带具体问题、选项和已有证据交给本人决定，等待答复后继续同一运行。", "parameters": {
+        "type": "object", "properties": {"question": {"type": "string"}, "options": {"type": "array", "items": {"type": "string"}},
+        "evidence": {"type": "array", "items": {"type": "string"}}}, "required": ["question", "options", "evidence"], "additionalProperties": False}},
     {"name": "list_context", "description": "列出当前项目资料的标题、摘要、来源、版本，按需检索。", "parameters": {
         "type": "object", "properties": {"query": {"type": "string"}}, "additionalProperties": False}},
     {"name": "read_context", "description": "读取当前项目某个资料的指定版本片段，最多4000字符，并保存引用。", "parameters": {

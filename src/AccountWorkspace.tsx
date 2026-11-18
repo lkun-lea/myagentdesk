@@ -4,6 +4,7 @@ import { MoonOutlined, SunOutlined } from '@ant-design/icons'
 import { api, errorCode, isUnauthorized, messageFor } from './accounts-api'
 import { PersonalCalendar, PersonalTasks } from './PersonalPlanning'
 import { MyAgent, ProjectContext } from './ProjectContext'
+import { DecisionInbox, ProjectChats } from './RequirementGroups'
 import { globalViews, ProjectContent, projectPages, Workbench } from './Workbench'
 import type { OpenRoute, Project, ProjectPage, View } from './Workbench'
 import './accounts.css'
@@ -274,11 +275,21 @@ export function AccountWorkspace({ dark, onDemo, toggleTheme }: {
   const [ready, setReady] = useState(false)
   const [reload, setReload] = useState(0)
   const [sessionCheck, setSessionCheck] = useState(0)
+  const [pendingDecisions, setPendingDecisions] = useState(0)
   const projectId = validId(location.get('project'))
   const inviteId = validId(location.get('invite'))
   const taskId = validId(location.get('task')) ?? undefined
-  const view = projectId ? 'projects' : globalViews.find(item => item.id === location.get('view'))?.id ?? 'workbench'
+  const view = globalViews.find(item => item.id === location.get('view'))?.id ?? (projectId ? 'projects' : 'workbench')
   const page = (Object.keys(projectPages) as ProjectPage[]).find(key => key === location.get('page')) ?? 'timeline'
+
+  useEffect(() => {
+    if (!user) { setPendingDecisions(0); return }
+    let active = true
+    const refresh = () => api<unknown[]>('/decisions').then(items => { if (active) setPendingDecisions(items.length) }).catch(() => {})
+    void refresh()
+    const timer = window.setInterval(refresh, 3000)
+    return () => { active = false; window.clearInterval(timer) }
+  }, [user])
 
   useEffect(() => {
     const onLocation = () => setLocation(new URLSearchParams(window.location.search))
@@ -288,7 +299,7 @@ export function AccountWorkspace({ dark, onDemo, toggleTheme }: {
 
   const navigate: OpenRoute = (target: View, params = {}, replace = false) => {
     const next = new URLSearchParams(params)
-    if (target !== 'workbench' && !next.has('project')) next.set('view', target)
+    if (target !== 'workbench' && target !== 'projects') next.set('view', target)
     const query = next.toString()
     if (window.location.search !== (query ? `?${query}` : '')) {
       const path = query ? `/?${query}` : '/'
@@ -390,8 +401,8 @@ export function AccountWorkspace({ dark, onDemo, toggleTheme }: {
       </div>
     </header>
     {hasShell && <nav className="mad-rail" aria-label="全局导航">
-      {globalViews.map(item => <Button key={item.id} type="text" icon={item.icon} aria-current={view === item.id ? 'page' : undefined}
-        onClick={() => navigate(item.id)}>{item.label}</Button>)}
+      {globalViews.map(item => <Button key={item.id} type="text" icon={item.icon} aria-label={item.label} aria-current={view === item.id ? 'page' : undefined}
+        onClick={() => navigate(item.id)}>{item.label}{item.id === 'decisions' && pendingDecisions > 0 ? ` (${pendingDecisions})` : ''}</Button>)}
     </nav>}
     <main className={hasShell ? 'account-main mad-main' : user ? 'account-main signed-in' : 'account-main'}>
       {fault && <Alert type="error" showIcon message={fault} />}
@@ -411,10 +422,9 @@ export function AccountWorkspace({ dark, onDemo, toggleTheme }: {
           })}>接受邀请</Button>
         </section>}
         {!inviteId && view === 'workbench' && <Workbench key={user.id} projects={projects} refresh={reload} navigate={navigate} />}
-        {!inviteId && view === 'chat' && <section className="mad-page"><h1>聊天</h1>
-          <p className="account-muted">需求群和消息入口随需求协作接入。</p>
-          <a href="https://github.com/lkun-lea/myagentdesk/issues/6" target="_blank" rel="noreferrer">查看实施进度 #6</a>
-        </section>}
+        {!inviteId && view === 'chat' && <ProjectChats key={user.id} projects={projects} userId={user.id}
+          selectedProject={projectId || undefined} initialGroup={location.get('group') ?? undefined} navigate={navigate} onUnavailable={projectError} />}
+        {!inviteId && view === 'decisions' && <DecisionInbox key={user.id} />}
         {!inviteId && view === 'calendar' && <PersonalCalendar key={user.id} navigate={navigate} taskId={taskId} onExpired={expired} />}
         {!inviteId && view === 'tasks' && <PersonalTasks key={user.id} navigate={navigate} taskId={taskId} onExpired={expired} />}
         {!inviteId && view === 'agent' && <MyAgent key={user.id} />}
@@ -432,8 +442,8 @@ export function AccountWorkspace({ dark, onDemo, toggleTheme }: {
             {page === 'members' ? <ProjectPanel key={user.id + ':' + current.id + ':' + current.role} project={current}
               onExpired={expired} onUnavailable={unavailable} />
               : page === 'requirements' || page === 'materials'
-                ? <ProjectContext key={user.id + ':' + current.id + ':' + page} project={current} page={page} onUnavailable={projectError} />
-                : <ProjectContent key={user.id + ':' + current.id + ':' + page} project={current} page={page} onUnavailable={projectError} />}
+                ? <ProjectContext key={user.id + ':' + current.id + ':' + page} project={current} userId={user.id} page={page} onUnavailable={projectError} />
+                : <ProjectContent key={user.id + ':' + current.id + ':' + page} project={current} page={page} onUnavailable={projectError} navigate={navigate} />}
           </>}
           {projectId && !current && !fault && <Spin aria-label="正在核验项目权限" />}
           {!projectId && <><h1>项目</h1>

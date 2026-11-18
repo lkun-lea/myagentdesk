@@ -52,13 +52,15 @@ uv run --locked uvicorn server.main:create_app --factory --env-file .env --host 
 
 模型由官方 Pi SDK 执行。`MAD_MODEL_ENV_FILE` 可指向现有模型配置文件，支持 `ATLAS_API_KEY`、`ATLAS_BASE_URL` 和 `ATLAS_MODEL`。也可通过服务进程的 `MAD_MODEL_API_KEY`、`MAD_MODEL_BASE_URL`、`MAD_MODEL` 配置兼容 OpenAI 的服务。凭据只在服务端读取。`MAD_NODE_BINARY` 指定 Node.js 22.19+ 可执行文件。
 
-设计、交接与恢复验收见 [项目上下文](docs/design/PROJECT_CONTEXT.md)。当前切片提供项目资料审阅闭环，完整需求群、文件执行授权和发布流程继续由对应 issue 交付。
+设计、交接与恢复验收见 [项目上下文](docs/design/PROJECT_CONTEXT.md)。当前提供项目资料及实现证据审阅闭环，文件执行授权和发布流程继续由对应 issue 交付。
+
+项目需求页可为已确认的需求立项建群，分配产品、研发、测试和质量负责人。群内 Agent 自动接力，产品方案、本人决策和质量复核保留人工确认。聊天入口与项目页共享阶段、消息和证据，查看[需求群及分阶段验收](docs/design/REQUIREMENT_GROUPS.md)。文件执行和正式发布由对应执行器与发布模块接入。
 
 ## 与 tebb 的关系
 
 设计来源是 [tebb #314](https://github.com/lkun-lea/tebb/issues/314)。可从 tebb 复用的候选包括目录授权与沙箱、运行回执与证据、账号登录交互和日程交互。官方 Skill 使用 [tebb-skills](https://github.com/lkun-lea/tebb-skills) 固定版本。是否直接复用代码由 [基座与复用边界](https://github.com/lkun-lea/myagentdesk/issues/2) 逐项验证并记录来源和许可。
 
-MyAgentDesk 独立管理应用、账号空间、项目状态和数据。计划使用官方 Pi SDK 执行模型及工具循环。
+MyAgentDesk 独立管理应用、账号空间、项目状态和数据，使用官方 Pi SDK 执行模型及工具循环。
 
 两端通过 GitHub Issue、PR 和构建链接定位原记录。首版试点把研发任务派给 tebb Agent，把完成通知、产物和证据带回原需求。试点验收后通过同一协议接入本机 Codex。详见 [联动架构与验收](docs/design/TEBB_INTEGRATION.md)。
 

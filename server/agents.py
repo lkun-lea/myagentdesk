@@ -1,5 +1,6 @@
 from typing import Literal
 from uuid import UUID, uuid4
+import time
 
 from fastapi import APIRouter, BackgroundTasks, Depends
 from fastapi.encoders import jsonable_encoder
@@ -12,6 +13,7 @@ from server.errors import Problem
 from server.pi_runtime import PiRuntime, SKILLS, TOOLS
 from server.project_context import authorized_run, context_changed, context_tool, event, latest_requirement
 from server.projects import membership, record
+from server.requirement_groups import check_group_run, group_handoff, group_message, groups_router
 
 
 class AgentInput(BaseModel):
@@ -27,6 +29,7 @@ class Assignment(BaseModel):
 class NewRun(BaseModel):
     id: UUID
     requirement_id: UUID
+    group_id: UUID | None = None
 
 
 class VersionConfirmation(BaseModel):
@@ -49,6 +52,10 @@ class AgentService:
         current = authorized_run(db, run["id"], run["user_id"])
         if current["status"] == "cancelled":
             raise Problem("run_cancelled", 409)
+        if current['status'] == 'waiting_decision':
+            raise Problem('decision_pending', 409)
+        if current['status'] != 'completed':
+            check_group_run(db, current)
         if context_changed(db, current):
             raise Problem("context_changed", 409)
         return current
@@ -58,7 +65,7 @@ class AgentService:
             locked = lease.execute("SELECT pg_try_advisory_lock(hashtextextended(%s,0)) AS acquired", (str(run_id),)).fetchone()["acquired"]
             lease.commit()
             if not locked:
-                return
+                return False
             try:
                 with connect(self.url) as db:
                     run = authorized_run(db, run_id, user_id, lock=True)
@@ -73,9 +80,19 @@ class AgentService:
                     requirement = latest_requirement(db, run["project_id"], run["requirement_id"])
                     receipts = db.execute("SELECT tool,result FROM mad_run_receipts WHERE run_id=%s AND generation=%s ORDER BY call_id",
                                           (run_id, run["generation"])).fetchall()
-                    bundle = {"role": run["role"], "requirement": {key: requirement[key] for key in ("id", "revision", "title", "body", "criteria")},
+                    bundle = {"run_id": str(run['id']), "generation": run['generation'], "role": run["role"], "requirement": {key: requirement[key] for key in ("id", "revision", "title", "body", "criteria")},
                               "checkpoint": run["checkpoint"], "receipts": receipts,
                               "skills": [SKILLS[name] for name in run["config"]["skills"]]}
+                    bundle['decisions'] = db.execute('''SELECT question,answer,note,checkpoint FROM mad_run_decisions
+                                                       WHERE run_id=%s AND generation=%s AND state='resolved' ORDER BY created_at''',
+                                                    (run_id, run['generation'])).fetchall()
+                    if run['group_id']:
+                        group = check_group_run(db, run)
+                        bundle['group'] = {'id': str(group['id']), 'stage': group['stage'], 'revision': group['revision'],
+                                           'source': group['source']}
+                        bundle['group']['recent_messages'] = db.execute('''SELECT kind,body,data FROM
+                            (SELECT sequence,kind,left(body,2000) AS body,data FROM mad_group_messages WHERE group_id=%s
+                             ORDER BY sequence DESC LIMIT 8) m ORDER BY sequence''', (group['id'],)).fetchall()
                     db.execute("UPDATE mad_agent_runs SET status='running' WHERE id=%s", (run_id,))
                     event(db, run_id, "started", {"checkpoint": run["checkpoint"]})
 
@@ -92,6 +109,8 @@ class AgentService:
                             if arguments.get("kind") == "text_delta":
                                 event(db, run_id, "text_delta", {"text": arguments.get("text", "")[:2000]})
                             return None
+                        if active['status'] == 'completed':
+                            raise Problem('run_completed', 409)
                         prior = db.execute("SELECT tool,arguments,result FROM mad_run_receipts WHERE run_id=%s AND generation=%s AND call_id=%s",
                                            (run_id, active["generation"], call_id)).fetchone()
                         if prior:
@@ -99,7 +118,9 @@ class AgentService:
                                 raise Problem("operation_conflict", 409)
                             return prior["result"]
                         try:
-                            result = jsonable_encoder(context_tool(db, active, name, arguments))
+                            result = jsonable_encoder(context_tool(db, active, name, arguments, call_id))
+                            if name == 'submit_handoff':
+                                group_handoff(db, active, result)
                         except Problem as exc:
                             event(db, run_id, "tool_refused", {"tool": name, "call_id": call_id, "reason": exc.code})
                             db.commit()
@@ -120,12 +141,84 @@ class AgentService:
                     event(db, run_id, status, {})
             except (Problem, OSError, ValueError, KeyError, TypeError, psycopg.Error) as exc:
                 code = exc.code if isinstance(exc, Problem) else "runtime_unavailable"
-                status = {"context_changed": "stale", "run_cancelled": "cancelled"}.get(code, "failed")
+                status = {"context_changed": "stale", "run_cancelled": "cancelled", 'decision_pending': 'waiting_decision',
+                          'run_completed': 'completed', 'stage_changed': 'stale'}.get(code, "failed")
                 with connect(self.url) as db:
                     db.execute("UPDATE mad_agent_runs SET status=%s WHERE id=%s AND status<>'cancelled'", (status, run_id))
                     event(db, run_id, "stopped", {"reason": code})
             finally:
                 lease.execute("SELECT pg_advisory_unlock(hashtextextended(%s,0))", (str(run_id),))
+
+    def resume(self, run_id, user_id):
+        for _ in range(20):
+            if self.execute(run_id, user_id) is not False:
+                with connect(self.url) as db:
+                    row = db.execute('SELECT group_id FROM mad_agent_runs WHERE id=%s', (run_id,)).fetchone()
+                if row and row['group_id']:
+                    self.drive(row['group_id'])
+                return
+            time.sleep(0.25)
+
+    def group_run(self, db, group, identifier=None):
+        role = group['stage']
+        if role not in {'product', 'development', 'testing'} or group['state'] != 'active':
+            raise Problem('stage_changed', 409)
+        owner = group[role + '_id']
+        membership(db, group['project_id'], owner, write=True)
+        position = db.execute('SELECT role FROM mad_project_roles WHERE project_id=%s AND user_id=%s', (group['project_id'], owner)).fetchone()
+        if not position or position['role'] != role:
+            raise Problem('role_required', 409)
+        prior = db.execute('SELECT * FROM mad_agent_runs WHERE group_id=%s AND group_revision=%s', (group['id'], group['revision'])).fetchone()
+        if prior:
+            return prior
+        config = self.runtime.configuration()
+        personal = personal_agent(db, owner, config['model'])
+        if personal['model'] != config['model']:
+            raise Problem('model_configuration_changed', 409)
+        if role == 'testing' and db.execute('''SELECT 1 FROM mad_run_contributors c JOIN mad_agent_runs r ON r.id=c.run_id
+                WHERE r.project_id=%s AND r.requirement_id=%s AND c.role='development' AND c.user_id=%s AND r.checkpoint>0 LIMIT 1''',
+                                           (group['project_id'], group['requirement_id'], owner)).fetchone():
+            raise Problem('independent_review_required', 409)
+        identifier = identifier or uuid4()
+        snapshot = {'revision': personal['revision'], 'model': personal['model'], 'skills': personal['skills'], 'base': config['base']}
+        db.execute('''INSERT INTO mad_agent_runs (id,project_id,requirement_id,requirement_revision,user_id,agent_id,role,config,group_id,group_revision,candidate_run)
+                      VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) ON CONFLICT DO NOTHING''',
+                   (identifier, group['project_id'], group['requirement_id'], group['requirement_revision'], owner, personal['id'], role,
+                    Jsonb(snapshot), group['id'], group['revision'], group['last_handoff'] if role == 'testing' else None))
+        run = db.execute('SELECT * FROM mad_agent_runs WHERE id=%s', (identifier,)).fetchone()
+        if not run or run['group_id'] != group['id'] or run['group_revision'] != group['revision']:
+            raise Problem('operation_conflict', 409)
+        db.execute('INSERT INTO mad_run_contributors VALUES (%s,%s,%s) ON CONFLICT DO NOTHING', (identifier, owner, role))
+        return run
+
+    def drive(self, group_id):
+        with connect(self.url) as lease:
+            key = 'mad:group:' + str(group_id)
+            if not lease.execute('SELECT pg_try_advisory_lock(hashtextextended(%s,0)) AS acquired', (key,)).fetchone()['acquired']:
+                return
+            lease.commit()
+            try:
+                for _ in range(12):
+                    with connect(self.url) as db:
+                        group = db.execute('SELECT * FROM mad_requirement_groups WHERE id=%s', (group_id,)).fetchone()
+                        if not group or not group['auto_run'] or group['state'] != 'active' or group['stage'] not in {'product','development','testing'}:
+                            return
+                        from server.requirement_groups import group_scope
+                        group = group_scope(db, group_id, group[group['stage'] + '_id'])
+                        run = self.group_run(db, group)
+                    if self.execute(run['id'], run['user_id']) is False:
+                        return
+                    with connect(self.url) as db:
+                        current = db.execute('SELECT status FROM mad_agent_runs WHERE id=%s', (run['id'],)).fetchone()
+                        if current['status'] != 'completed':
+                            return
+                with connect(self.url) as db:
+                    group_message(db, group, run['user_id'], 'attention', '本次自动推进已达 12 个阶段，请核对返工原因后继续。')
+            except Problem as exc:
+                with connect(self.url) as db:
+                    group_message(db, group, group['product_id'], 'attention', '自动接力等待处理。', {'reason': exc.code})
+            finally:
+                lease.execute('SELECT pg_advisory_unlock(hashtextextended(%s,0))', (key,))
 
 
 def agents_router(settings, identity):
@@ -174,9 +267,23 @@ def agents_router(settings, identity):
         with connect(settings.database_url) as db:
             membership(db, project_id, user["id"], write=True)
             requirement = latest_requirement(db, project_id, data.requirement_id)
+            if data.group_id is None:
+                linked = db.execute('SELECT id FROM mad_requirement_groups WHERE project_id=%s AND requirement_id=%s',
+                                    (project_id, data.requirement_id)).fetchone()
+                if linked:
+                    data.group_id = linked['id']
             role = db.execute("SELECT role FROM mad_project_roles WHERE project_id=%s AND user_id=%s", (project_id, user["id"])).fetchone()
-            if not role or role["role"] not in {"development", "testing"}:
+            if not role or role["role"] not in ({'product','development','testing'} if data.group_id else {'development','testing'}):
                 raise Problem("permission_denied", 403)
+            group = None
+            if data.group_id:
+                from server.requirement_groups import group_scope
+                group = group_scope(db, data.group_id, user['id'])
+                if group['project_id'] != project_id or group['requirement_id'] != data.requirement_id:
+                    raise Problem('group_not_found', 404)
+                if group['stage'] != role['role'] or group.get(role['role'] + '_id') != user['id'] or group['state'] != 'active':
+                    raise Problem('stage_changed', 409)
+                return service.group_run(db, group, data.id)
             if role["role"] == "testing" and db.execute("""SELECT 1 FROM mad_handoffs WHERE project_id=%s AND requirement_id=%s
                                                           AND role='development' AND author=%s""", (project_id, data.requirement_id, user["id"])).fetchone():
                 raise Problem("independent_review_required", 409)
@@ -184,10 +291,12 @@ def agents_router(settings, identity):
             if personal["model"] != config["model"]:
                 raise Problem("model_configuration_changed", 409)
             snapshot = {"revision": personal["revision"], "model": personal["model"], "skills": personal["skills"], "base": config["base"]}
-            db.execute("""INSERT INTO mad_agent_runs (id,project_id,requirement_id,requirement_revision,user_id,agent_id,role,config)
-                          VALUES (%s,%s,%s,%s,%s,%s,%s,%s) ON CONFLICT DO NOTHING""",
-                       (data.id, project_id, data.requirement_id, requirement["revision"], user["id"], personal["id"], role["role"], Jsonb(snapshot)))
+            db.execute("""INSERT INTO mad_agent_runs (id,project_id,requirement_id,requirement_revision,user_id,agent_id,role,config,group_id,group_revision,candidate_run)
+                          VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) ON CONFLICT DO NOTHING""",
+                       (data.id, project_id, data.requirement_id, requirement["revision"], user["id"], personal["id"], role["role"], Jsonb(snapshot),
+                        data.group_id, group['revision'] if group else None, group['last_handoff'] if group and role['role']=='testing' else None))
             row = authorized_run(db, data.id, user["id"])
+            db.execute('INSERT INTO mad_run_contributors VALUES (%s,%s,%s) ON CONFLICT DO NOTHING', (data.id, user['id'], role['role']))
             if row["project_id"] != project_id or row["requirement_id"] != data.requirement_id:
                 raise Problem("operation_conflict", 409)
             return row
@@ -220,7 +329,10 @@ def agents_router(settings, identity):
             row = authorized_run(db, run_id, user["id"])
             if context_changed(db, row):
                 raise Problem("context_changed", 409)
-        background.add_task(service.execute, run_id, user["id"])
+            check_group_run(db, row)
+            if row['status'] == 'waiting_decision':
+                raise Problem('decision_pending', 409)
+        background.add_task(service.resume, run_id, user["id"])
         return {"id": run_id, "outcome": "accepted"}
 
     @router.post("/runs/{run_id}/cancel")
@@ -248,9 +360,14 @@ def agents_router(settings, identity):
                 if data.documents.get(ref["document_id"]) != revision:
                     raise Problem("version_conflict", 409)
             db.execute("UPDATE mad_run_references SET active=false WHERE run_id=%s", (run_id,))
+            db.execute("UPDATE mad_run_decisions SET state='superseded',revision=revision+1 WHERE run_id=%s AND state='pending'", (run_id,))
+            if row['group_id']:
+                group = check_group_run(db, row)
+                db.execute("UPDATE mad_requirement_groups SET state='active' WHERE id=%s", (group['id'],))
             db.execute("UPDATE mad_agent_runs SET requirement_revision=%s,status='paused',generation=generation+1,confirmed_at=now() WHERE id=%s",
                        (requirement["revision"], run_id))
             event(db, run_id, "context_confirmed", {"from_revision": row["requirement_revision"], "revision": requirement["revision"]})
             return {"id": run_id, "outcome": "confirmed"}
 
+    router.include_router(groups_router(settings, identity, service))
     return router

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Alert, Button, Modal, Select, Spin, Tag, Timeline } from 'antd'
 import {
   AppstoreOutlined, CalendarOutlined, CheckSquareOutlined, ClockCircleOutlined,
-  FileTextOutlined, FolderOpenOutlined, GithubOutlined, MessageOutlined, RobotOutlined,
+  FileTextOutlined, FolderOpenOutlined, GithubOutlined, MessageOutlined, RobotOutlined, QuestionCircleOutlined,
   RocketOutlined, SafetyCertificateOutlined, StarFilled, StarOutlined,
 } from '@ant-design/icons'
 import { api, errorCode, messageFor } from './accounts-api'
@@ -12,7 +12,7 @@ export const projectPages = {
   issues: 'Issues', build: '构建与发布', members: '成员',
 } as const
 export type ProjectPage = keyof typeof projectPages
-export type View = 'workbench' | 'chat' | 'projects' | 'calendar' | 'tasks' | 'agent'
+export type View = 'workbench' | 'chat' | 'projects' | 'calendar' | 'tasks' | 'agent' | 'decisions'
 export type OpenRoute = (view: View, params?: Record<string, string>, replace?: boolean) => void
 
 export type Project = {
@@ -26,6 +26,7 @@ export const globalViews = [
   { id: 'tasks', label: '事项', icon: <CheckSquareOutlined /> },
   { id: 'workbench', label: '工作台', icon: <AppstoreOutlined /> },
   { id: 'agent', label: '我的 Agent', icon: <RobotOutlined /> },
+  { id: 'decisions', label: '待我决策', icon: <QuestionCircleOutlined /> },
 ] as const
 
 const icons: Record<string, React.ComponentType> = {
@@ -149,16 +150,16 @@ const waitingPages: Partial<Record<ProjectPage, [number, string]>> = {
   build: [11, '验收证据、构建和发布回执尚未接入。'],
 }
 
-export function ProjectContent({ project, page, onUnavailable }: {
-  project: Project; page: ProjectPage; onUnavailable: (code: string) => void
+export function ProjectContent({ project, page, onUnavailable, navigate }: {
+  project: Project; page: ProjectPage; onUnavailable: (code: string) => void; navigate: OpenRoute
 }) {
-  const [events, setEvents] = useState<{ id: number; occurred_at: string }[]>()
+  const [events, setEvents] = useState<{ id: number; occurred_at: string; action: string; target: string }[]>()
   const [error, setError] = useState('')
   const [attempt, setAttempt] = useState(0)
   useEffect(() => {
     if (page !== 'timeline') return
     let active = true
-    api<{ id: number; occurred_at: string }[]>(`/projects/${project.id}/timeline`).then(items => {
+    api<{ id: number; occurred_at: string; action: string; target: string }[]>(`/projects/${project.id}/timeline`).then(items => {
       if (active) setEvents(items)
     }).catch(failure => {
       if (!active) return
@@ -174,7 +175,11 @@ export function ProjectContent({ project, page, onUnavailable }: {
     {error ? <Alert type="error" showIcon message={error} action={<Button size="small" onClick={() => {
       setError(''); setAttempt(value => value + 1)
     }}>重试</Button>} /> : !events ? <Spin aria-label="正在加载时间线" /> : events.length
-      ? <Timeline items={events.map(event => ({ key: event.id, children: <><strong>创建项目</strong>
+      ? <Timeline items={events.map(event => ({ key: event.id, children: <><strong>{({ project_created: '创建项目',
+        requirement_group_created: '需求已立项建群', requirement_stage_changed: '需求阶段已流转', requirement_confirmed: '需求版本已确认',
+        context_published: '项目资料已发布' } as Record<string,string>)[event.action] ?? event.action}</strong>
+        {['requirement_group_created', 'requirement_stage_changed'].includes(event.action) && <Button type="link"
+          onClick={() => navigate('chat', { project: project.id, group: event.target })}>查看需求群</Button>}
         <p className="account-muted"><time dateTime={event.occurred_at}>{new Date(event.occurred_at).toLocaleString()}</time></p></> }))} />
       : <p className="account-muted">暂无项目事件。</p>}
   </section>

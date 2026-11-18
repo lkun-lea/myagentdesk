@@ -52,6 +52,8 @@ class ModelEndpoint(BaseHTTPRequestHandler):
         else:
             name, args = "submit_handoff", {"summary": "按当前资料完成独立对照", "evidence": [results["read_context"]["text"]],
                                             "verdict": "passed" if bundle["role"] == "testing" else "delivered"}
+        if hasattr(self.server, 'plan'):
+            name, args = self.server.plan(bundle, results, name, args)
         call_id = "call_" + name
         chunk = {"id": "fixture", "object": "chat.completion.chunk", "created": 1, "model": "context-fixture",
                  "choices": [{"index": 0, "delta": {"role": "assistant", "tool_calls": [{"index": 0, "id": call_id,

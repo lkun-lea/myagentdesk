@@ -136,6 +136,7 @@ function ProjectPanel({ project, onExpired, onUnavailable }: {
   useEffect(() => {
     mounted.current = true
     let alive = true
+    let activityRefresh: ReturnType<typeof window.setTimeout> | undefined
     const load = () => {
       const request = ++generation.current
       Promise.all([api<Project>(path), api<Member[]>(path + '/members'), manager ? api<Invite[]>(path + '/invites') : Promise.resolve([]),
@@ -160,7 +161,7 @@ function ProjectPanel({ project, onExpired, onUnavailable }: {
         if (!alive) return
         setActivity(JSON.parse(event.data))
         setStreamStatus('')
-        load()
+        if(activityRefresh===undefined) activityRefresh=window.setTimeout(()=>{activityRefresh=undefined;load()},100)
       }
       stream.onerror = () => {
         if (!alive) return
@@ -183,6 +184,7 @@ function ProjectPanel({ project, onExpired, onUnavailable }: {
       mounted.current = false
       generation.current++
       window.clearInterval(poll)
+      window.clearTimeout(activityRefresh)
       stream?.close()
       window.removeEventListener('focus', load)
     }

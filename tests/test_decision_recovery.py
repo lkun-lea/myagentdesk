@@ -43,6 +43,9 @@ def decision_case(workflow,tmp_path):
     group=advance(product,product.get(f"/api/groups/{group['id']}").json())
     base_plan=endpoint.plan
     def plan(bundle,results,name,args):
+        if bundle['role']=='development':
+            assert bundle['resources'][0]['id']==resource
+            assert bundle['current_run']['execution_revision']>=1
         if bundle['role']=='development' and name=='submit_handoff':
             key='approved' if bundle.get('decisions') else 'draft'
             published=results.get('publish_artifact',{})
@@ -87,6 +90,14 @@ def test_directory_revocation_keeps_decision_then_restores_once(decision_case):
     assert tester.get('/api/artifacts/'+str(artifact['id'])).status_code==403
     c['grant'](c['ids'][2],'read')
     assert tester.get('/api/artifacts/'+str(artifact['id'])).text=='approved content'
+    requirement={**c['requirement'],'id':str(uuid4()),'expected_revision':0}
+    product.put(f"/api/projects/{c['project']}/requirements",json=requirement)
+    payload={'id':str(uuid4()),'requirement_id':requirement['id'],'resource_ids':[c['resource']]}
+    path=f"/api/projects/{c['project']}/runs"
+    assert developer.post(path,json=payload).status_code==201
+    assert developer.post(path,json={**payload,'resource_ids':[]}).status_code==409
+    c['grant'](c['ids'][1],'none',3)
+    assert developer.post(path,json=payload).status_code==201
 
 
 def test_reassignment_requires_current_grants_and_invalidates_original_entry(decision_case):
@@ -141,6 +152,7 @@ def test_replaced_request_and_changed_version_reject_old_confirmation(decision_c
     assert developer.post(target+'/replace',json=data).json()['id']==data['id']
     assert developer.post(target+'/resolve',json=c['answer']).status_code==409
     product.put(f"/api/projects/{c['project']}/requirements",json={**c['requirement'],'expected_revision':1})
+    assert developer.get('/api/decisions/'+data['id']).json()['outdated']
     assert developer.post('/api/decisions/'+data['id']+'/resolve',json={**c['answer'],'expected_revision':1}).status_code==409
 
 

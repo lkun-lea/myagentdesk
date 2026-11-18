@@ -324,6 +324,13 @@ def agents_router(settings, identity, service=None):
             if role["role"] == "testing" and db.execute("""SELECT 1 FROM mad_handoffs WHERE project_id=%s AND requirement_id=%s
                                                           AND role='development' AND author=%s""", (project_id, data.requirement_id, user["id"])).fetchone():
                 raise Problem("independent_review_required", 409)
+            existing=db.execute('SELECT id FROM mad_agent_runs WHERE id=%s',(data.id,)).fetchone()
+            if existing:
+                prior=authorized_run(db,data.id,user['id'])
+                bound={row['resource_id'] for row in db.execute('SELECT resource_id FROM mad_run_resources WHERE run_id=%s',(data.id,))}
+                if prior['project_id']!=project_id or prior['requirement_id']!=data.requirement_id or bound!=set(data.resource_ids):
+                    raise Problem('operation_conflict',409)
+                return prior
             personal = personal_agent(db, user["id"], config["model"])
             if personal["model"] != config["model"]:
                 raise Problem("model_configuration_changed", 409)

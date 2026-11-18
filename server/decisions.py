@@ -99,7 +99,13 @@ def decisions_router(settings,identity,service):
         with connect(settings.database_url) as db:
             return db.execute('''SELECT d.*,r.project_id,r.group_id,r.requirement_id,r.status AS execution_state,
                                  r.execution_revision,p.name AS project_name,q.title AS requirement_title,
-                                 j.reason AS blocked_reason FROM mad_run_decisions d
+                                 j.reason AS blocked_reason,
+                                 (d.generation<>r.generation OR EXISTS(SELECT 1 FROM mad_requirements v
+                                    WHERE v.project_id=r.project_id AND v.id=r.requirement_id AND v.revision>r.requirement_revision)
+                                  OR (r.status<>'completed' AND EXISTS(SELECT 1 FROM mad_requirement_groups g WHERE g.id=r.group_id AND g.revision<>r.group_revision))
+                                  OR EXISTS(SELECT 1 FROM mad_run_references ref JOIN mad_context_documents v ON v.project_id=r.project_id
+                                    AND v.id=ref.document_id AND v.revision>ref.revision WHERE ref.run_id=r.id AND ref.active)) AS outdated
+                                 FROM mad_run_decisions d
                                  JOIN mad_agent_runs r ON r.id=d.run_id JOIN mad_memberships m
                                  ON m.project_id=r.project_id AND m.user_id=d.owner_id
                                  JOIN mad_projects p ON p.id=r.project_id JOIN mad_requirements q
@@ -117,6 +123,8 @@ def decisions_router(settings,identity,service):
                 raise Problem('decision_not_found',404)
             run=authorized_run(db,row['run_id'],user['id'])
             row['execution_state']=run['status']
+            group=db.execute('SELECT revision FROM mad_requirement_groups WHERE id=%s',(run['group_id'],)).fetchone() if run['group_id'] else None
+            row['outdated']=row['generation']!=run['generation'] or context_changed(db,run) or bool(run['status']!='completed' and group and group['revision']!=run['group_revision'])
             row['group_id']=run['group_id']
             row['project_id']=run['project_id']
             row['missing_resources']=missing_resources(db,run)

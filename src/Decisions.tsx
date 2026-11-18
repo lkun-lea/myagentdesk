@@ -6,6 +6,7 @@ type Decision = { id: string; run_id: string; owner_id: string; group_id?: strin
   question: string; options: string[]; evidence: string[]; checkpoint: number; revision: number;
   state: string; execution_state: string; answer?: string; note?: string; due_at: string;
   project_name?: string; requirement_title?: string; receipt?: { outcome: string; execution_state: string };
+  outdated?: boolean;
   missing_resources?: { id: string; name: string; required_access: string }[];
   references?: { title: string; source: string; revision: number; excerpt: string }[];
   job?: { state: string; reason?: string; attempts: number }; escalations?: { reason: string; created_at: string }[] }
@@ -51,7 +52,7 @@ export function DecisionInbox({ changed, initialDecision }: { changed?: () => vo
     {detail&&!initialDecision&&<Button onClick={()=>setDetail(undefined)}>返回决定列表</Button>}
     {initialDecision&&<a href="/?view=decisions">返回决定列表</a>}
     {visible?.map(item=><article className="mad-context-card" key={item.id}>
-      <div className="mad-page-heading"><h3>{item.question}</h3><Tag>{item.state==='superseded'?'已被替换':executionLabels[item.execution_state]??item.state}</Tag></div>
+      <div className="mad-page-heading"><h3>{item.question}</h3><Tag>{item.state==='superseded'?'已被替换':item.outdated?'版本已变化，需重新核对':executionLabels[item.execution_state]??item.state}</Tag></div>
       <p>{item.project_name} {item.requirement_title}</p>
       <p className="account-muted">运行 {item.run_id} · 原检查点 {item.checkpoint}</p>
       {item.state==='pending'&&new Date(item.due_at)<new Date()&&<Tag color="warning">已逾期，请联系项目负责人</Tag>}
@@ -69,7 +70,7 @@ export function DecisionInbox({ changed, initialDecision }: { changed?: () => vo
           options={item.options.map(value=>({value,label:value}))} onChange={answer=>setAnswers({...answers,[item.id]:{...answers[item.id],answer}})}/></label>
         <label className="mad-group-field">决定说明<Input.TextArea aria-label="决定说明" maxLength={3000} value={answers[item.id]?.note??''}
           onChange={e=>setAnswers({...answers,[item.id]:{...answers[item.id],note:e.target.value}})}/></label>
-        <Button type="primary" loading={busy===item.id} disabled={!!busy||!answers[item.id]?.answer||!answers[item.id]?.note?.trim()}
+        <Button type="primary" loading={busy===item.id} disabled={!!busy||item.outdated||!answers[item.id]?.answer||!answers[item.id]?.note?.trim()}
           onClick={()=>void act(item.id,()=>api('/decisions/'+item.id+'/resolve','POST',{expected_revision:item.revision,...answers[item.id]}))}>确认并继续原运行</Button>
         <details><summary>更正此问题并替换原请求</summary>
           <label className="mad-group-field">替换问题<Input.TextArea aria-label="替换问题" maxLength={3000} value={questions[item.id]??''}
@@ -81,7 +82,7 @@ export function DecisionInbox({ changed, initialDecision }: { changed?: () => vo
             setDetail(undefined)
           })}>替换并使旧入口失效</Button></details>
       </>:item.state==='superseded'?<p>此请求已替换，请从待确认列表打开当前问题。</p>:<><p>已保存决定：{item.answer}</p><p>{item.note}</p>
-        {item.state==='resolved'&&!['running','completed','cancelled'].includes(item.execution_state)&&<Button loading={busy===item.id}
+        {item.state==='resolved'&&!['running','completed','cancelled'].includes(item.execution_state)&&<Button loading={busy===item.id} disabled={!!item.outdated}
           onClick={()=>void act(item.id,()=>api('/decisions/'+item.id+'/resume','POST',{expected_revision:item.revision}))}>核对并续跑原运行</Button>}</>}
     </article>)}
   </section>

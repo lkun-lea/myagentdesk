@@ -170,3 +170,5 @@ def enable_accounts(app, settings, transport, github_transport=None):
     app.include_router(github_router(settings.database_url, identity, settings.github_read_token, github_transport))
     app.include_router(specifications_router(settings.database_url, identity, settings.github_read_token, github_transport))
     app.include_router(release_plan_router(settings.database_url, identity))
+    from server.delivery import delivery_router
+    app.include_router(delivery_router(settings, identity, service, github_transport))

@@ -195,10 +195,14 @@ class AgentService:
                 return
             time.sleep(0.25)
 
-    def group_run(self, db, group, identifier=None):
+    def group_run(self, db, group, identifier=None, *, external=False):
         role = group['stage']
         if role not in {'product', 'development', 'testing'} or group['state'] != 'active':
             raise Problem('stage_changed', 409)
+        if not external and role != 'product' and db.execute(
+            'SELECT 1 FROM mad_delivery_dispatches WHERE group_id=%s LIMIT 1', (group['id'],)
+        ).fetchone():
+            raise Problem('external_execution_required', 409)
         owner = group[role + '_id']
         membership(db, group['project_id'], owner, write=True)
         position = db.execute('SELECT role FROM mad_project_roles WHERE project_id=%s AND user_id=%s', (group['project_id'], owner)).fetchone()

@@ -253,6 +253,8 @@ export function ReleaseTimeline({ project, userId, planId, planRevision, navigat
               <dt>目标日期</dt><dd>{selectedPlan.target_date ?? '待排期'}{overdue(selectedPlan) && ' · 已逾期'}</dd>
               <dt>实际发布</dt><dd>{selectedPlan.actual_published_at ?? '尚无发布回执'}</dd>
             </dl>
+            {['awaiting_build', 'awaiting_release', 'published'].includes(selectedPlan.release_state) &&
+              <Button onClick={() => navigate('projects', { project: project.id, page: 'build', plan: selectedPlan.plan_id })}>查看构建与发布</Button>}
             {selection.kind === 'plan' && selection.milestone !== undefined && selectedPlan.milestones[selection.milestone] &&
               <p>里程碑 {selectedPlan.milestones[selection.milestone].name} · {selectedPlan.milestones[selection.milestone].date}</p>}
             <p>{Object.entries(acceptanceStates).map(([key, label]) => `${label} ${selectedPlan.counts[key as keyof VersionPlan['counts']]}`).join(' · ')}</p>

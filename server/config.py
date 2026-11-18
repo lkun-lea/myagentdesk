@@ -14,6 +14,7 @@ class Settings:
     resource_root: str = ""
     resume_worker: bool = False
     github_read_token: str = field(default='', repr=False)
+    pilot_release_root: str = ''
 
     @classmethod
     def from_env(cls):
@@ -28,4 +29,5 @@ class Settings:
             resource_root=environ.get("MAD_RESOURCE_ROOT", ""),
             resume_worker=environ.get("MAD_RESUME_WORKER", "1") == "1",
             github_read_token=environ.get('MAD_GITHUB_READ_TOKEN', ''),
+            pilot_release_root=environ.get('MAD_PILOT_RELEASE_ROOT', ''),
         )

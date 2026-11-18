@@ -9,6 +9,7 @@ import { ResourcePermissions } from './ResourcePermissions'
 import { GitHubIssues } from './GitHubIssues'
 import { ReleaseTimeline } from './ReleaseTimeline'
 import { Specifications } from './Specifications'
+import { BuildRelease } from './Delivery'
 import { globalViews, ProjectContent, projectPages, Workbench } from './Workbench'
 import type { OpenRoute, Project, ProjectPage, View } from './Workbench'
 import './accounts.css'
@@ -459,6 +460,8 @@ export function AccountWorkspace({ dark, onDemo, toggleTheme }: {
                 : page === 'specs' ? <Specifications key={[user.id, current.id, current.role, location.get('requirement'), location.get('specRevision')].join(':')} project={current}
                   requirementId={validId(location.get('requirement')) ?? undefined} revision={Number(location.get('specRevision')) || undefined}
                   navigate={navigate} onUnavailable={projectError} />
+                : page === 'build' ? <BuildRelease key={user.id + ':' + current.id + ':' + current.role} project={current}
+                  userId={user.id} planId={validId(location.get('plan')) ?? undefined} navigate={navigate} onUnavailable={projectError} />
                 : <ProjectContent key={user.id + ':' + current.id + ':' + page} project={current} page={page} onUnavailable={projectError} navigate={navigate} />}
           </>}
           {projectId && !current && !fault && <Spin aria-label="正在核验项目权限" />}

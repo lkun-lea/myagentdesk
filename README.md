@@ -72,6 +72,14 @@ uv run --locked python -m server.resume_worker
 
 ## 与 tebb 的关系
 
+单需求交付试点可从需求群派发到已有的 tebb 本机沙箱。适配器命令如下，使用获授权的项目克隆、本机命令清单和每个操作者自己的状态目录。按提示输入需求群给出的领取令牌。
+
+```sh
+uv run --locked python scripts/tebb_delivery.py --server http://127.0.0.1:8000 --dispatch UUID --repo PATH --tebb PATH --recipe PATH --state PATH
+```
+
+从「构建与发布」核对独立验收、同提交 CI 和本地渠道回执。运行发布前在服务端配置 `MAD_PILOT_RELEASE_ROOT`。[交付试点设计与验收标准](docs/design/DELIVERY_PILOT.md)
+
 设计来源是 [tebb #314](https://github.com/lkun-lea/tebb/issues/314)。可从 tebb 复用的候选包括目录授权与沙箱、运行回执与证据、账号登录交互和日程交互。官方 Skill 使用 [tebb-skills](https://github.com/lkun-lea/tebb-skills) 固定版本。是否直接复用代码由 [基座与复用边界](https://github.com/lkun-lea/myagentdesk/issues/2) 逐项验证并记录来源和许可。
 
 MyAgentDesk 独立管理应用、账号空间、项目状态和数据，使用官方 Pi SDK 执行模型及工具循环。

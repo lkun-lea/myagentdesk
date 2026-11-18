@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
-import { Alert, Button, Input, Select, Spin, Steps, Tag } from 'antd'
+import { Alert, Button, Checkbox, Input, Select, Spin, Steps, Tag } from 'antd'
 import { api, errorCode, messageFor } from './accounts-api'
 import type { OpenRoute, Project } from './Workbench'
 import { DecisionInbox, DecisionDelegation } from './Decisions'
 export { DecisionInbox } from './Decisions'
 import type { Resource } from './ResourcePermissions'
+import { GroupDelivery } from './Delivery'
 
 type Member = { id: string; email: string; role: string }
 type Position = { user_id: string; role: string }
@@ -13,8 +14,8 @@ type Run = { id: string; role: string; status: string; user_id: string; checkpoi
 type Decision = { id: string; run_id: string; owner_id: string; role?: string; question: string; options: string[];
   evidence: string[]; checkpoint: number; revision: number }
 type Group = { id: string; requirement_id: string; project_id: string; requirement_revision: number; revision: number;
-  stage: string; state: string; source: string; product_id: string; development_id: string; testing_id: string; quality_id: string;
-  runs?: Run[]; pending_decisions?: Decision[]; requirement?: { title: string; body: string; criteria: string[] } }
+  stage: string; state: string; source: string; product_id: string; development_id: string; testing_id: string; quality_id: string; auto_run: boolean;
+  external_execution?: boolean; runs?: Run[]; pending_decisions?: Decision[]; requirement?: { title: string; body: string; criteria: string[] } }
 type Message = { id: string; sequence: number; author: string; kind: string; body: string; created_at: string;
   data: { evidence?: string[]; role?: string; run_id?: string; owner_id?: string; source?: string; stage?: string;
     from_stage?: string; checkpoint?: number; candidate_run?: string; requirement_revision?: number;
@@ -37,6 +38,7 @@ export function RequirementGroups({ project, userId, requirementId, initialGroup
   const [requirements, setRequirements] = useState<Requirement[]>([])
   const [resources,setResources]=useState<Resource[]>([])
   const [resourceIds,setResourceIds]=useState<string[]>([])
+  const [manualDelivery, setManualDelivery] = useState(false)
   const [draft, setDraft] = useState<Record<string, string>>({ requirement_id: requirementId ?? '', quality_id: userId, source: '' })
   const [messages, setMessages] = useState<Message[]>([])
   const [body, setBody] = useState('')
@@ -119,7 +121,7 @@ export function RequirementGroups({ project, userId, requirementId, initialGroup
       <p className="account-muted">这条需求尚未建立协作群。</p>
       {manager && <form className="mad-context-form" onSubmit={event => {
         event.preventDefault(); void act(async () => {
-          const created = await api<Group>(path + '/groups', 'POST', {...draft,development_resources:resourceIds})
+          const created = await api<Group>(path + '/groups', 'POST', {...draft,development_resources:resourceIds,auto_run: !manualDelivery})
           setSelected(created.id)
         })
       }}>
@@ -133,6 +135,7 @@ export function RequirementGroups({ project, userId, requirementId, initialGroup
           onChange={value => {setDraft({ ...draft, [role + '_id']: value });if(role==='development')setResourceIds([])}} /></label>)}
         <label>研发所需产物目录<Select mode="multiple" aria-label="研发所需产物目录" value={resourceIds} onChange={setResourceIds}
           options={resources.filter(r=>r.grants.some(g=>g.user_id===draft.development_id&&g.access==='write')).map(r=>({value:r.id,label:r.name}))}/></label>
+        <Checkbox checked={manualDelivery} onChange={event => setManualDelivery(event.target.checked)}>手动推进，使用 tebb 执行交付试点</Checkbox>
         <Button htmlType="submit" type="primary" loading={busy} disabled={!draft.requirement_id || stages.some(role => !draft[role + '_id'])}>立项并创建需求群</Button>
       </form>}
     </>}
@@ -141,9 +144,11 @@ export function RequirementGroups({ project, userId, requirementId, initialGroup
       <Steps size="small" current={group.stage === 'completed' ? 4 : stages.indexOf(group.stage)} items={stages.map(stage => ({ title: stageNames[stage] }))} />
       <p className="account-muted">需求 v{group.requirement_revision} · 当前负责人 {group.stage === 'completed' ? '已完成' : memberName(group[(group.stage + '_id') as keyof Group] as string)}</p>
       <p>{group.source.startsWith('https://') ? <a href={group.source} target="_blank" rel="noreferrer">需求来源</a> : group.source}</p>
+      <GroupDelivery key={group.id} group={group} project={project} userId={userId} />
       <div className="account-actions">
         <Button onClick={() => navigate('projects', { project: project.id, page: 'specs', requirement: group.requirement_id })}>查看需求群规格</Button>
-        {group.state === 'active' && group[group.stage + '_id' as keyof Group] === userId && <Button type="primary" loading={busy}
+        {group.state === 'active' && group[group.stage + '_id' as keyof Group] === userId &&
+          (!group.external_execution || group.stage === 'product') && <Button type="primary" loading={busy}
           onClick={() => void act(async () => {
             const run = await api<Run>(path + '/runs', 'POST', { id: crypto.randomUUID(), requirement_id: group.requirement_id, group_id: group.id })
             await api('/runs/' + run.id + '/execute', 'POST')

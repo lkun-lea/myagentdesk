@@ -93,15 +93,22 @@ def requirement_blocker(requirement):
     return None
 
 
-def summarize(plan, requirements, managers):
+def summarize(plan, requirements, managers, releases, pilot_plans, approved_builds):
     counts = {state: 0 for state in ('accepted', 'pending', 'blocked')}
     for identifier in plan['requirement_ids']:
         counts[requirements[identifier]['acceptance']] += 1
     plan['counts'] = counts
     plan['owner'] = managers.get(plan['owner_id'])
-    plan['actual_published_at'] = None
-    if plan['status'] == 'committed':
-        plan['release_state'] = 'awaiting_release' if counts['accepted'] and not (counts['pending'] or counts['blocked']) else 'awaiting_acceptance'
+    plan['actual_published_at'] = releases.get((plan['plan_id'], plan['revision']))
+    if plan['actual_published_at']:
+        plan['release_state'] = 'published'
+    elif plan['status'] == 'committed':
+        if not counts['accepted'] or counts['pending'] or counts['blocked']:
+            plan['release_state'] = 'awaiting_acceptance'
+        elif str(plan['plan_id']) in pilot_plans and (plan['plan_id'], plan['revision']) not in approved_builds:
+            plan['release_state'] = 'awaiting_build'
+        else:
+            plan['release_state'] = 'awaiting_release'
     else:
         plan['release_state'] = plan['status']
     return plan
@@ -120,7 +127,14 @@ def release_plan_router(url, identity):
             managers = db.execute('''SELECT u.id,u.email FROM mad_memberships m JOIN mad_users u ON u.id=m.user_id
                 WHERE m.project_id=%s AND m.role IN ('owner','admin') ORDER BY u.email''', (project_id,)).fetchall()
             emails = {row['id']: row['email'] for row in managers}
-            plans = [summarize(row, by_id, emails) for row in db.execute(CURRENT_PLANS, (project_id,))]
+            releases = {(row['plan_id'], row['plan_revision']): row['published_at'] for row in db.execute(
+                'SELECT plan_id,plan_revision,published_at FROM mad_delivery_releases WHERE project_id=%s', (project_id,))}
+            pilots = {row['plan'] for row in db.execute("SELECT DISTINCT input->>'plan_id' AS plan FROM mad_delivery_dispatches WHERE project_id=%s", (project_id,))}
+            builds = {(row['plan_id'], row['plan_revision']) for row in db.execute('''SELECT b.plan_id,b.plan_revision
+                FROM mad_delivery_builds b JOIN mad_delivery_dispatches d ON d.id=b.verification_id
+                JOIN mad_requirement_groups g ON g.id=d.group_id AND g.last_handoff=d.id AND g.stage='completed'
+                WHERE b.project_id=%s''', (project_id,))}
+            plans = [summarize(row, by_id, emails, releases, pilots, builds) for row in db.execute(CURRENT_PLANS, (project_id,))]
             scheduled = {identifier for plan in plans if plan['status'] != 'cancelled' for identifier in plan['requirement_ids']}
             return {'plans': sorted(plans, key=lambda row: (row['target_date'] or date.max, row['name'], row['plan_id'])),
                     'requirements': requirements, 'managers': managers,

@@ -21,6 +21,15 @@ export async function api<T>(path: string, method = 'GET', body?: object): Promi
 }
 
 const messages: Record<string, string> = {
+  dispatch_not_found: '找不到该派发，请核对领取令牌。',
+  dispatch_claimed: '该派发已经由另一台设备领取。',
+  external_execution_required: '该需求的研发和独立验收从 tebb 领取。',
+  delivery_plan_changed: '试点需要当前已承诺、仅包含本需求的计划修订。请核对计划。',
+  delivery_evidence_required: '当前候选尚缺同一版本的独立验收、必过回归或质量放行。',
+  delivery_ci_mismatch: 'CI 回执须是同仓库、同提交且成功的构建运行。',
+  artifact_mismatch: '产物与回执登记的摘要不一致。',
+  artifact_required: '候选产物尚未入档。',
+  release_channel_unavailable: '本地试点发布渠道不可用，请核对服务配置。',
   auth_result_unknown: '认证回执未确认。请核对原请求，再决定是否重新申请。',
   invalid_or_expired_code: '验证码不正确或已过期。请检查邮箱中的最新验证码。',
   rate_limited: '请求过于频繁，请稍后再试。',

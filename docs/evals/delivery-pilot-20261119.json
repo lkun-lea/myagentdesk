@@ -1,0 +1,179 @@
+{
+  "issue": "https://github.com/lkun-lea/myagentdesk/issues/10",
+  "dispatches": [
+    {
+      "id": "0ed547b7-fbbc-4ad1-a539-ae455c96b662",
+      "stage": "testing",
+      "status": "succeeded",
+      "actor": "1a43dda0-59f8-4a1d-853e-99fdca10c9a3",
+      "input": {
+        "base": "4425b7cb4cc8c9a775717d8bcd1ab4f2240dd275",
+        "checks": [
+          "固定规格接口及历史回归"
+        ],
+        "commit": "c6fbba0e950239555c8ca1ff651ea9077b44d804",
+        "digest": "52aa8990dab1037790ca1fb9edfc11dfe99a413d5b87b213d8c066a54a26b8b4",
+        "plan_id": "1228e29e-a775-4904-9821-272e10ee054c",
+        "criteria": [
+          "规格链接固定在完整提交",
+          "改写的验收条件重新待验收"
+        ],
+        "repository": "lkun-lea/myagentdesk",
+        "candidate_id": "e3f30bf6-ba2f-49cd-933e-c2468299a7ca",
+        "plan_revision": 2,
+        "repository_id": 1455643579,
+        "requested_commit": null,
+        "criteria_revision": 2,
+        "connection_revision": 1,
+        "requirement_revision": 2
+      },
+      "receipt": {
+        "checks": [
+          {
+            "key": "criterion:1",
+            "run": "75c1d3ed872e421b884da76a54d89b49",
+            "output": "Full SHA validated and used in directory and proposal permalinks\r\n",
+            "command": "/usr/bin/python3 -c 'from pathlib import Path; import re; backend=Path('\"'\"'server/specifications.py'\"'\"').read_text(); frontend=Path('\"'\"'src/Specifications.tsx'\"'\"').read_text(); assert '\"'\"'r\\'\"'\"'[0-9a-f]{40}\\'\"'\"''\"'\"' in backend; assert '\"'\"'git/commits/{commit}'\"'\"' in backend; assert '\"'\"'tree/${reference.commit}/${reference.directory}'\"'\"' in frontend; assert '\"'\"'blob/${reference.commit}/${reference.directory}/proposal.md'\"'\"' in frontend; print('\"'\"'Full SHA validated and used in directory and proposal permalinks'\"'\"')'",
+            "exit_code": 0,
+            "environment": "WSL + bubblewrap / Ubuntu"
+          },
+          {
+            "key": "criterion:2",
+            "run": "71421cf292c44d3b93ffb06f4b50bd36",
+            "output": "Changed condition pending; unchanged pass remains historical\r\n",
+            "command": "/usr/bin/python3 -c 'from pathlib import Path; import ast; module=ast.parse(Path('\"'\"'server/specifications.py'\"'\"').read_text()); fn=next(n for n in module.body if isinstance(n,ast.FunctionDef) and n.name=='\"'\"'case_statuses'\"'\"'); ns={'\"'\"'testing_evidence'\"'\"': lambda db, row: [{'\"'\"'case_results'\"'\"':[{'\"'\"'criterion'\"'\"':1,'\"'\"'result'\"'\"':'\"'\"'passed'\"'\"'},{'\"'\"'criterion'\"'\"':2,'\"'\"'result'\"'\"':'\"'\"'passed'\"'\"'}]}]}; exec(compile(ast.Module(body=[fn],type_ignores=[]),'\"'\"'server/specifications.py'\"'\"','\"'\"'exec'\"'\"'),ns); spec={'\"'\"'repository_id'\"'\"':1,'\"'\"'change_id'\"'\"':'\"'\"'fixed'\"'\"','\"'\"'tree'\"'\"':'\"'\"'same'\"'\"'}; previous={'\"'\"'criteria'\"'\"':['\"'\"'unchanged'\"'\"','\"'\"'before'\"'\"'],'\"'\"'specification'\"'\"':spec,'\"'\"'title'\"'\"':'\"'\"'pilot'\"'\"','\"'\"'body'\"'\"':'\"'\"'scope'\"'\"'}; current={**previous,'\"'\"'criteria'\"'\"':['\"'\"'unchanged'\"'\"','\"'\"'after'\"'\"']}; data=ns['\"'\"'case_statuses'\"'\"'](None,current,previous,None); assert [(x['\"'\"'status'\"'\"'],x['\"'\"'affected'\"'\"']) for x in data]==[('\"'\"'historical'\"'\"',False),('\"'\"'pending_reverification'\"'\"',True)]; print('\"'\"'Changed condition pending; unchanged pass remains historical'\"'\"')'",
+            "exit_code": 0,
+            "environment": "WSL + bubblewrap / Ubuntu"
+          },
+          {
+            "key": "check:1",
+            "run": "918b4f18d97b4b248f9dbe68acf651d1",
+            "output": "Historical revision lookup, evidence storage and regression coverage present\r\n",
+            "command": "/usr/bin/python3 -c 'from pathlib import Path; backend=Path('\"'\"'server/specifications.py'\"'\"').read_text(); test=Path('\"'\"'tests/test_specifications.py'\"'\"').read_text(); sql=Path('\"'\"'server/migrations/009_fixed_specifications.sql'\"'\"').read_text(); assert '\"'\"'case_results'\"'\"' in sql; assert '\"'\"'WHERE project_id=%s AND id=%s AND revision=%s'\"'\"' in backend; assert '\"'\"'first_evidence'\"'\"' in test and '\"'\"'current\\'\"'\"': False'\"'\"' in test; print('\"'\"'Historical revision lookup, evidence storage and regression coverage present'\"'\"')'",
+            "exit_code": 0,
+            "environment": "WSL + bubblewrap / Ubuntu"
+          }
+        ],
+        "commit": "c6fbba0e950239555c8ca1ff651ea9077b44d804",
+        "digest": "52aa8990dab1037790ca1fb9edfc11dfe99a413d5b87b213d8c066a54a26b8b4",
+        "status": "succeeded"
+      }
+    },
+    {
+      "id": "a3a809e9-dda5-4620-89c4-ee57d2dc968c",
+      "stage": "testing",
+      "status": "failed",
+      "actor": "1a43dda0-59f8-4a1d-853e-99fdca10c9a3",
+      "input": {
+        "base": "4425b7cb4cc8c9a775717d8bcd1ab4f2240dd275",
+        "checks": [
+          "固定规格接口及历史回归"
+        ],
+        "commit": "c6fbba0e950239555c8ca1ff651ea9077b44d804",
+        "digest": "52aa8990dab1037790ca1fb9edfc11dfe99a413d5b87b213d8c066a54a26b8b4",
+        "plan_id": "1228e29e-a775-4904-9821-272e10ee054c",
+        "criteria": [
+          "规格链接固定在完整提交",
+          "改写的验收条件重新待验收"
+        ],
+        "repository": "lkun-lea/myagentdesk",
+        "candidate_id": "e3f30bf6-ba2f-49cd-933e-c2468299a7ca",
+        "plan_revision": 2,
+        "repository_id": 1455643579,
+        "requested_commit": null,
+        "criteria_revision": 2,
+        "connection_revision": 1,
+        "requirement_revision": 2
+      },
+      "receipt": {
+        "checks": [
+          {
+            "key": "criterion:1",
+            "run": "b97e1756702f4a24b07500f8bac24796",
+            "output": "intentional first verification failure\r\n",
+            "command": "/usr/bin/python3 -c 'print('\"'\"'intentional first verification failure'\"'\"'); raise SystemExit(4)'",
+            "exit_code": 4,
+            "environment": "WSL + bubblewrap / Ubuntu"
+          }
+        ],
+        "commit": "c6fbba0e950239555c8ca1ff651ea9077b44d804",
+        "digest": "52aa8990dab1037790ca1fb9edfc11dfe99a413d5b87b213d8c066a54a26b8b4",
+        "status": "failed"
+      }
+    },
+    {
+      "id": "e3f30bf6-ba2f-49cd-933e-c2468299a7ca",
+      "stage": "development",
+      "status": "succeeded",
+      "actor": "35f13668-482a-446b-bbb5-b00be26102ea",
+      "input": {
+        "base": "4425b7cb4cc8c9a775717d8bcd1ab4f2240dd275",
+        "checks": [
+          "固定规格接口及历史回归"
+        ],
+        "commit": "c6fbba0e950239555c8ca1ff651ea9077b44d804",
+        "digest": null,
+        "plan_id": "1228e29e-a775-4904-9821-272e10ee054c",
+        "criteria": [
+          "规格链接固定在完整提交",
+          "改写的验收条件重新待验收"
+        ],
+        "repository": "lkun-lea/myagentdesk",
+        "candidate_id": null,
+        "plan_revision": 2,
+        "repository_id": 1455643579,
+        "requested_commit": "c6fbba0e950239555c8ca1ff651ea9077b44d804",
+        "criteria_revision": 2,
+        "connection_revision": 1,
+        "requirement_revision": 2
+      },
+      "receipt": {
+        "checks": [
+          {
+            "key": "implementation",
+            "run": "61d86474fb0a43bf9f749c0a615e03cf",
+            "output": "Candidate syntax, fixed-reference migration and proposal present\r\n",
+            "command": "/usr/bin/python3 -c 'from pathlib import Path; import ast; src=Path('\"'\"'server/specifications.py'\"'\"'); ast.parse(src.read_text(encoding='\"'\"'utf-8'\"'\"')); assert Path('\"'\"'server/migrations/009_fixed_specifications.sql'\"'\"').is_file(); assert Path('\"'\"'openspec/changes/pin-requirement-specification/proposal.md'\"'\"').is_file(); print('\"'\"'Candidate syntax, fixed-reference migration and proposal present'\"'\"')'",
+            "exit_code": 0,
+            "environment": "WSL + bubblewrap / Ubuntu"
+          }
+        ],
+        "commit": "c6fbba0e950239555c8ca1ff651ea9077b44d804",
+        "digest": "52aa8990dab1037790ca1fb9edfc11dfe99a413d5b87b213d8c066a54a26b8b4",
+        "status": "succeeded"
+      }
+    }
+  ],
+  "builds": [
+    {
+      "candidate_id": "e3f30bf6-ba2f-49cd-933e-c2468299a7ca",
+      "verification_id": "0ed547b7-fbbc-4ad1-a539-ae455c96b662",
+      "project_id": "916abcc5-4bd8-4cf4-813c-19ff27c3be08",
+      "plan_id": "1228e29e-a775-4904-9821-272e10ee054c",
+      "plan_revision": 2,
+      "quality_id": "998ef144-1c6c-4bc7-a363-add6fe18227a",
+      "ci": {
+        "url": "https://github.com/lkun-lea/myagentdesk/actions/runs/44360088551",
+        "commit": "c6fbba0e950239555c8ca1ff651ea9077b44d804",
+        "run_id": 44360088551
+      },
+      "approved_at": "2026-11-19T02:55:51.95326+08:00"
+    }
+  ],
+  "releases": [
+    {
+      "project_id": "916abcc5-4bd8-4cf4-813c-19ff27c3be08",
+      "plan_id": "1228e29e-a775-4904-9821-272e10ee054c",
+      "plan_revision": 2,
+      "candidate_id": "e3f30bf6-ba2f-49cd-933e-c2468299a7ca",
+      "publisher_id": "a6ea796f-52c4-4619-9a96-9492606470e3",
+      "payload": {
+        "commit": "c6fbba0e950239555c8ca1ff651ea9077b44d804",
+        "digest": "52aa8990dab1037790ca1fb9edfc11dfe99a413d5b87b213d8c066a54a26b8b4",
+        "channel": "local-pilot",
+        "filename": "candidate-e3f30bf6-ba2f-49cd-933e-c2468299a7ca.patch"
+      },
+      "published_at": "2026-11-19T02:55:54.590805+08:00"
+    }
+  ]
+}

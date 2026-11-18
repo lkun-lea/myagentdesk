@@ -36,3 +36,4 @@ jobs:
       - run: uv run --locked pytest tests/test_github_issues.py -q
       - run: uv run --locked pytest tests/test_release_plans.py -q
       - run: uv run --locked pytest tests/test_specifications.py -q
+      - run: uv run --locked pytest tests/test_delivery.py -q

@@ -15,7 +15,7 @@ export type VersionPlan = VersionFields & {
   revision: number
   owner: string | null
   counts: Record<'accepted' | 'pending' | 'blocked', number>
-  release_state: 'draft' | 'awaiting_release' | 'awaiting_acceptance' | 'cancelled'
+  release_state: 'draft' | 'awaiting_build' | 'awaiting_release' | 'awaiting_acceptance' | 'cancelled' | 'published'
   actual_published_at: string | null
 }
 export type ScheduledRequirement = {
@@ -27,7 +27,7 @@ export type PlanningData = {
   plans: VersionPlan[]; requirements: ScheduledRequirement[]; managers: { id: string; email: string }[]; unscheduled_ids: string[]
 }
 
-export const planStates = { draft: '计划中', awaiting_release: '等待发布回执', awaiting_acceptance: '等待阶段验收', cancelled: '已取消' }
+export const planStates = { draft: '计划中', awaiting_build: '等待构建放行', awaiting_release: '等待发布回执', awaiting_acceptance: '等待阶段验收', cancelled: '已取消', published: '已发布' }
 export const acceptanceStates = { accepted: '已验收', pending: '待验收', blocked: '阻塞' }
 export const requirementStages: Record<string, string> = { product: '产品确认', development: '实现与自测', testing: '独立验收', quality: '质量复核', completed: '阶段完成' }
 export const blockers: Record<string, { label: string; next: string }> = {

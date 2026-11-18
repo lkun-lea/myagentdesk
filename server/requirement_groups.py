@@ -171,6 +171,8 @@ def groups_router(settings, identity, service):
             group['runs'] = db.execute('''SELECT id,role,status,user_id,checkpoint,group_revision FROM mad_agent_runs
                                          WHERE group_id=%s ORDER BY created_at''', (group_id,)).fetchall()
             group['requirement'] = latest_requirement(db, group['project_id'], group['requirement_id'])
+            group['external_execution'] = db.execute('SELECT 1 FROM mad_delivery_dispatches WHERE group_id=%s LIMIT 1',
+                                                     (group_id,)).fetchone() is not None
             group['pending_decisions'] = db.execute('''SELECT d.*,r.role FROM mad_run_decisions d JOIN mad_agent_runs r ON r.id=d.run_id
                                                       WHERE r.group_id=%s AND (d.state='pending' OR
                                                         (d.state='resolved' AND r.status NOT IN ('completed','cancelled'))) ORDER BY d.created_at''', (group_id,)).fetchall()

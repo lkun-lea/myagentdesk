@@ -6,7 +6,7 @@ import { RequirementGroups } from './RequirementGroups'
 
 type Agent = { id: string; revision: number; model: string; skills: string[] }
 type Configuration = { agent: Agent; models: string[]; skills: string[]; available: boolean }
-type Requirement = { id: string; revision: number; title: string; body: string; criteria: string[] }
+type Requirement = { id: string; revision: number; title: string; body: string; criteria: string[]; specification?: { commit: string } | null }
 type Document = { id: string; revision: number; title: string; source: string; summary: string }
 type Run = { id: string; requirement_id: string; requirement_revision: number; status: string; checkpoint: number;
   config?: { model: string; revision: number; skills: string[] };
@@ -181,6 +181,7 @@ export function ProjectContext({ project, page, userId, initialRequirement, navi
           })}>核对 GitHub Issue #{source.issue_number}</Button>)}
         </div>}
         <div className="account-actions">
+          <Button onClick={() => navigate('projects', { project: project.id, page: 'specs', requirement: selected.id })}>查看固定规格与验收</Button>
           {!grouped && <Button type="primary" loading={busy} onClick={() => void act(async () => {
             if (pendingRun.current?.requirement !== selected.id) pendingRun.current = { id: crypto.randomUUID(), requirement: selected.id }
             const run = await api<Run>(path + '/runs', 'POST', { id: pendingRun.current.id, requirement_id: selected.id })
@@ -191,7 +192,7 @@ export function ProjectContext({ project, page, userId, initialRequirement, navi
         </div>
       </section>}
       {selected && <RequirementGroups key={selected.id} project={project} userId={userId} requirementId={selected.id}
-        onGroup={setGrouped} onUnavailable={onUnavailable} />}
+        onGroup={setGrouped} onUnavailable={onUnavailable} navigate={navigate} />}
       {manager && editingOpen && <form className="mad-context-form" onSubmit={event => {
         event.preventDefault(); void act(async () => {
           await api(path + '/requirements', 'PUT', { ...editing, expected_revision: editing.revision })
@@ -201,8 +202,9 @@ export function ProjectContext({ project, page, userId, initialRequirement, navi
       }}><h3>{editing.revision ? `确认需求新版本 · 当前 v${editing.revision}` : '确认新需求'}</h3>
         <label>需求标题<Input required maxLength={120} value={editing.title} onChange={event => setEditing({ ...editing, title: event.target.value })} /></label>
         <label>需求内容<Input.TextArea required rows={3} maxLength={12000} value={editing.body} onChange={event => setEditing({ ...editing, body: event.target.value })} /></label>
-        <label>验收条件，每行一条<Input.TextArea required rows={3} value={editing.criteria.join('\n')}
+        <label>验收条件，每行一条<Input.TextArea required readOnly={!!editing.specification} rows={3} value={editing.criteria.join('\n')}
           onChange={event => setEditing({ ...editing, criteria: event.target.value.split('\n') })} /></label>
+        {editing.specification && <p className="account-muted">调整验收条件需在规格页确认新的基线。</p>}
         <div className="account-actions"><Button htmlType="submit" loading={busy}>确认需求版本</Button>
           <Button disabled={busy} onClick={() => setEditingOpen(false)}>取消编辑</Button></div>
       </form>}

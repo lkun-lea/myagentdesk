@@ -17,14 +17,15 @@ type Group = { id: string; requirement_id: string; project_id: string; requireme
   runs?: Run[]; pending_decisions?: Decision[]; requirement?: { title: string; body: string; criteria: string[] } }
 type Message = { id: string; sequence: number; author: string; kind: string; body: string; created_at: string;
   data: { evidence?: string[]; role?: string; run_id?: string; owner_id?: string; source?: string; stage?: string;
-    from_stage?: string; checkpoint?: number; candidate_run?: string; context_references?: { document_id: string; revision: number; start_offset: number; end_offset: number }[] } }
+    from_stage?: string; checkpoint?: number; candidate_run?: string; requirement_revision?: number;
+    context_references?: { document_id: string; revision: number; start_offset: number; end_offset: number }[] } }
 const stageNames: Record<string, string> = { product: '产品确认', development: '实现与自测', testing: '独立验收', quality: '质量复核', completed: '已完成' }
 const stages = ['product', 'development', 'testing', 'quality']
 const runNames: Record<string, string> = { queued: '待开始', running: '执行中', waiting_decision: '等待本人决策', waiting_authorization: '已确认，等待授权', paused: '已暂停', failed: '失败可重试', stale: '需要核对版本', completed: '已交接', cancelled: '已取消' }
 
-export function RequirementGroups({ project, userId, requirementId, initialGroup, onGroup, onUnavailable }: {
+export function RequirementGroups({ project, userId, requirementId, initialGroup, onGroup, onUnavailable, navigate }: {
   project: Project; userId: string; requirementId?: string; initialGroup?: string;
-  onGroup?: (value: boolean) => void; onUnavailable: (code: string) => void
+  onGroup?: (value: boolean) => void; onUnavailable: (code: string) => void; navigate: OpenRoute
 }) {
   const path = '/projects/' + project.id
   const manager = project.role !== 'member'
@@ -141,6 +142,7 @@ export function RequirementGroups({ project, userId, requirementId, initialGroup
       <p className="account-muted">需求 v{group.requirement_revision} · 当前负责人 {group.stage === 'completed' ? '已完成' : memberName(group[(group.stage + '_id') as keyof Group] as string)}</p>
       <p>{group.source.startsWith('https://') ? <a href={group.source} target="_blank" rel="noreferrer">需求来源</a> : group.source}</p>
       <div className="account-actions">
+        <Button onClick={() => navigate('projects', { project: project.id, page: 'specs', requirement: group.requirement_id })}>查看需求群规格</Button>
         {group.state === 'active' && group[group.stage + '_id' as keyof Group] === userId && <Button type="primary" loading={busy}
           onClick={() => void act(async () => {
             const run = await api<Run>(path + '/runs', 'POST', { id: crypto.randomUUID(), requirement_id: group.requirement_id, group_id: group.id })
@@ -176,6 +178,9 @@ export function RequirementGroups({ project, userId, requirementId, initialGroup
           {message.data.run_id && <small>运行 {message.data.run_id.slice(0, 8)}</small>}
           {message.data.checkpoint !== undefined && <small>原检查点 {message.data.checkpoint}</small>}
           {message.data.candidate_run && <small>对应研发候选 {message.data.candidate_run.slice(0, 8)}</small>}
+          {message.kind === 'handoff' && message.data.requirement_revision && <Button type="link"
+            onClick={() => navigate('projects', { project: project.id, page: 'specs', requirement: group.requirement_id,
+              specRevision: String(message.data.requirement_revision) })}>查看该次交接的规格 v{message.data.requirement_revision}</Button>}
           {message.data.context_references?.map((ref, index) => <Button key={index} type="link" onClick={() => void act(async () => {
             setOriginal(await api(path + `/context/${ref.document_id}/${ref.revision}`))
           })}>查看阶段依据 v{ref.revision} · {ref.start_offset}–{ref.end_offset}</Button>)}
@@ -204,7 +209,7 @@ export function ProjectChats({ projects, userId, selectedProject, initialGroup, 
   return <section className="mad-page"><h1>聊天</h1>
     <Select aria-label="聊天项目" value={project?.id} options={projects.map(item => ({ value: item.id, label: item.name }))}
       onChange={id => navigate('chat', { project: id })} />
-    {project ? <RequirementGroups key={project.id} project={project} userId={userId} initialGroup={initialGroup} onUnavailable={onUnavailable} />
+    {project ? <RequirementGroups key={project.id} project={project} userId={userId} initialGroup={initialGroup} onUnavailable={onUnavailable} navigate={navigate} />
       : <p className="account-muted">暂无可访问的项目。</p>}
   </section>
 }

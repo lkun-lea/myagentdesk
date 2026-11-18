@@ -176,3 +176,19 @@ def test_authenticated_transport_still_rejects_private_repositories():
     with pytest.raises(Problem) as error:
         upstream.issue(41, 9)
     assert error.value.code == 'github_source_unavailable'
+
+
+def test_authenticated_read_rechecks_visibility_before_returning_issue():
+    repository_reads = 0
+
+    def reply(request):
+        nonlocal repository_reads
+        if request.url.path == '/repositories/41':
+            repository_reads += 1
+            return httpx.Response(200, json={'id': 41, 'full_name': 'example/design', 'private': repository_reads > 1})
+        return httpx.Response(200, json={'number': 9, 'title': 'Now private', 'body': 'Hidden', 'state': 'open'})
+
+    upstream = GitHubIssues('fixture-github-reader', httpx.MockTransport(reply))
+    with pytest.raises(Problem) as error:
+        upstream.issue(41, 9)
+    assert repository_reads == 2 and error.value.code == 'github_source_unavailable'

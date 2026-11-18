@@ -41,6 +41,7 @@ class LinkInput(BaseModel):
 class GitHubIssues:
     def __init__(self, token='', transport=None):
         self.transport = transport
+        self.authenticated = bool(token)
         self.headers = {'Accept': 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28',
                         'User-Agent': 'MyAgentDesk/0.1'}
         if token:
@@ -83,6 +84,9 @@ class GitHubIssues:
     def issue(self, repository_id, number):
         name, _ = self.repository(f'/repositories/{repository_id}', repository_id)
         issue = self.read(f'/repositories/{repository_id}/issues/{number}')
+        if self.authenticated:
+            # A credential could still read the issue if visibility changed during the first request.
+            name, _ = self.repository(f'/repositories/{repository_id}', repository_id)
         if 'pull_request' in issue or issue.get('number') != number:
             raise Problem('github_issue_not_found', 404)
         if issue.get('state') not in {'open', 'closed'} or not isinstance(issue.get('title'), str):

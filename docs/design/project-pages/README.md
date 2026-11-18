@@ -1,5 +1,7 @@
 # 项目页面设计
 
+项目的真实 GitHub 单条关联入口及浏览器截图见 [GitHub Issue 只读关联](../GITHUB_ISSUES.md)。
+
 项目页面草图已评审。时间线采用[已确认的全宽时间轴与 Issue 右栏](#时间线与-issue-详情)。[项目五页预览](project-pages.html) 可沿同一条示例需求切换事件记录、需求、规格、资料和构建发布。[五页可编辑源稿](project-pages.fragment.html)
 
 | 页面 | 图稿 | 实施 issue |

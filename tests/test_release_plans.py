@@ -41,12 +41,16 @@ def test_schedule_linked_issue_and_revise_with_current_membership(github_project
     assert current['plans'][0]['counts'] == {'accepted': 0, 'pending': 1, 'blocked': 0}
     assert current['plans'][0]['actual_published_at'] is None
     update = {**initial, 'expected_revision': 1, 'requirement_ids': [], 'reason': '延期并移出试点'}
+    assert owner.patch(path + '/members/' + member_id, json={'role': 'admin'}).status_code == 200
     with ThreadPoolExecutor(2) as workers:
-        replies = list(workers.map(lambda target: owner.put(version, json={**update, 'target_date': target}), ['2026-11-22', '2026-11-24']))
+        first = workers.submit(owner.put, version, json={**update, 'target_date': '2026-11-22'})
+        second = workers.submit(member.put, version, json={**update, 'target_date': '2026-11-24'})
+        replies = [first.result(), second.result()]
     assert sorted(reply.status_code for reply in replies) == [200, 409]
     history = member.get(version + '/history').json()['revisions']
     assert [row['revision'] for row in history] == [2, 1]
-    assert history[0]['reason'] == update['reason'] and history[0]['actor_id'] == owner_id
+    winner = owner_id if replies[0].status_code == 200 else member_id
+    assert history[0]['reason'] == update['reason'] and history[0]['actor_id'] == winner
     assert history[0]['requirement_ids'] == [] and history[1]['requirement_ids'] == [requirement]
     assert member.get(version + '/history/1').json()['target_date'] == initial['target_date']
     assert member.get(plans).json()['plans'][0]['counts']['pending'] == 0

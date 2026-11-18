@@ -12,6 +12,8 @@
 
 版本计数以当前范围和 #6 的有效阶段验收为准。等待本人、等待授权、改派待接手、失败和已失效证据显示阻塞。日期只表示计划，完成阶段验收后仍等待发布。实际发布字段预留给 #11 核验后的回执，本切片没有发布操作。
 
+[全宽实机截图](project-pages/release-timeline-live.png) · [阻塞详情右栏](project-pages/release-timeline-detail.png) · [390px 深色](project-pages/release-timeline-mobile.png) · [逐项验收](../evals/release-timeline-20261118.md)
+
 ## 状态与职责
 
 | 记录 | 维护者与更新规则 |

@@ -109,7 +109,11 @@ TOOLS = [
         "start": {"type": "integer"}, "end": {"type": "integer"}}, "required": ["id", "revision", "start", "end"], "additionalProperties": False}},
     {"name": "read_handoff", "description": "独立测试读取当前需求修订对应的研发交接和证据。", "parameters": {
         "type": "object", "properties": {}, "additionalProperties": False}},
-    {"name": "submit_handoff", "description": "提交本阶段结论和具体证据。测试必须先读取研发交接并独立读资料。", "parameters": {
+    {"name": "submit_handoff", "description": "提交本阶段结论和具体证据。测试必须先读取研发交接并独立读资料；固定规格的需求须为每条验收条件提交 case_results，criterion 从 1 开始。", "parameters": {
         "type": "object", "properties": {"summary": {"type": "string"}, "evidence": {"type": "array", "items": {"type": "string"}},
-        "verdict": {"type": "string", "enum": ["delivered", "passed", "rejected"]}}, "required": ["summary", "evidence", "verdict"], "additionalProperties": False}},
+        "verdict": {"type": "string", "enum": ["delivered", "passed", "rejected"]},
+        "case_results": {"type": "array", "items": {"type": "object", "properties": {
+            "criterion": {"type": "integer"}, "result": {"type": "string", "enum": ["passed", "rejected"]},
+            "evidence": {"type": "string"}}, "required": ["criterion", "result", "evidence"], "additionalProperties": False}}},
+        "required": ["summary", "evidence", "verdict"], "additionalProperties": False}},
 ]

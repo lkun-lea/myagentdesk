@@ -35,14 +35,26 @@ class RequirementInput(RequirementContent):
     expected_revision: int = Field(ge=0)
 
 
-def save_requirement(db, project_id, data, author):
-    previous = db.execute('SELECT coalesce(max(revision),0) AS revision FROM mad_requirements WHERE project_id=%s AND id=%s',
-                          (project_id, data.id)).fetchone()['revision']
-    if previous != data.expected_revision:
+def save_requirement(db, project_id, data, author, *, specification=None):
+    previous = db.execute('''SELECT revision,criteria,specification FROM mad_requirements
+                            WHERE project_id=%s AND id=%s ORDER BY revision DESC LIMIT 1''',
+                          (project_id, data.id)).fetchone()
+    previous_revision = previous['revision'] if previous else 0
+    if previous_revision != data.expected_revision:
         raise Problem('version_conflict', 409)
-    revision = previous + 1
-    db.execute('INSERT INTO mad_requirements (project_id,id,revision,title,body,criteria,author) VALUES (%s,%s,%s,%s,%s,%s,%s)',
-               (project_id, data.id, revision, data.title, data.body, Jsonb(data.criteria), author))
+    revision = previous_revision + 1
+    prior_pin = previous['specification'] if previous else None
+    if specification is None and prior_pin:
+        if previous['criteria'] != data.criteria:
+            raise Problem('spec_confirmation_required', 409)
+        specification = prior_pin
+    if specification is not None:
+        same_criteria = prior_pin and previous['criteria'] == data.criteria
+        specification = {**specification, 'criteria_revision': prior_pin['criteria_revision'] if same_criteria else revision}
+    db.execute('''INSERT INTO mad_requirements (project_id,id,revision,title,body,criteria,author,specification)
+                  VALUES (%s,%s,%s,%s,%s,%s,%s,%s)''',
+               (project_id, data.id, revision, data.title, data.body, Jsonb(data.criteria), author,
+                Jsonb(specification) if specification is not None else None))
     if previous:
         from server.requirement_groups import restart_group
         restart_group(db, project_id, data.id, revision, author)
@@ -125,6 +137,27 @@ def document_list(db, project, query=""):
                       (project, query)).fetchall()
 
 
+def acceptance_cases(requirement, cases, verdict):
+    if not requirement['specification']:
+        return []
+    criteria = requirement['criteria']
+    if not isinstance(cases, list) or len(cases) != len(criteria):
+        raise Problem('evidence_required', 409)
+    indexed = {}
+    for case in cases:
+        if not isinstance(case, dict):
+            raise Problem('invalid_request', 422)
+        number, result, proof = case.get('criterion'), case.get('result'), case.get('evidence')
+        if (type(number) is not int or not 1 <= number <= len(criteria) or number in indexed
+                or result not in ('passed', 'rejected') or not isinstance(proof, str)
+                or not 1 <= len(proof.strip()) <= 2000 or len(proof) > 2000):
+            raise Problem('invalid_request', 422)
+        indexed[number] = {'criterion': number, 'result': result, 'evidence': proof}
+    if (verdict == 'passed') != all(case['result'] == 'passed' for case in indexed.values()):
+        raise Problem('invalid_request', 422)
+    return [indexed[number] for number in range(1, len(criteria) + 1)]
+
+
 def context_tool(db, run, tool, args, call_id=None):
     project = run["project_id"]
     if tool == 'request_decision':
@@ -190,6 +223,7 @@ def context_tool(db, run, tool, args, call_id=None):
             raise Problem("evidence_required", 409)
         candidate = None
         verdict = "delivered"
+        cases = []
         if run["role"] == "testing":
             original = context_tool(db, run, "read_handoff", {})
             candidate = UUID(original["run_id"])
@@ -202,6 +236,7 @@ def context_tool(db, run, tool, args, call_id=None):
             verdict = args.get("verdict")
             if verdict not in {"passed", "rejected"}:
                 raise Problem("invalid_request", 422)
+            cases = acceptance_cases(latest_requirement(db, project, run['requirement_id']), args.get('case_results'), verdict)
         elif run['role'] == 'product' and run.get('group_id'):
             verdict = 'proposed'
         elif run["role"] != "development":
@@ -209,13 +244,15 @@ def context_tool(db, run, tool, args, call_id=None):
         references = db.execute("SELECT document_id,revision,start_offset,end_offset FROM mad_run_references WHERE run_id=%s AND active",
                                 (run["id"],)).fetchall()
         db.execute("""INSERT INTO mad_handoffs (run_id,project_id,requirement_id,requirement_revision,author,role,
-                       summary,evidence,verdict,candidate_run,context_references) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                       summary,evidence,verdict,candidate_run,context_references,case_results)
+                       VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
                        ON CONFLICT (run_id) DO UPDATE SET requirement_revision=excluded.requirement_revision,
                        summary=excluded.summary,evidence=excluded.evidence,verdict=excluded.verdict,
-                       candidate_run=excluded.candidate_run,context_references=excluded.context_references""",
+                       candidate_run=excluded.candidate_run,context_references=excluded.context_references,
+                       case_results=excluded.case_results""",
                    (run["id"], project, run["requirement_id"], run["requirement_revision"], run["user_id"],
                     run["role"], summary, Jsonb(evidence), verdict, candidate, Jsonb([
-                        {**ref, "document_id": str(ref["document_id"])} for ref in references])))
+                        {**ref, "document_id": str(ref["document_id"])} for ref in references]), Jsonb(cases)))
         return {"run_id": str(run["id"]), "verdict": verdict, "submitted": True}
     raise Problem("tool_unavailable", 404)
 

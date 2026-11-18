@@ -103,6 +103,8 @@ class AgentService:
                     bundle = {"run_id": str(run['id']), "generation": run['generation'], "execution_revision":run['execution_revision'],"role": run["role"], "requirement": {key: requirement[key] for key in ("id", "revision", "title", "body", "criteria")},
                               "checkpoint": run["checkpoint"], "receipts": receipts,
                               "skills": [SKILLS[name] for name in run["config"]["skills"]]}
+                    if requirement['specification']:
+                        bundle['requirement']['specification'] = requirement['specification']
                     bundle['decisions'] = db.execute('''SELECT question,answer,note,checkpoint FROM mad_run_decisions
                                                        WHERE run_id=%s AND generation=%s AND state='resolved' ORDER BY created_at''',
                                                     (run_id, run['generation'])).fetchall()
@@ -150,7 +152,7 @@ class AgentService:
                             if exc.code in {'invalid_request', 'evidence_required', 'handoff_not_found'}:
                                 return {'error': exc.code, 'message': {
                                     'invalid_request': '工具参数无效。read_context 需 0 <= start < end <= start + 4000，按目录中真实 id 和版本分段读取；其他工具请核对参数定义。',
-                                    'evidence_required': '交接须先读取原文并给出具体证据；独立测试还须先读取当前研发交接。',
+                                    'evidence_required': '交接须先读取原文并给出具体证据。独立测试还须读取当前研发交接；固定规格的需求须逐条提交 case_results。',
                                     'handoff_not_found': '当前需求尚无可供独立测试读取的研发交接，请核对阶段及已有工具结果。',
                                 }[exc.code]}
                             raise
@@ -405,6 +407,10 @@ def agents_router(settings, identity, service=None):
             requirement = latest_requirement(db, row["project_id"], row["requirement_id"])
             if requirement["revision"] != data.expected_revision:
                 raise Problem("version_conflict", 409)
+            if requirement['specification'] and db.execute(
+                'SELECT 1 FROM mad_handoffs WHERE run_id=%s', (run_id,)
+            ).fetchone():
+                raise Problem('run_completed', 409)
             for ref in db.execute("SELECT DISTINCT document_id FROM mad_run_references WHERE run_id=%s AND active", (run_id,)).fetchall():
                 revision = db.execute("SELECT max(revision) AS revision FROM mad_context_documents WHERE project_id=%s AND id=%s",
                                       (row["project_id"], ref["document_id"])).fetchone()["revision"]

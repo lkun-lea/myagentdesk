@@ -11,7 +11,7 @@ from server.projects import projects_router
 from server.sessions import Sessions, new_flow
 from server.workbench import workbench_router
 from server.project_context import context_router
-from server.agents import agents_router
+from server.agents import agents_router, AgentService
 
 
 class SendCode(BaseModel):
@@ -161,4 +161,6 @@ def enable_accounts(app, settings, transport):
     app.include_router(projects_router(settings.database_url, identity))
     app.include_router(workbench_router(settings.database_url, identity))
     app.include_router(context_router(settings.database_url, identity))
-    app.include_router(agents_router(settings, identity))
+    service=AgentService(settings)
+    app.state.agent_service=service
+    app.include_router(agents_router(settings, identity, service))

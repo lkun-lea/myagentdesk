@@ -2,6 +2,9 @@ import { useEffect, useRef, useState } from 'react'
 import { Alert, Button, Input, Select, Spin, Steps, Tag } from 'antd'
 import { api, errorCode, messageFor } from './accounts-api'
 import type { OpenRoute, Project } from './Workbench'
+import { DecisionInbox, DecisionDelegation } from './Decisions'
+export { DecisionInbox } from './Decisions'
+import type { Resource } from './ResourcePermissions'
 
 type Member = { id: string; email: string; role: string }
 type Position = { user_id: string; role: string }
@@ -17,47 +20,7 @@ type Message = { id: string; sequence: number; author: string; kind: string; bod
     from_stage?: string; checkpoint?: number; candidate_run?: string; context_references?: { document_id: string; revision: number; start_offset: number; end_offset: number }[] } }
 const stageNames: Record<string, string> = { product: '产品确认', development: '实现与自测', testing: '独立验收', quality: '质量复核', completed: '已完成' }
 const stages = ['product', 'development', 'testing', 'quality']
-const runNames: Record<string, string> = { queued: '待开始', running: '执行中', waiting_decision: '等待本人决策', paused: '已暂停', failed: '失败可重试', stale: '需要核对版本', completed: '已交接', cancelled: '已取消' }
-
-export function DecisionInbox({ changed }: { changed?: () => void }) {
-  const [items, setItems] = useState<Decision[]>()
-  const [answers, setAnswers] = useState<Record<string, { answer?: string; note?: string }>>({})
-  const [error, setError] = useState('')
-  const [busy, setBusy] = useState('')
-  const [reload, setReload] = useState(0)
-  useEffect(() => {
-    let active = true
-    const read = () => api<Decision[]>('/decisions').then(value => { if (active) setItems(value) }).catch(failure => {
-      if (active) setError(messageFor(errorCode(failure)))
-    })
-    void read()
-    const timer = window.setInterval(read, 3000)
-    return () => { active = false; window.clearInterval(timer) }
-  }, [reload])
-  return <section className="mad-page"><h2>待我决策</h2>
-    {error && <Alert type="error" showIcon message={error} />}
-    {!items && !error && <Spin />}
-    {items?.length === 0 && <p className="account-muted">暂无待处理的决定。</p>}
-    {items?.map(item => <article className="mad-context-card" key={item.id}>
-      <h3>{item.question}</h3><p className="account-muted">运行 {item.run_id.slice(0, 8)} · 检查点 {item.checkpoint}</p>
-      <ul>{item.evidence.map((line, index) => <li key={index}>{line}</li>)}</ul>
-      <label className="mad-group-field">选择方案<Select aria-label="决策方案" value={answers[item.id]?.answer}
-        options={item.options.map(option => ({ value: option, label: option }))}
-        onChange={answer => setAnswers({ ...answers, [item.id]: { ...answers[item.id], answer } })} /></label>
-      <label className="mad-group-field">决定说明<Input.TextArea aria-label="决定说明" maxLength={3000} value={answers[item.id]?.note ?? ''}
-        onChange={event => setAnswers({ ...answers, [item.id]: { ...answers[item.id], note: event.target.value } })} /></label>
-      <Button type="primary" loading={busy === item.id} disabled={!!busy || !answers[item.id]?.answer || !answers[item.id]?.note?.trim()}
-        onClick={async () => {
-          setBusy(item.id); setError('')
-          try {
-            await api('/decisions/' + item.id + '/resolve', 'POST', { expected_revision: item.revision, ...answers[item.id] })
-            setReload(value => value + 1); changed?.()
-          } catch (failure) { setError(messageFor(errorCode(failure))) }
-          finally { setBusy('') }
-        }}>确认并继续原运行</Button>
-    </article>)}
-  </section>
-}
+const runNames: Record<string, string> = { queued: '待开始', running: '执行中', waiting_decision: '等待本人决策', waiting_authorization: '已确认，等待授权', paused: '已暂停', failed: '失败可重试', stale: '需要核对版本', completed: '已交接', cancelled: '已取消' }
 
 export function RequirementGroups({ project, userId, requirementId, initialGroup, onGroup, onUnavailable }: {
   project: Project; userId: string; requirementId?: string; initialGroup?: string;
@@ -71,11 +34,12 @@ export function RequirementGroups({ project, userId, requirementId, initialGroup
   const [members, setMembers] = useState<Member[]>([])
   const [positions, setPositions] = useState<Position[]>([])
   const [requirements, setRequirements] = useState<Requirement[]>([])
+  const [resources,setResources]=useState<Resource[]>([])
+  const [resourceIds,setResourceIds]=useState<string[]>([])
   const [draft, setDraft] = useState<Record<string, string>>({ requirement_id: requirementId ?? '', quality_id: userId, source: '' })
   const [messages, setMessages] = useState<Message[]>([])
   const [body, setBody] = useState('')
   const [note, setNote] = useState('')
-  const [replacement, setReplacement] = useState<Record<string, string>>({})
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
   const [reload, setReload] = useState(0)
@@ -91,9 +55,10 @@ export function RequirementGroups({ project, userId, requirementId, initialGroup
   useEffect(() => {
     let active = true
     Promise.all([api<Group[]>(path + '/groups'), api<Member[]>(path + '/members'), api<Position[]>(path + '/roles'),
-      api<Requirement[]>(path + '/requirements')]).then(([value, people, roles, req]) => {
+      api<Requirement[]>(path + '/requirements'),api<{resources:Resource[]}>(path+'/resources')]).then(([value, people, roles, req, directory]) => {
       if (!active) return
       setGroups(value); setMembers(people); setPositions(roles); setRequirements(req); setReady(true)
+      setResources(directory.resources)
       onGroup?.(value.some(item => item.requirement_id === requirementId))
     }).catch(failure => {
       if (!active) return
@@ -153,7 +118,7 @@ export function RequirementGroups({ project, userId, requirementId, initialGroup
       <p className="account-muted">这条需求尚未建立协作群。</p>
       {manager && <form className="mad-context-form" onSubmit={event => {
         event.preventDefault(); void act(async () => {
-          const created = await api<Group>(path + '/groups', 'POST', draft)
+          const created = await api<Group>(path + '/groups', 'POST', {...draft,development_resources:resourceIds})
           setSelected(created.id)
         })
       }}>
@@ -164,7 +129,9 @@ export function RequirementGroups({ project, userId, requirementId, initialGroup
         {stages.map(role => <label key={role}>{stageNames[role]}负责人<Select aria-label={stageNames[role] + '负责人'}
           value={draft[role + '_id']} options={members.filter(member => role === 'quality' ? member.role !== 'member'
             : positions.some(position => position.user_id === member.id && position.role === role)).map(member => ({ value: member.id, label: member.email }))}
-          onChange={value => setDraft({ ...draft, [role + '_id']: value })} /></label>)}
+          onChange={value => {setDraft({ ...draft, [role + '_id']: value });if(role==='development')setResourceIds([])}} /></label>)}
+        <label>研发所需产物目录<Select mode="multiple" aria-label="研发所需产物目录" value={resourceIds} onChange={setResourceIds}
+          options={resources.filter(r=>r.grants.some(g=>g.user_id===draft.development_id&&g.access==='write')).map(r=>({value:r.id,label:r.name}))}/></label>
         <Button htmlType="submit" type="primary" loading={busy} disabled={!draft.requirement_id || stages.some(role => !draft[role + '_id'])}>立项并创建需求群</Button>
       </form>}
     </>}
@@ -189,17 +156,11 @@ export function RequirementGroups({ project, userId, requirementId, initialGroup
           }))}>{action === 'approve' ? (group.stage === 'quality' ? '复核通过并完成需求' : '确认产品方案') : '退回并说明原因'}</Button>)}</div>
       </section>}
       {group.state === 'waiting_decision' && <Alert type="warning" showIcon message="Agent 正在等待本人决策，原运行和检查点已保留。" />}
+      {group.state === 'waiting_authorization' && <Alert type="warning" showIcon message="本人决定已保存，原运行等待目录授权恢复。" />}
+      {group.state === 'awaiting_takeover' && <Alert type="info" showIcon message="决定与检查点已转交，等待替补核对后续跑。" />}
       {group.pending_decisions?.some(item => item.owner_id === userId) && <DecisionInbox changed={() => setReload(value => value + 1)} />}
-      {manager && group.pending_decisions?.filter(item => item.owner_id !== userId).map(item => <section className="mad-context-card" key={item.id}>
-        <h3>{item.question}</h3><p>待处理成员 · {memberName(item.owner_id)}</p>
-        <Select aria-label="决策替补" placeholder="选择同岗位替补" value={replacement[item.id]}
-          options={members.filter(member => positions.some(position => position.user_id === member.id && position.role === item.role))
-            .map(member => ({ value: member.id, label: member.email }))}
-          onChange={value => setReplacement({ ...replacement, [item.id]: value })} />
-        <Button disabled={!replacement[item.id] || busy} onClick={() => void act(() => api('/decisions/' + item.id + '/reassign', 'POST', {
-          member_id: replacement[item.id], expected_revision: item.revision,
-        }))}>转交决定与原运行</Button>
-      </section>)}
+      {manager && group.pending_decisions?.filter(item => item.owner_id !== userId).map(item =>
+        <DecisionDelegation key={item.id} decision={item} changed={() => setReload(value => value + 1)} />)}
       {runDetail && <section className="mad-context-card"><h3>我的原运行 {runDetail.id.slice(0, 8)}</h3>
         <p>{runNames[runDetail.status]} · 检查点 {runDetail.checkpoint}</p>
         <details><summary>阶段工具与证据</summary>{runDetail.events?.filter(item => item.kind !== 'text_delta').slice(-25)

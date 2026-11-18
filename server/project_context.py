@@ -103,7 +103,7 @@ def document_list(db, project, query=""):
 def context_tool(db, run, tool, args, call_id=None):
     project = run["project_id"]
     if tool == 'request_decision':
-        from server.requirement_groups import request_decision
+        from server.decisions import request_decision
         return request_decision(db, run, args, call_id)
     if tool == 'read_group_messages':
         if not run.get('group_id'):

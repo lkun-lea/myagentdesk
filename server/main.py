@@ -1,5 +1,8 @@
 from mimetypes import add_type
 from pathlib import Path
+from contextlib import asynccontextmanager
+from threading import Thread
+import asyncio
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
@@ -15,7 +18,21 @@ from server.errors import Problem
 
 def create_app(settings: Settings | None = None, *, static_dir: Path | None = None, auth_transport=None):
     settings = settings or Settings.from_env()
-    app = FastAPI(title="MyAgentDesk", version="0.1.0", docs_url=None, redoc_url=None, openapi_url=None)
+    @asynccontextmanager
+    async def lifespan(app):
+        thread=None
+        if settings.resume_worker and settings.database_url:
+            from server.resume_worker import serve
+            app.state.agent_service.stopping.clear()
+            thread=Thread(target=serve,args=(app.state.agent_service,),daemon=True)
+            thread.start()
+        try:
+            yield
+        finally:
+            if thread:
+                app.state.agent_service.stopping.set()
+                await asyncio.to_thread(thread.join,5)
+    app = FastAPI(title="MyAgentDesk", version="0.1.0", docs_url=None, redoc_url=None, openapi_url=None,lifespan=lifespan)
 
     @app.middleware("http")
     async def protect_api(request: Request, call_next):

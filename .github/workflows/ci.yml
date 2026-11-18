@@ -32,3 +32,4 @@ jobs:
       - run: uv run --locked pytest tests/test_accounts.py -q
       - run: uv run --locked pytest tests/test_project_context.py -q
       - run: uv run --locked pytest tests/test_requirement_groups.py -q
+      - run: uv run --locked pytest tests/test_decision_recovery.py -q

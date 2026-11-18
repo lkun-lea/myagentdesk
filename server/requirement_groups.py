@@ -1,5 +1,5 @@
 from typing import Literal
-from uuid import UUID, uuid4, uuid5, NAMESPACE_URL
+from uuid import UUID, uuid4
 
 from fastapi import APIRouter, BackgroundTasks, Depends
 from psycopg.types.json import Jsonb
@@ -19,6 +19,7 @@ class GroupInput(BaseModel):
     testing_id: UUID
     quality_id: UUID
     auto_run: bool = True
+    development_resources: list[UUID] = Field(default_factory=list, max_length=8)
 
 
 class GroupMessage(BaseModel):
@@ -30,17 +31,6 @@ class StageDecision(BaseModel):
     expected_revision: int
     action: Literal['approve', 'return']
     note: str = Field(min_length=1, max_length=3000)
-
-
-class AnswerInput(BaseModel):
-    expected_revision: int
-    answer: str = Field(min_length=1, max_length=1000)
-    note: str = Field(min_length=1, max_length=3000)
-
-
-class ReassignInput(BaseModel):
-    member_id: UUID
-    expected_revision: int
 
 
 def group_scope(db, group_id, user_id):
@@ -102,31 +92,6 @@ def group_handoff(db, run, result):
     db.execute("UPDATE mad_agent_runs SET status='completed' WHERE id=%s", (run['id'],))
 
 
-def request_decision(db, run, args, call_id):
-    group = check_group_run(db, run)
-    question, options, evidence = args.get('question'), args.get('options'), args.get('evidence')
-    if not isinstance(question, str) or not 1 <= len(question) <= 3000:
-        raise Problem('invalid_request', 422)
-    if not isinstance(options, list) or not 2 <= len(options) <= 5 or any(not isinstance(option, str) or not 1 <= len(option) <= 1000 for option in options):
-        raise Problem('invalid_request', 422)
-    if not isinstance(evidence, list) or not 1 <= len(evidence) <= 12 or any(not isinstance(item, str) or not 1 <= len(item) <= 2000 for item in evidence):
-        raise Problem('evidence_required', 422)
-    identifier = uuid5(NAMESPACE_URL, f"mad:decision:{run['id']}:{run['generation']}:{call_id}")
-    db.execute('''INSERT INTO mad_run_decisions (id,run_id,generation,owner_id,question,options,evidence,checkpoint)
-                  VALUES (%s,%s,%s,%s,%s,%s,%s,%s) ON CONFLICT DO NOTHING''',
-               (identifier, run['id'], run['generation'], run['user_id'], question, Jsonb(options), Jsonb(evidence), run['checkpoint'] + 1))
-    decision = db.execute("SELECT id FROM mad_run_decisions WHERE run_id=%s AND generation=%s AND state='pending'",
-                          (run['id'], run['generation'])).fetchone()
-    db.execute("UPDATE mad_agent_runs SET status='waiting_decision' WHERE id=%s", (run['id'],))
-    event(db, run['id'], 'decision_requested', {'decision_id': str(decision['id']), 'checkpoint': run['checkpoint'] + 1})
-    if group:
-        db.execute("UPDATE mad_requirement_groups SET state='waiting_decision' WHERE id=%s", (group['id'],))
-        group_message(db, group, run['user_id'], 'decision', question,
-                      {'decision_id': str(decision['id']), 'owner_id': str(run['user_id']), 'run_id': str(run['id']),
-                       'options': options, 'evidence': evidence, 'checkpoint': run['checkpoint'] + 1, 'generation': run['generation']})
-    return {'decision_id': str(decision['id']), 'state': 'pending', 'owner_id': str(run['user_id'])}
-
-
 def restart_group(db, project_id, requirement_id, revision, author):
     group = db.execute('SELECT * FROM mad_requirement_groups WHERE project_id=%s AND requirement_id=%s',
                        (project_id, requirement_id)).fetchone()
@@ -181,6 +146,12 @@ def groups_router(settings, identity, service):
                        (group_id, project_id, data.requirement_id, requirement['revision'], data.source,
                         data.product_id, data.development_id, data.testing_id, data.quality_id, data.auto_run))
             group = group_scope(db, group_id, user['id'])
+            for resource in set(data.development_resources):
+                found = db.execute('SELECT 1 FROM mad_project_resources WHERE id=%s AND project_id=%s', (resource,project_id)).fetchone()
+                grant = db.execute('SELECT access FROM mad_resource_grants WHERE resource_id=%s AND user_id=%s', (resource,data.development_id)).fetchone()
+                if not found or not grant or grant['access']!='write':
+                    raise Problem('authorization_required',409)
+                db.execute('INSERT INTO mad_group_resources VALUES (%s,%s)', (group_id,resource))
             group_message(db, group, user['id'], 'created', '需求已立项，产品阶段待推进。', {'source': data.source})
             record(db, project_id, user['id'], group_id, 'requirement_group_created')
             if group['auto_run']:
@@ -201,7 +172,8 @@ def groups_router(settings, identity, service):
                                          WHERE group_id=%s ORDER BY created_at''', (group_id,)).fetchall()
             group['requirement'] = latest_requirement(db, group['project_id'], group['requirement_id'])
             group['pending_decisions'] = db.execute('''SELECT d.*,r.role FROM mad_run_decisions d JOIN mad_agent_runs r ON r.id=d.run_id
-                                                      WHERE r.group_id=%s AND d.state='pending' ORDER BY d.created_at''', (group_id,)).fetchall()
+                                                      WHERE r.group_id=%s AND (d.state='pending' OR
+                                                        (d.state='resolved' AND r.status NOT IN ('completed','cancelled'))) ORDER BY d.created_at''', (group_id,)).fetchall()
             return group
 
     @router.get('/groups/{group_id}/messages')
@@ -256,79 +228,7 @@ def groups_router(settings, identity, service):
                 background.add_task(service.drive, group_id)
             return result
 
-    @router.get('/decisions')
-    def decisions(user=authenticated):
-        with connect(settings.database_url) as db:
-            return db.execute('''SELECT d.*,r.project_id,r.group_id,r.requirement_id FROM mad_run_decisions d
-                                 JOIN mad_agent_runs r ON r.id=d.run_id JOIN mad_memberships m
-                                 ON m.project_id=r.project_id AND m.user_id=d.owner_id
-                                 WHERE d.owner_id=%s AND d.state='pending' ORDER BY d.created_at''', (user['id'],)).fetchall()
-
-    @router.post('/decisions/{decision_id}/resolve')
-    def resolve(decision_id: UUID, data: AnswerInput, background: BackgroundTasks, user=authenticated):
-        with connect(settings.database_url) as db:
-            decision = db.execute('SELECT * FROM mad_run_decisions WHERE id=%s AND owner_id=%s', (decision_id, user['id'])).fetchone()
-            if not decision:
-                raise Problem('decision_not_found', 404)
-            run = authorized_run(db, decision['run_id'], user['id'], lock=True)
-            decision = db.execute('SELECT * FROM mad_run_decisions WHERE id=%s FOR UPDATE', (decision_id,)).fetchone()
-            if decision['state'] == 'resolved':
-                if decision['answer'] != data.answer or decision['note'] != data.note:
-                    raise Problem('operation_conflict', 409)
-            else:
-                check_group_run(db, run)
-                if decision['state'] != 'pending' or decision['revision'] != data.expected_revision or decision['generation'] != run['generation']:
-                    raise Problem('version_conflict', 409)
-                if context_changed(db, run):
-                    raise Problem('context_changed', 409)
-                if data.answer not in decision['options']:
-                    raise Problem('invalid_request', 422)
-                db.execute("UPDATE mad_run_decisions SET state='resolved',answer=%s,note=%s,resolved_at=now(),revision=revision+1 WHERE id=%s", (data.answer, data.note, decision_id))
-                db.execute("UPDATE mad_agent_runs SET status='paused' WHERE id=%s", (run['id'],))
-                event(db, run['id'], 'decision_resolved', {'decision_id': str(decision_id), 'answer': data.answer, 'note': data.note, 'checkpoint': decision['checkpoint']})
-                if run['group_id']:
-                    group = group_scope(db, run['group_id'], user['id'])
-                    db.execute("UPDATE mad_requirement_groups SET state='active' WHERE id=%s", (group['id'],))
-                    group_message(db, group, user['id'], 'decision_resolved', data.note,
-                                  {'decision_id': str(decision_id), 'run_id': str(run['id']), 'answer': data.answer,
-                                   'checkpoint': decision['checkpoint'], 'generation': run['generation']})
-            background.add_task(service.resume, run['id'], user['id'])
-            return {'id': decision_id, 'run_id': run['id'], 'checkpoint': decision['checkpoint'], 'outcome': 'resolved'}
-
-    @router.post('/decisions/{decision_id}/reassign')
-    def reassign(decision_id: UUID, data: ReassignInput, user=authenticated):
-        with connect(settings.database_url) as db:
-            decision = db.execute('SELECT * FROM mad_run_decisions WHERE id=%s', (decision_id,)).fetchone()
-            if not decision:
-                raise Problem('decision_not_found', 404)
-            run = db.execute('SELECT * FROM mad_agent_runs WHERE id=%s', (decision['run_id'],)).fetchone()
-            membership(db, run['project_id'], user['id'], write=True, manage=True)
-            decision = db.execute('SELECT * FROM mad_run_decisions WHERE id=%s FOR UPDATE', (decision_id,)).fetchone()
-            run = db.execute('SELECT * FROM mad_agent_runs WHERE id=%s FOR UPDATE', (decision['run_id'],)).fetchone()
-            membership(db, run['project_id'], data.member_id)
-            role = db.execute('SELECT role FROM mad_project_roles WHERE project_id=%s AND user_id=%s', (run['project_id'], data.member_id)).fetchone()
-            if not role or role['role'] != run['role'] or decision['state'] != 'pending' or decision['revision'] != data.expected_revision:
-                raise Problem('role_required', 409)
-            if not db.execute('SELECT pg_try_advisory_xact_lock(hashtextextended(%s,0)) AS acquired', (str(run['id']),)).fetchone()['acquired']:
-                raise Problem('run_busy', 409)
-            from server.agents import personal_agent
-            agent = personal_agent(db, data.member_id, run['config']['model'])
-            if run['group_id']:
-                group = group_scope(db, run['group_id'], user['id'])
-                if group['revision'] != run['group_revision']:
-                    raise Problem('stage_changed', 409)
-                opposite = {'development': 'testing_id', 'testing': 'development_id'}.get(run['role'])
-                if opposite and group[opposite] == data.member_id:
-                    raise Problem('independent_review_required', 409)
-                from psycopg import sql
-                db.execute(sql.SQL('UPDATE mad_requirement_groups SET {}=%s WHERE id=%s').format(sql.Identifier(run['role'] + '_id')),
-                           (data.member_id, group['id']))
-                group_message(db, group, user['id'], 'decision_reassigned', '待决策及原运行已转交同岗位替补。',
-                              {'decision_id': str(decision_id), 'owner_id': str(data.member_id), 'run_id': str(run['id'])})
-            db.execute('UPDATE mad_agent_runs SET user_id=%s,agent_id=%s WHERE id=%s', (data.member_id, agent['id'], run['id']))
-            db.execute('INSERT INTO mad_run_contributors VALUES (%s,%s,%s) ON CONFLICT DO NOTHING', (run['id'], data.member_id, run['role']))
-            db.execute('UPDATE mad_run_decisions SET owner_id=%s,revision=revision+1 WHERE id=%s', (data.member_id, decision_id))
-            event(db, run['id'], 'decision_reassigned', {'from': str(run['user_id']), 'to': str(data.member_id), 'checkpoint': run['checkpoint']})
-            return {'id': decision_id, 'run_id': run['id'], 'owner_id': data.member_id}
+    from server.decisions import decisions_router
+    router.include_router(decisions_router(settings,identity,service))
 
     return router

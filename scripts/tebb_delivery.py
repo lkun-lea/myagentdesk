@@ -7,6 +7,7 @@ from io import BytesIO
 from pathlib import Path, PurePosixPath
 from shlex import join
 from subprocess import check_output
+from tempfile import NamedTemporaryFile
 from time import sleep
 from urllib.parse import urlparse
 from uuid import UUID, uuid4, uuid5
@@ -73,6 +74,8 @@ def run_command(manager, session, identifier, key, argv, environment):
         raise ValueError('Local command is too long to retain as evidence')
     request_id = uuid5(identifier, key).hex
     job = manager.start(command, session, timeout=90, request_id=request_id)['job']
+    if job['command'] != command or job['session'] != session:
+        raise ValueError('The command differs from the original tebb receipt. Use the original recipe.')
     while job['state'] in {'starting', 'running', 'stopping'}:
         sleep(.25)
         job = manager.get(job['id'])
@@ -83,7 +86,7 @@ def run_command(manager, session, identifier, key, argv, environment):
         if offset == item['offset']:
             break
         offset = item['offset']
-    result = {'key': key, 'run': job['id'], 'command': command, 'environment': environment,
+    result = {'key': key, 'run': job['id'], 'command': job['command'], 'environment': environment,
               'exit_code': job['exit_code'] if job['exit_code'] is not None else -1,
               'output': bytes(output[:15000]).decode('utf-8', 'replace')}
     if len(output) > 15000:
@@ -130,9 +133,16 @@ def execute(args, dispatch, device):
 
 
 def receipt_file(path, data):
-    pending = path.with_suffix('.tmp')
-    pending.write_text(json.dumps(data, ensure_ascii=False), encoding='utf-8')
-    pending.replace(path)
+    file = NamedTemporaryFile(dir=path.parent, mode='w', encoding='utf-8', delete=False)
+    pending = Path(file.name)
+    try:
+        with file:
+            json.dump(data, file, ensure_ascii=False)
+            file.flush()
+            os.fsync(file.fileno())
+        pending.replace(path)
+    finally:
+        pending.unlink(missing_ok=True)
 
 
 def main():

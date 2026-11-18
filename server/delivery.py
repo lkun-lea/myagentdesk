@@ -289,9 +289,9 @@ def delivery_router(settings, identity, service, github_transport=None):
             row, group = worker(db, identifier, authorization)
             if row['device'] is not None and row['device'] != data.device:
                 raise Problem('dispatch_claimed', 409)
+            if row['status'] in {'queued', 'running'} and not fresh(db, row, group):
+                raise Problem('stage_changed', 409)
             if row['status'] == 'queued':
-                if not fresh(db, row, group):
-                    raise Problem('stage_changed', 409)
                 row = db.execute("UPDATE mad_delivery_dispatches SET device=%s,status='running' WHERE id=%s RETURNING *",
                                  (data.device, identifier)).fetchone()
             return view(row)

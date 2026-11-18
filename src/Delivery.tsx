@@ -30,7 +30,7 @@ function Evidence({ attempt, project }: { attempt: Dispatch; project: Project })
     {data?.checks.map(item => <div className="mad-context-card" key={item.key}>
       <strong>{item.key === 'implementation' ? '候选自测' : (item.key.startsWith('criterion:') ? attempt.input.criteria : attempt.input.checks)[Number(item.key.split(':')[1]) - 1]}</strong>
       <p>{item.environment} · 命令运行 {item.run} · 退出码 {item.exit_code}</p>
-      <pre className="mad-delivery-output">{item.command}{'\n'}{item.output}</pre>
+      <pre>{item.command}{'\n'}{item.output}</pre>
     </div>)}
   </details>
 }

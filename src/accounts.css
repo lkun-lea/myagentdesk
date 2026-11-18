@@ -20,9 +20,3 @@
   .account-top { padding-inline: 10px; flex-wrap: wrap; }
   .account-main { padding-inline: 12px; }
 }
-.mad-delivery-output {
-  max-height: 18rem;
-  overflow: auto;
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-}

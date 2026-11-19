@@ -1,4 +1,4 @@
-from base64 import b64decode
+from base64 import b64decode, b64encode
 from datetime import datetime, timezone
 from hashlib import sha256
 from hmac import compare_digest
@@ -15,6 +15,7 @@ from pydantic import BaseModel, Field, StringConstraints, model_validator
 
 from server.db import connect
 from server.delivery_devices import authorize_device, delivery_devices_router, token_matches
+from server.delivery_uploads import MAX_ARTIFACT, Chunk, Manifest, assemble, declare, store_chunk
 from server.errors import Problem
 from server.github_issues import GitHubIssues, active_connection, connection
 from server.project_context import handoff_outdated, latest_requirement
@@ -25,13 +26,13 @@ from server.requirement_groups import group_handoff, group_message, group_scope
 Commit = Annotated[str, StringConstraints(pattern=r'^[a-f0-9]{40}$')]
 Digest = Annotated[str, StringConstraints(pattern=r'^[a-f0-9]{64}$')]
 Bounded = Annotated[str, StringConstraints(min_length=1, max_length=1000)]
-MAX_ARTIFACT = 512 * 1024
 
 
 class DispatchInput(BaseModel):
     id: UUID
     secret: Digest | None = None
     desktop: bool = False
+    automatic: bool = False
     revision: int = Field(ge=1)
     plan_id: UUID
     commit: Commit | None = None
@@ -40,6 +41,8 @@ class DispatchInput(BaseModel):
     def transport(self):
         if self.desktop == (self.secret is not None):
             raise ValueError('Use a paired device or an individual dispatch token')
+        if self.automatic and (not self.desktop or self.commit is not None):
+            raise ValueError('Automatic coding starts at the pinned base on a paired device')
         return self
 
 
@@ -56,12 +59,18 @@ class CheckResult(BaseModel):
     output: str = Field(max_length=16000)
 
 
+class CodingEvidence(BaseModel):
+    run: UUID
+    files: list[Bounded] = Field(min_length=1, max_length=20)
+
+
 class ExecutionReceipt(DeviceInput):
     commit: Commit
     digest: Digest | None = None
     artifact: str | None = Field(default=None, max_length=((MAX_ARTIFACT + 2) // 3) * 4)
     status: Literal['succeeded', 'failed', 'cancelled', 'needs_review']
     checks: list[CheckResult] = Field(max_length=40)
+    coding: CodingEvidence | None = None
 
     @model_validator(mode='after')
     def check_terminal(self):
@@ -172,6 +181,8 @@ def approved_candidate(db, project, plan_id, revision, candidate_id):
 
 
 def verify_ci(github, candidate, run_id):
+    if candidate['input'].get('automatic'):
+        raise Problem('delivery_patch_needs_commit', 409)
     repository_id = candidate['input']['repository_id']
     repository, _ = github.repository(f'/repositories/{repository_id}', repository_id)
     result = github.read(f'/repositories/{repository_id}/actions/runs/{run_id}')
@@ -237,7 +248,8 @@ def delivery_router(settings, identity, service, github_transport=None):
             if prior:
                 if (prior['group_id'] != group_id or prior['actor'] != user['id'] or prior['group_revision'] != data.revision
                         or prior['input']['plan_id'] != str(data.plan_id) or prior['input']['requested_commit'] != data.commit
-                        or prior['desktop'] != data.desktop or not compare_digest(prior['secret_digest'], secret)):
+                        or prior['desktop'] != data.desktop or bool(prior['input'].get('automatic')) != data.automatic
+                        or not compare_digest(prior['secret_digest'], secret)):
                     raise Problem('operation_conflict', 409)
                 authorize_actor(db, group, user['id'], prior['stage'])
                 return view(prior)
@@ -267,16 +279,23 @@ def delivery_router(settings, identity, service, github_transport=None):
                         or candidate['input']['plan_revision'] != plan['revision']
                         or candidate['input']['plan_id'] != str(data.plan_id)):
                     raise Problem('independent_review_required', 409)
-            if (stage == 'development' and (not data.commit or data.commit == pin['commit'])) or (candidate and data.commit):
+            if ((stage == 'development' and not data.automatic and (not data.commit or data.commit == pin['commit']))
+                    or (candidate and (data.commit or data.automatic))):
                 raise Problem('invalid_request', 422)
             frozen = {'repository': pin['repository'], 'repository_id': pin['repository_id'], 'base': pin['commit'],
                       'connection_revision': linked['revision'],
-                      'requested_commit': data.commit, 'commit': candidate['receipt']['commit'] if candidate else data.commit,
+                      'requested_commit': data.commit, 'commit': candidate['receipt']['commit'] if candidate else data.commit or pin['commit'],
                       'candidate_id': str(candidate['id']) if candidate else None,
                       'digest': candidate['receipt']['digest'] if candidate else None,
                       'requirement_revision': requirement['revision'], 'criteria_revision': pin['criteria_revision'],
                       'criteria': requirement['criteria'], 'checks': plan['required_checks'], 'plan_id': str(data.plan_id),
                       'plan_revision': plan['revision']}
+            if data.automatic:
+                frozen.update(automatic=True, instruction=requirement['body'])
+            if candidate and candidate['input'].get('automatic'):
+                if not data.desktop:
+                    raise Problem('delivery_desktop_required', 409)
+                frozen.update(patch_only=True, paths=candidate['receipt']['coding']['files'])
             row = db.execute('''INSERT INTO mad_delivery_dispatches (id,project_id,group_id,group_revision,actor,stage,secret_digest,input,desktop)
                        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING *''',
                        (data.id, group['project_id'], group_id, group['revision'], user['id'], stage, secret, Jsonb(frozen), data.desktop)).fetchone()
@@ -314,7 +333,7 @@ def delivery_router(settings, identity, service, github_transport=None):
             row, group = worker(db, identifier, data.device, authorization)
             if row['device'] != data.device:
                 raise Problem('dispatch_claimed', 409)
-            receipt = data.model_dump(mode='json', exclude={'artifact', 'device'})
+            receipt = data.model_dump(mode='json', exclude={'artifact', 'device', 'coding'} if data.coding is None else {'artifact', 'device'})
             if row['receipt'] is not None:
                 if row['receipt'] != receipt or (data.artifact is not None and artifact_bytes(data) != row['artifact']):
                     raise Problem('operation_conflict', 409)
@@ -330,20 +349,53 @@ def delivery_router(settings, identity, service, github_transport=None):
                         (keys != expected or data.digest != row['input']['digest'])):
                     raise Problem('delivery_evidence_required', 409)
             elif data.status == 'succeeded':
-                if keys != ['implementation']:
+                if keys != ['implementation'] or bool(row['input'].get('automatic')) != bool(data.coding):
                     raise Problem('delivery_evidence_required', 409)
-                artifact = artifact_bytes(data)
+                if row['input'].get('automatic') and data.artifact is not None:
+                    raise Problem('artifact_upload_required', 409)
+                artifact = artifact_bytes(data) if data.artifact is not None else assemble(db, identifier, data.digest)
             if data.artifact is not None and artifact is None:
                 raise Problem('artifact_mismatch', 422)
+            if data.coding and (not row['input'].get('automatic') or len(set(data.coding.files)) != len(data.coding.files)):
+                raise Problem('invalid_request', 422)
             status = data.status if fresh(db, row, group) else 'historical'
             row = db.execute('''UPDATE mad_delivery_dispatches SET status=%s,receipt=%s,artifact=%s WHERE id=%s RETURNING *''',
                              (status, Jsonb(receipt), artifact, identifier)).fetchone()
             kind, message = ('executor_review', 'tebb 启动结果待核对。') if data.status == 'needs_review' else ('executor', 'tebb 执行回执已入档。')
             group_message(db, group, row['actor'], kind, message, {'dispatch_id': str(identifier), 'status': status})
             record(db, row['project_id'], row['actor'], identifier, 'tebb_receipt_recorded')
+            if artifact is not None:
+                db.execute('DELETE FROM mad_delivery_chunks WHERE dispatch=%s', (identifier,))
             if status == 'succeeded':
                 terminal_handoff(db, service, group, row, data)
             return view(row)
+
+    def upload_scope(db, identifier, device, authorization):
+        row, _ = worker(db, identifier, device, authorization)
+        if row['device'] != device or not row['desktop'] or row['stage'] != 'development':
+            raise Problem('permission_denied', 403)
+        return row
+
+    @router.put('/executor/{identifier}/upload')
+    def upload(identifier: UUID, data: Manifest, authorization: Annotated[str, Header()] = ''):
+        with connect(settings.database_url) as db:
+            return declare(db, upload_scope(db, identifier, data.device, authorization), data)
+
+    @router.put('/executor/{identifier}/upload/{position}')
+    def upload_chunk(identifier: UUID, position: int, data: Chunk, authorization: Annotated[str, Header()] = ''):
+        with connect(settings.database_url) as db:
+            return store_chunk(db, upload_scope(db, identifier, data.device, authorization), position, data)
+
+    @router.get('/executor/{identifier}/candidate')
+    def patch_candidate(identifier: UUID, device: UUID, authorization: Annotated[str, Header()] = ''):
+        with connect(settings.database_url) as db:
+            row, group = worker(db, identifier, device, authorization)
+            if row['device'] != device or row['status'] != 'running' or not row['input'].get('patch_only') or not fresh(db, row, group):
+                raise Problem('stage_changed', 409)
+            candidate = dispatch_row(db, UUID(row['input']['candidate_id']))
+            if candidate['receipt']['digest'] != row['input']['digest'] or candidate['artifact'] is None:
+                raise Problem('artifact_mismatch', 409)
+            return {'patch': b64encode(candidate['artifact']).decode()}
 
     @router.post('/groups/{group_id}/dispatches/{identifier}/cancel')
     def cancel(group_id: UUID, identifier: UUID, user=authenticated):

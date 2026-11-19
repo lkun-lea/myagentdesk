@@ -15,7 +15,8 @@ type Decision = { id: string; run_id: string; owner_id: string; role?: string; q
   evidence: string[]; checkpoint: number; revision: number }
 type Group = { id: string; requirement_id: string; project_id: string; requirement_revision: number; revision: number;
   stage: string; state: string; source: string; product_id: string; development_id: string; testing_id: string; quality_id: string; auto_run: boolean;
-  external_execution?: boolean; runs?: Run[]; pending_decisions?: Decision[]; requirement?: { title: string; body: string; criteria: string[] } }
+  last_handoff?: string | null; external_execution?: boolean; runs?: Run[]; pending_decisions?: Decision[];
+  requirement?: { title: string; body: string; criteria: string[] } }
 type Message = { id: string; sequence: number; author: string; kind: string; body: string; created_at: string;
   data: { evidence?: string[]; role?: string; run_id?: string; owner_id?: string; source?: string; stage?: string;
     from_stage?: string; checkpoint?: number; candidate_run?: string; requirement_revision?: number;

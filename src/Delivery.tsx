@@ -1,16 +1,16 @@
 import { useEffect, useRef, useState } from 'react'
-import { Alert, Button, Input, Modal, Select, Spin, Tag } from 'antd'
+import { Alert, Button, Checkbox, Input, Modal, Select, Spin, Tag } from 'antd'
 import { api, errorCode, messageFor } from './accounts-api'
 import type { VersionPlan } from './release-plans'
 import type { OpenRoute, Project } from './Workbench'
 
 type Group = { id: string; requirement_id: string; revision: number; stage: string; state: string;
-  auto_run: boolean; development_id: string; testing_id: string }
+  auto_run: boolean; development_id: string; testing_id: string; last_handoff?: string | null }
 type Proof = { key: string; run: string; command: string; environment: string; exit_code: number; output: string }
 type Dispatch = { id: string; group_id: string; group_revision: number; stage: 'development' | 'testing'; status: string; has_artifact: boolean;
   input: { commit: string; plan_id: string; plan_revision: number; candidate_id: string | null; criteria: string[]; checks: string[];
-    requirement_revision: number; digest: string | null };
-  receipt: { commit: string; digest: string | null; checks: Proof[] } | null }
+    requirement_revision: number; digest: string | null; automatic?: boolean; patch_only?: boolean };
+  receipt: { commit: string; digest: string | null; checks: Proof[]; coding?: { run: string; files: string[] } } | null }
 type Build = { plan_id: string; plan_revision: number; candidate_id: string; verification_id: string; ci: { url: string; run_id: number } }
 type Release = { plan_id: string; plan_revision: number; candidate_id: string; published_at: string;
   payload: { commit: string; digest: string; channel: string; filename: string } }
@@ -83,7 +83,8 @@ function Evidence({ attempt, project }: { attempt: Dispatch; project: Project })
   const data = attempt.receipt
   return <details>
     <summary>{attempt.stage === 'development' ? '实现与自测' : '独立验收'} · {attempt.id.slice(0, 8)} · {statusNames[attempt.status]}</summary>
-    <p>需求 v{attempt.input.requirement_revision} · 计划 v{attempt.input.plan_revision} · 提交 <code>{attempt.input.commit}</code></p>
+    <p>需求 v{attempt.input.requirement_revision} · 计划 v{attempt.input.plan_revision} · {attempt.input.automatic || attempt.input.patch_only ? '固定基准' : '提交'} <code>{attempt.input.commit}</code></p>
+    {data?.coding && <p>tebb 编码运行 <code>{data.coding.run}</code> · 改动文件 {data.coding.files.join('、')}</p>}
     {data?.digest && <p>产物 SHA-256 <code>{data.digest}</code></p>}
     {attempt.has_artifact &&
       <a href={'/api/projects/' + project.id + '/delivery/artifacts/' + attempt.id} download>下载候选补丁</a>}
@@ -101,11 +102,12 @@ export function GroupDelivery({ group, project, userId }: { group: Group; projec
   const [plan, setPlan] = useState<string>()
   const [commit, setCommit] = useState('')
   const [channel, setChannel] = useState<'desktop' | 'manual'>('desktop')
+  const [autoCode, setAutoCode] = useState(false)
   const [shown, setShown] = useState<{ id: string; secret: string }>()
   const [busy, setBusy] = useState(false)
   const [fault, setFault] = useState('')
   const [refresh, setRefresh] = useState(0)
-  const pending = useRef<{ id: string; secret?: string; desktop: boolean; revision: number; plan_id: string; commit?: string }>(undefined)
+  const pending = useRef<{ id: string; secret?: string; desktop: boolean; automatic: boolean; revision: number; plan_id: string; commit?: string }>(undefined)
   const path = '/projects/' + project.id
   const groupPath = '/groups/' + group.id + '/dispatches'
   const canDispatch = !group.auto_run && group.state === 'active' && (
@@ -131,6 +133,8 @@ export function GroupDelivery({ group, project, userId }: { group: Group; projec
   }
 
   const planId = plan ?? plans[0]?.plan_id
+  const automatic = channel === 'desktop' && group.stage === 'development' && autoCode
+  const patchOnly = group.stage === 'testing' && attempts.some(item => item.id === group.last_handoff && item.input.automatic)
   const openAttempt = attempts.find(item => item.group_revision === group.revision && ['queued', 'running', 'needs_review'].includes(item.status))
   if (!canDispatch && !attempts.length && !fault) return null
   return <section className="mad-context-card">
@@ -140,10 +144,10 @@ export function GroupDelivery({ group, project, userId }: { group: Group; projec
     {canDispatch && !openAttempt && (!planId ? <p>先在项目时间线确认仅包含本需求的版本计划，并固定 OpenSpec 规格。</p> :
       <form className="mad-context-form" onSubmit={event => {
         event.preventDefault()
-        const sha = group.stage === 'development' ? commit.trim().toLowerCase() : undefined
-        const desktop = channel === 'desktop'
-        if (!pending.current || pending.current.revision !== group.revision || pending.current.plan_id !== planId || pending.current.commit !== sha || pending.current.desktop !== desktop) {
-          pending.current = { id: crypto.randomUUID(), desktop, secret: desktop ? undefined : code(), revision: group.revision, plan_id: planId, commit: sha }
+        const sha = group.stage === 'development' && !automatic ? commit.trim().toLowerCase() : undefined
+        const desktop = patchOnly || channel === 'desktop'
+        if (!pending.current || pending.current.revision !== group.revision || pending.current.plan_id !== planId || pending.current.commit !== sha || pending.current.desktop !== desktop || pending.current.automatic !== automatic) {
+          pending.current = { id: crypto.randomUUID(), desktop, automatic, secret: desktop ? undefined : code(), revision: group.revision, plan_id: planId, commit: sha }
         }
         const request = pending.current
         void act(async () => {
@@ -152,11 +156,13 @@ export function GroupDelivery({ group, project, userId }: { group: Group; projec
           pending.current = undefined
         })
       }}>
-        <label>领取方式<Select aria-label="领取方式" value={channel} onChange={setChannel}
+        <label>领取方式<Select aria-label="领取方式" value={patchOnly ? 'desktop' : channel} disabled={patchOnly} onChange={setChannel}
           options={[{ value: 'desktop', label: '已配对的 tebb 桌面' }, { value: 'manual', label: '手动令牌' }]} /></label>
         <label>版本计划<Select aria-label="版本计划" value={planId} onChange={setPlan}
           options={plans.map(item => ({ value: item.plan_id, label: item.name + ' v' + item.revision }))} /></label>
-        {group.stage === 'development' && <label>候选完整提交 SHA<Input required value={commit} pattern="[a-fA-F0-9]{40}"
+        {group.stage === 'development' && channel === 'desktop' && <Checkbox checked={autoCode}
+          onChange={event => setAutoCode(event.target.checked)}>从固定规格提交自动编码</Checkbox>}
+        {group.stage === 'development' && !automatic && <label>候选完整提交 SHA<Input required value={commit} pattern="[a-fA-F0-9]{40}"
           onChange={event => setCommit(event.target.value)} /></label>}
         <Button type="primary" htmlType="submit" loading={busy}>{group.stage === 'testing' ? '派发独立验收' : '派发至 tebb'}</Button>
       </form>)}
@@ -225,12 +231,12 @@ export function BuildRelease({ project, userId, planId, navigate, onUnavailable 
       options={candidates.map(item => ({ value: item.id, label: item.input.commit.slice(0, 12) + ' · 计划 v' + item.input.plan_revision }))} />}
     {selected && <section className="mad-context-card">
       <div className="mad-page-heading"><h3>{plan?.name ?? '版本计划'} · v{selected.input.plan_revision}</h3>
-        <Tag>{!current ? '历史候选' : released ? '已发布' : build ? '已放行' : '待核对证据'}</Tag></div>
+        <Tag>{!current ? '历史候选' : released ? '已发布' : build ? '已放行' : selected.input.automatic ? '补丁等待集成提交' : '待核对证据'}</Tag></div>
       <Button onClick={() => navigate('projects', { project: project.id, page: 'timeline', plan: selected.input.plan_id })}>查看版本时间线</Button>
       <Evidence attempt={selected} project={project} />
       {data?.dispatches.filter(item => item.input.candidate_id === selected.id).map(item => <Evidence attempt={item} project={project} key={item.id} />)}
       {build && <p><a href={build.ci.url} rel="noreferrer" target="_blank">构建 CI #{build.ci.run_id}</a></p>}
-      {current && manager && !build && <form className="mad-context-form" onSubmit={event => {
+      {current && manager && !build && !selected.input.automatic && <form className="mad-context-form" onSubmit={event => {
         event.preventDefault()
         void act(() => api(path + '/delivery/' + plan.plan_id + '/approve', 'POST', {
           revision: plan.revision, candidate_id: selected.id, ci_run_id: Number(ci),

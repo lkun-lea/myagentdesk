@@ -1,6 +1,8 @@
 """Exercise the same public Issue through authenticated desktop claims and recovery."""
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import replace
+from base64 import b64decode, b64encode
+from hashlib import sha256
 from pathlib import Path
 from time import monotonic, sleep
 from uuid import uuid4
@@ -69,14 +71,15 @@ def pairing(actor, workbench, label):
     return {'id': package['id'], 'origin': ORIGIN, 'code': package['secret']}, workbench
 
 
-def request_attempt(actor, group, plan, commit=None):
-    payload = {'id': str(uuid4()), 'revision': group['revision'], 'plan_id': plan, 'desktop': True, 'commit': commit}
+def request_attempt(actor, group, plan, commit=None, *, automatic=False):
+    payload = {'id': str(uuid4()), 'revision': group['revision'], 'plan_id': plan, 'desktop': True, 'commit': commit,
+               'automatic': automatic}
     response = actor.post(f"/api/groups/{group['id']}/dispatches", json=payload)
     assert response.status_code == 200, response.text
     return payload['id']
 
 
-def environments(workflow, source):
+def environments(workflow, source, specification=None):
     original, users, project, _, _, group_input, endpoint = workflow
     repository, base, head, _ = source
     settings = replace(endpoint.settings, github_read_token=os.environ.get('MAD_DELIVERY_GITHUB_READ_TOKEN', ''))
@@ -93,7 +96,7 @@ def environments(workflow, source):
     assert upstream.status_code == 200, upstream.text
     issue = upstream.json()
     spec = {'title': '#10 ' + issue['title'][:105], 'body': '验证桌面设备领取、确认与原运行恢复。',
-            'criteria': ['完整提交定位规则', '历史证据可回查']}
+            'criteria': ['完整提交定位规则', '历史证据可回查'], **(specification or {})}
     link = product.post(prefix + '/github/issues/10/link', json={'connection_revision': revision, 'requirement': spec})
     assert link.status_code == 200, link.text
     requirement = link.json()['requirement_id']
@@ -158,8 +161,79 @@ def test_desktop_device_permissions_and_idempotent_receipts(source, workflow):
 
 
 def b64_artifact():
-    from base64 import b64encode
     return b64encode(ARTIFACT).decode()
+
+
+def test_automatic_candidate_upload_resumes_and_requires_independent_desktop(source, workflow):
+    product, developer, tester, worker, prefix, group_path, plan, _ = environments(workflow, source)
+    group = product.get(group_path).json()
+    identifier = request_attempt(developer, group, plan, automatic=True)
+    dispatch = '/api/executor/' + identifier
+
+    def activate(actor, label):
+        device = pairing(actor, worker, label)[0]
+        secret = uuid4().hex + uuid4().hex
+        assert worker.post(f"/api/executor/devices/{device['id']}/activate",
+                           json={'code': device['code'], 'credential': secret}).status_code == 200
+        return {'device': device['id']}, {'Authorization': 'Bearer ' + secret}
+
+    device, headers = activate(developer, 'coding')
+    loser, other = activate(developer, 'another device')
+    claim = worker.post(dispatch + '/claim', json=device, headers=headers)
+    assert claim.status_code == 200
+    frozen = claim.json()['input']
+    assert frozen['commit'] == source[1] and frozen['automatic']
+    assert frozen['instruction'] == '验证桌面设备领取、确认与原运行恢复。'
+    pieces = [b'a' * 128, b'b' * 128, b'c' * 64]
+    payload = b''.join(pieces)
+    digest = sha256(payload).hexdigest()
+    manifest = {'size': len(payload), 'digest': digest, 'chunk_bytes': 128,
+                'chunks': [sha256(piece).hexdigest() for piece in pieces]}
+
+    def put(suffix, data):
+        return worker.put(dispatch + suffix, json={**device, **data}, headers=headers)
+
+    def chunk(index, value):
+        return put(f'/upload/{index}', {'data': b64encode(value).decode()})
+
+    receipt = {'commit': source[1], 'status': 'succeeded', 'digest': digest,
+               'checks': [evidence('implementation')], 'coding': {'run': str(uuid4()), 'files': ['src/Specifications.tsx']}}
+    assert put('/receipt', {**receipt, 'artifact': b64encode(payload).decode()}).status_code == 409
+    assert worker.put(dispatch + '/upload', json={**loser, **manifest}, headers=other).status_code == 403
+    assert put('/upload', manifest).json() == {'missing': [0, 1, 2], 'received': 0, 'total': 3}
+    assert put('/upload', {**manifest, 'digest': '1' * 64}).status_code == 409
+    assert chunk(0, b'bad').status_code == 422
+    assert chunk(0, pieces[0]).status_code == 200
+    assert put('/receipt', receipt).status_code == 409
+    assert put('/upload', manifest).json() == {'missing': [1, 2], 'received': 1, 'total': 3}
+    for index in (1, 2):
+        assert chunk(index, pieces[index]).status_code == 200
+    assert put('/receipt', receipt).status_code == 200
+    assert put('/upload', manifest).json() == {'missing': [], 'received': 3, 'total': 3}
+    assert put('/receipt', receipt).status_code == 200
+    assert sum(row['kind'] == 'executor' for row in product.get(group_path + '/messages').json()) == 1
+    assert tester.get(prefix + '/delivery/artifacts/' + identifier).content == payload
+    group = product.get(group_path).json()
+    assert group['stage'] == 'testing'
+    manual = tester.post(group_path + '/dispatches', json={
+        'id': str(uuid4()), 'secret': 'f' * 64, 'revision': group['revision'], 'plan_id': plan,
+    })
+    assert manual.status_code == 409
+    qa = request_attempt(tester, group, plan)
+    tester_device, tester_headers = activate(tester, 'independent tester')
+    testing = f'/api/executor/{qa}'
+    assert worker.post(testing + '/claim', json=tester_device, headers=tester_headers).status_code == 200
+    candidate = worker.get(testing + '/candidate', params=tester_device, headers=tester_headers)
+    assert candidate.status_code == 200 and b64decode(candidate.json()['patch']) == payload
+    check = {'commit': source[1], 'status': 'succeeded', 'digest': digest,
+             'checks': [evidence('criterion:1'), evidence('criterion:2')]}
+    assert worker.put(testing + '/receipt', json={**tester_device, **check}, headers=tester_headers).status_code == 200
+    quality = product.get(group_path).json()
+    assert quality['stage'] == 'quality'
+    assert advance(product, quality)['stage'] == 'completed'
+    release_gate = product.post(prefix + '/delivery/' + plan + '/approve',
+                                json={'revision': 1, 'candidate_id': identifier, 'ci_run_id': 1})
+    assert release_gate.status_code == 409 and release_gate.json()['error'] == 'delivery_patch_needs_commit'
 
 
 @pytest.mark.skipif(not os.environ.get('MAD_DESKTOP_TEBB'), reason='Enable the Windows tebb desktop sandbox acceptance explicitly')
